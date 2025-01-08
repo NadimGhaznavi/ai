@@ -4,6 +4,17 @@ from enum import Enum
 from collections import namedtuple
 import numpy as np
 
+# The runtime environment was setup within venv with the following
+# commands:
+#
+# $ python3 venv ai_dev
+# $ . ai_dev/bin/activate
+# (ai_dev) $ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+# (ai_dev) $ pip3 install pygame, matplotlib, IPython
+#
+# Run the game with the AI driving:
+# (ai_dev) $ python agent.py
+
 pygame.init()
 font = pygame.font.Font('arial.ttf', 25)
 
