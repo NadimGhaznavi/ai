@@ -6,15 +6,25 @@ from ai_snake_game import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer
 from helper import plot
 
+random.seed(42)
+torch.manual_seed(1970)
+
 MAX_MEMORY = 100_000 # Maximum memory for the replay buffer
 BATCH_SIZE = 1000 # Batch size for the replay buffer
-HIDDEN_SIZE = 256 # Hidden size for the model
+HIDDEN_SIZE = 32 # Hidden size for the model
 DISCOUNT = 0.8 # Discount rate, must be smaller than 1  
 LR = 0.003 # Learning rate
 EPSILON_VALUE = 200 # Epsilon value, for exploration (i.e. vs exploitation)
-RANDOM_MAX = 200
-MODEL_VERSION = 0
+MODEL_VERSION = 7
 
+if MODEL_VERSION > 0:
+  LR = 0.001
+  HIDDEN_SIZE = 256
+  EPSION_VALUE = 100
+
+if MODEL_VERSION == 7:
+  HIDDEN_SIZE = 32
+  
 
 class Agent:
 
@@ -24,7 +34,7 @@ class Agent:
     self.gamma = DISCOUNT # Discount rate, for future rewards
     # If memory exceeds MAX_MEMORY, oldest memory is removed i.e. popleft()
     self.memory = deque(maxlen=MAX_MEMORY) 
-    self.model = Linear_QNet(14, HIDDEN_SIZE, 3) 
+    self.model = Linear_QNet(11, HIDDEN_SIZE, 3, MODEL_VERSION) 
     self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
   def get_state(self, game):
@@ -62,24 +72,6 @@ class Agent:
       (dir_u and game.is_collision(point_l)) or
       (dir_r and game.is_collision(point_u)) or
       (dir_l and game.is_collision(point_d)),
-
-      # Danger straight 2
-      (dir_r and game.is_collision(point_r2)) or
-      (dir_l and game.is_collision(point_l2)) or
-      (dir_u and game.is_collision(point_u2)) or
-      (dir_d and game.is_collision(point_d2)),
-
-      # Danger right 2
-      (dir_u and game.is_collision(point_r2)) or
-      (dir_d and game.is_collision(point_l2)) or
-      (dir_l and game.is_collision(point_u2)) or
-      (dir_r and game.is_collision(point_d2)),
-
-      # Danger left 2
-      (dir_d and game.is_collision(point_r2)) or
-      (dir_u and game.is_collision(point_l2)) or 
-      (dir_r and game.is_collision(point_u2)) or
-      (dir_l and game.is_collision(point_d2)),
 
       # Move direction
       dir_l,
@@ -139,7 +131,7 @@ def train():
   total_score = 0 # Score for the current game
   record = 0 # Best score
   agent = Agent()
-  game = SnakeGameAI()
+  game = SnakeGameAI(MODEL_VERSION)
   #agent.model.load()
   while True:
     # Get old state
@@ -161,7 +153,11 @@ def train():
       if score > record:
         record = score
         agent.model.save()
-      print('Game', agent.n_games, 'Score', score, 'Record', record)
+
+      game_str = 'Game v' + str(MODEL_VERSION)
+      print('Game (v' + str(MODEL_VERSION) + '){:>4}'.format(agent.n_games) + ', ' + \
+            'Score' + '{:>4}'.format(score) + ', ' + \
+            'Record', record)
 
       plot_scores.append(score)
       total_score += score
