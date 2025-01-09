@@ -5,6 +5,7 @@ from collections import deque
 from ai_snake_game import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer
 from helper import plot
+from time import time
 
 random.seed(42)
 torch.manual_seed(1970)
@@ -15,16 +16,21 @@ HIDDEN_SIZE = 32 # Hidden size for the model
 DISCOUNT = 0.8 # Discount rate, must be smaller than 1  
 LR = 0.003 # Learning rate
 EPSILON_VALUE = 200 # Epsilon value, for exploration (i.e. vs exploitation)
-MODEL_VERSION = 7
+MODEL_VERSION = 9
 
 if MODEL_VERSION > 0:
   LR = 0.001
   HIDDEN_SIZE = 256
   EPSION_VALUE = 100
 
-if MODEL_VERSION == 7:
-  HIDDEN_SIZE = 32
-  
+if MODEL_VERSION > 7:
+  EPSILON_VALUE = 150
+  HIDDEN_SIZE = 64
+
+if MODEL_VERSION == 9:
+  LR = 0.001
+  EPSION_VALUE = 200
+  HIDDEN_SIZE = 128
 
 class Agent:
 
@@ -128,12 +134,13 @@ class Agent:
 def train():
   plot_scores = [] # Scores for each game
   plot_mean_scores = [] # Average scores over a rolling window
+  plot_game_times = []
   total_score = 0 # Score for the current game
   record = 0 # Best score
   agent = Agent()
   game = SnakeGameAI(MODEL_VERSION)
-  #agent.model.load()
   while True:
+    start_time = time()
     # Get old state
     state_old = agent.get_state(game)
     # Get move
@@ -154,16 +161,27 @@ def train():
         record = score
         agent.model.save()
 
+      # Calculate elapsed game time
+      end_time = time()
+      total_time = round((end_time - start_time), 1)
+      plot_game_times.append(total_time)
+
+      if total_time > 60:
+        min = str(total_time / 60)
+        sec = str(total_time % 60)
+        total_time = min + ' min ' + sec
+
       game_str = 'Game v' + str(MODEL_VERSION)
       print('Game (v' + str(MODEL_VERSION) + '){:>4}'.format(agent.n_games) + ', ' + \
             'Score' + '{:>4}'.format(score) + ', ' + \
-            'Record', record)
+            'Record' + '{:>4}'.format(record) + ', ' + \
+            'Game Time ' + str(total_time) +  ' sec')
 
       plot_scores.append(score)
       total_score += score
       mean_score = total_score / agent.n_games
       plot_mean_scores.append(mean_score)
-      plot(plot_scores, plot_mean_scores, MODEL_VERSION)
+      plot(plot_scores, plot_mean_scores, plot_game_times, MODEL_VERSION)
 
 if __name__ == '__main__':
   train()
