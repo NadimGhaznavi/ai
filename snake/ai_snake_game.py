@@ -4,6 +4,8 @@ from enum import Enum
 from collections import namedtuple
 import numpy as np
 
+random.seed(1970)
+
 # The runtime environment was setup within venv with the following
 # commands:
 #
@@ -40,12 +42,12 @@ SPEED = 100
 
 class SnakeGameAI:
     
-  def __init__(self, w=BOARD_WIDTH, h=BOARD_HEIGHT):
+  def __init__(self, version='N/A', w=BOARD_WIDTH, h=BOARD_HEIGHT):
     self.w = w
     self.h = h
     # init display
     self.display = pygame.display.set_mode((self.w, self.h))
-    pygame.display.set_caption('Snake')
+    pygame.display.set_caption('Snake v' + str(version))
     self.clock = pygame.time.Clock()
     self.reset()
 
