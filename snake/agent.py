@@ -2,10 +2,12 @@ import torch
 import random
 import numpy as np
 from collections import deque
+from time import time
 from ai_snake_game import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer
 from helper import plot
-from time import time
+from epsilon_greedy import EpsilonGreedy as EG
+
 
 random.seed(42)
 torch.manual_seed(1970)
@@ -16,21 +18,24 @@ HIDDEN_SIZE = 32 # Hidden size for the model
 DISCOUNT = 0.8 # Discount rate, must be smaller than 1  
 LR = 0.003 # Learning rate
 EPSILON_VALUE = 200 # Epsilon value, for exploration (i.e. vs exploitation)
-MODEL_VERSION = 9
+EG_EPSILON_VALUE = 0.1 # EpsilonGreedy epsilon value
+MODEL_VERSION = 5
 
 if MODEL_VERSION > 0:
   LR = 0.001
   HIDDEN_SIZE = 256
   EPSION_VALUE = 100
 
-if MODEL_VERSION > 7:
+if MODEL_VERSION > 1:
   EPSILON_VALUE = 150
-  HIDDEN_SIZE = 64
 
-if MODEL_VERSION == 9:
-  LR = 0.001
-  EPSION_VALUE = 200
-  HIDDEN_SIZE = 128
+if MODEL_VERSION > 2:
+  HIDDEN_SIZE = 1024
+  EPSILON_VALUE = 500
+
+if MODEL_VERSION > 3:
+  HIDDEN_SIZE = 512
+
 
 class Agent:
 
@@ -40,8 +45,10 @@ class Agent:
     self.gamma = DISCOUNT # Discount rate, for future rewards
     # If memory exceeds MAX_MEMORY, oldest memory is removed i.e. popleft()
     self.memory = deque(maxlen=MAX_MEMORY) 
-    self.model = Linear_QNet(11, HIDDEN_SIZE, 3, MODEL_VERSION) 
+    self.model = Linear_QNet(18, HIDDEN_SIZE, 3, MODEL_VERSION) 
     self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
+    self.eg = EG(3, EG_EPSILON_VALUE)
+    self.last_dirs = [ 0, 0, 1, 0 ]
 
   def get_state(self, game):
     head = game.snake[0]
@@ -50,34 +57,49 @@ class Agent:
     point_u = Point(head.x, head.y - 20)
     point_d = Point(head.x, head.y + 20)
 
-    point_l2 = Point(head.x - 40, head.y)
-    point_r2 = Point(head.x + 40, head.y)
-    point_u2 = Point(head.x, head.y - 40)
-    point_d2 = Point(head.x, head.y + 40)
-
     dir_l = game.direction == Direction.LEFT
     dir_r = game.direction == Direction.RIGHT
     dir_u = game.direction == Direction.UP
     dir_d = game.direction == Direction.DOWN
 
     state = [
-      # Danger straight
-      (dir_r and game.is_collision(point_r)) or
-      (dir_l and game.is_collision(point_l)) or
-      (dir_u and game.is_collision(point_u)) or
-      (dir_d and game.is_collision(point_d)),
+      ## Wall collision danger
+      # Danger straight 
+      (dir_r and game.is_wall_collision(point_r)) or
+      (dir_l and game.is_wall_collision(point_l)) or
+      (dir_u and game.is_wall_collision(point_u)) or
+      (dir_d and game.is_wall_collision(point_d)),
 
       # Danger right
-      (dir_u and game.is_collision(point_r)) or
-      (dir_d and game.is_collision(point_l)) or
-      (dir_l and game.is_collision(point_u)) or
-      (dir_r and game.is_collision(point_d)),
+      (dir_u and game.is_wall_collision(point_r)) or
+      (dir_d and game.is_wall_collision(point_l)) or
+      (dir_l and game.is_wall_collision(point_u)) or
+      (dir_r and game.is_wall_collision(point_d)),
 
       # Danger left
-      (dir_d and game.is_collision(point_r)) or
-      (dir_u and game.is_collision(point_l)) or
-      (dir_r and game.is_collision(point_u)) or
-      (dir_l and game.is_collision(point_d)),
+      (dir_d and game.is_wall_collision(point_r)) or
+      (dir_u and game.is_wall_collision(point_l)) or
+      (dir_r and game.is_wall_collision(point_u)) or
+      (dir_l and game.is_wall_collision(point_d)),
+
+      ## Self collision danger
+      # Danger straight
+      (dir_r and game.is_self_collision(point_r)) or
+      (dir_l and game.is_self_collision(point_l)) or
+      (dir_u and game.is_self_collision(point_u)) or
+      (dir_d and game.is_self_collision(point_d)),
+
+      # Danger right
+      (dir_u and game.is_self_collision(point_r)) or
+      (dir_d and game.is_self_collision(point_l)) or
+      (dir_l and game.is_self_collision(point_u)) or
+      (dir_r and game.is_self_collision(point_d)),
+
+      # Danger left
+      (dir_d and game.is_self_collision(point_r)) or
+      (dir_u and game.is_self_collision(point_l)) or
+      (dir_r and game.is_self_collision(point_u)) or
+      (dir_l and game.is_self_collision(point_d)),
 
       # Move direction
       dir_l,
@@ -91,6 +113,11 @@ class Agent:
       game.food.y < game.head.y, # Food up
       game.food.y > game.head.y, # Food down
     ]
+
+    for aDir in self.last_dirs:
+      state.append(aDir)
+
+    self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
 
     return np.array(state, dtype=int)
 
@@ -118,7 +145,6 @@ class Agent:
     # Random move: exploration vs exploitation...
     # The more games played, the less likely to explore i.e. 
     self.epsilon = EPSILON_VALUE - self.n_games
-    #self.epsilon = 0
     final_move = [0, 0, 0]
     if random.randint(0, EPSILON_VALUE) < self.epsilon:
       # Random move
@@ -129,6 +155,8 @@ class Agent:
       prediction = self.model(state0)
       move = torch.argmax(prediction).item()
       final_move[move] = 1
+   
+    #self.last_dirs.append(final_move)
     return final_move
 
 def train():
