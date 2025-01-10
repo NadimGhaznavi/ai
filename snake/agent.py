@@ -14,26 +14,34 @@ torch.manual_seed(1970)
 
 MAX_MEMORY = 100_000 # Maximum memory for the replay buffer
 BATCH_SIZE = 1000 # Batch size for the replay buffer
-HIDDEN_SIZE = 32 # Hidden size for the model
+# Number of nodes in the input layer i.e. the number of nodes used to 
+# describe the state of the game
+INPUT_NODES = 18 
+HIDDEN_NODES = 32 # Number of nodes in the hidden layers
+HIDDEN_LAYERS = 1 # Number of hidden layers
+# Number of nodes in the output layer. This corresponds to valid moves
+# that the snake can make i.e. left, right or continue straight
+OUTPUT_NODES = 3 
 DISCOUNT = 0.8 # Discount rate, must be smaller than 1  
 LR = 0.003 # Learning rate
 EPSILON_VALUE = 200 # Epsilon value, for exploration (i.e. vs exploitation)
 EG_EPSILON_VALUE = 0.1 # EpsilonGreedy epsilon value
-MODEL_VERSION = 3
+# The version of this codebase. This is used to allow me to have code branching and
+# model changes depending on the version of the code base. This allows me to easily
+# revert back or select specific versions of the AI code to be run.
+AI_VERSION = 3 
 
-if MODEL_VERSION > 0:
+if AI_VERSION > 0:
   LR = 0.001
   HIDDEN_SIZE = 256
   EPSION_VALUE = 150
 
-if MODEL_VERSION > 2:
+if AI_VERSION > 2:
   HIDDEN_SIZE = 1024
   EPSILON_VALUE = 500
 
-if MODEL_VERSION > 3:
+if AI_VERSION > 3:
   HIDDEN_SIZE = 2048
-
-
 
 class Agent:
 
@@ -44,7 +52,7 @@ class Agent:
     self.gamma = DISCOUNT # Discount rate, for future rewards
     # If memory exceeds MAX_MEMORY, oldest memory is removed i.e. popleft()
     self.memory = deque(maxlen=MAX_MEMORY) 
-    self.model = Linear_QNet(18, HIDDEN_SIZE, 3, MODEL_VERSION) 
+    self.model = Linear_QNet(INPUT_NODES, HIDDEN_NODES, HIDDEN_LAYERS, OUTPUT_NODES, AI_VERSION) 
     self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
     self.eg = EG(3, EG_EPSILON_VALUE)
     self.last_dirs = [ 0, 0, 1, 0 ]
@@ -215,8 +223,8 @@ def train(game):
         sec = str(total_time % 60)
         total_time = min + ' min ' + sec
 
-      game_str = 'Game v' + str(MODEL_VERSION)
-      print('Game (v' + str(MODEL_VERSION) + '){:>4}'.format(agent.n_games) + ', ' + \
+      game_str = 'Game v' + str(AI_VERSION)
+      print('Game (v' + str(AI_VERSION) + '){:>4}'.format(agent.n_games) + ', ' + \
             'Score' + '{:>4}'.format(score) + ', ' + \
             'Record' + '{:>4}'.format(record) + ', ' + \
             'Game Time ' + str(total_time) +  ' sec')
@@ -225,9 +233,9 @@ def train(game):
       total_score += score
       mean_score = total_score / agent.n_games
       plot_mean_scores.append(mean_score)
-      plot(plot_scores, plot_mean_scores, plot_game_times, MODEL_VERSION)
+      plot(plot_scores, plot_mean_scores, plot_game_times, AI_VERSION)
 
 if __name__ == '__main__':
-  game = SnakeGameAI(MODEL_VERSION)
+  game = SnakeGameAI(AI_VERSION)
   train(game)
 

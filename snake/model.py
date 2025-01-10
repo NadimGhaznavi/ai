@@ -5,40 +5,32 @@ import torch.nn.functional as F
 import os
 
 class Linear_QNet(nn.Module):
-  def __init__(self, input_size, hidden_size, output_size, model_version):
+  def __init__(self, input_nodes, hidden_nodes, hidden_layers, output_nodes, ai_version):
     super().__init__()
-    self.model_version = model_version
-    self.linear_in = nn.Linear(input_size, hidden_size)
-    if self.model_version > 3:
-      self.linear_hidden_1 = nn.Linear(hidden_size, hidden_size)
-    #if self.model_version > 4:
-    #  self.linear_hidden_2 = nn.Linear(hidden_size, hidden_size)
-    #if self.model_version > 5:
-    #  self.linear_hidden_3 = nn.Linear(hidden_size, hidden_size)
-    #self.linear_hidden_4 = nn.Linear(hidden_size, hidden_size)
-    #self.linear_hidden_5 = nn.Linear(hidden_size, hidden_size)
-    #self.linear_hidden_6 = nn.Linear(hidden_size, hidden_size)
-    #self.linear_hidden_7 = nn.Linear(hidden_size, hidden_size)
-    self.linear_out = nn.Linear(hidden_size, output_size)
+    self.ai_version = ai_version
+    self.linear_in = nn.Linear(input_nodes, hidden_nodes)
+    if self.ai_version > 2:
+      self.linear_hidden_1 = nn.Linear(hidden_nodes, hidden_nodes)
+    self.linear_out = nn.Linear(hidden_nodes, output_nodes)
     
   
   def forward(self, x):
     x = F.relu(self.linear_in(x))
-    if self.model_version > 2:
+    if self.ai_version > 2:
       x = self.linear_hidden_1(x)
     x = self.linear_out(x)
     return x
   
   def save(self):
-    file_name = 'model_' + str(self.model_version) + 'pth'
+    file_name = 'ai_model_v' + str(self.ai_version) + 'pth'
     model_folder_path = './model'
     if not os.path.exists(model_folder_path):
       os.makedirs(model_folder_path)
     file_name = os.path.join(model_folder_path, file_name)
     torch.save(self.state_dict(), file_name)
 
-  def load(self, file_name='model.pth'):
-    file_name = os.path.join('./model', file_name)
+  def load(self, file_name='ai_model.pth'):
+    file_name = os.path.join('./ai_model', file_name)
     self.load_state_dict(torch.load(file_name))
     
 class QTrainer:
