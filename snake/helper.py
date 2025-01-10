@@ -7,7 +7,7 @@ def plot(scores, mean_scores, game_times, ai_version):
   display.clear_output(wait=True)
   display.display(plt.gcf())
   plt.clf()
-  plt.title('Training v' + str(ai_version))
+  plt.title('Snake AI Training (v' + str(ai_version) + ')')
   plt.xlabel('Number of games')
   plt.ylabel('Score')
   plt.plot(scores)
@@ -15,12 +15,6 @@ def plot(scores, mean_scores, game_times, ai_version):
   plt.ylim(ymin=0)
   plt.text(len(scores)-1, scores[-1], str(scores[-1]))
   plt.text(len(mean_scores)-1, mean_scores[-1], str(mean_scores[-1]))
-
-  #fig, ax1 = plt.subplots()
-  #ax2 = ax1.twinx()
-  #color = 'tab:green'
-  #ax2.plot(game_times, color=color)
-  #fig.tight_layout()
 
   plt.show()
   plt.pause(0.1)

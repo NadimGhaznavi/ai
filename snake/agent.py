@@ -18,7 +18,7 @@ BATCH_SIZE = 1000 # Batch size for the replay buffer
 # describe the state of the game
 INPUT_NODES = 18 
 HIDDEN_NODES = 32 # Number of nodes in the hidden layers
-HIDDEN_LAYERS = 1 # Number of hidden layers
+HIDDEN_LAYERS = 0 # Number of hidden layers
 # Number of nodes in the output layer. This corresponds to valid moves
 # that the snake can make i.e. left, right or continue straight
 OUTPUT_NODES = 3 
@@ -29,19 +29,14 @@ EG_EPSILON_VALUE = 0.1 # EpsilonGreedy epsilon value
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
-AI_VERSION = 3 
+AI_VERSION = 6
 
-if AI_VERSION > 0:
+if AI_VERSION > 1:
   LR = 0.001
-  HIDDEN_SIZE = 256
-  EPSION_VALUE = 150
+  HIDDEN_NODES = 64
 
-if AI_VERSION > 2:
-  HIDDEN_SIZE = 1024
-  EPSILON_VALUE = 500
-
-if AI_VERSION > 3:
-  HIDDEN_SIZE = 2048
+if AI_VERSION > 4:
+  HIDDEN_LAYERS = 2
 
 class Agent:
 
@@ -52,7 +47,8 @@ class Agent:
     self.gamma = DISCOUNT # Discount rate, for future rewards
     # If memory exceeds MAX_MEMORY, oldest memory is removed i.e. popleft()
     self.memory = deque(maxlen=MAX_MEMORY) 
-    self.model = Linear_QNet(INPUT_NODES, HIDDEN_NODES, HIDDEN_LAYERS, OUTPUT_NODES, AI_VERSION) 
+    self.model = Linear_QNet(INPUT_NODES, HIDDEN_NODES, HIDDEN_LAYERS, OUTPUT_NODES, AI_VERSION)
+    print(self.model.layer_stack)
     self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
     self.eg = EG(3, EG_EPSILON_VALUE)
     self.last_dirs = [ 0, 0, 1, 0 ]
@@ -191,6 +187,7 @@ def train(game):
   total_score = 0 # Score for the current game
   record = 0 # Best score
   agent = Agent(game)
+  agent.model.load()
   while True:
     start_time = time()
     # Get old state
@@ -218,16 +215,15 @@ def train(game):
       total_time = round((end_time - start_time), 1)
       plot_game_times.append(total_time)
 
-      if total_time > 60:
-        min = str(total_time / 60)
-        sec = str(total_time % 60)
-        total_time = min + ' min ' + sec
+      #if total_time > 60:
+      #  min = str(total_time / 60)
+      #  sec = str(total_time % 60)
+      #  total_time = min + ' min ' + sec
 
-      game_str = 'Game v' + str(AI_VERSION)
-      print('Game (v' + str(AI_VERSION) + '){:>4}'.format(agent.n_games) + ', ' + \
+      print('Snake AI (v' + str(AI_VERSION) + '){:>4}'.format(agent.n_games) + ', ' + \
             'Score' + '{:>4}'.format(score) + ', ' + \
             'Record' + '{:>4}'.format(record) + ', ' + \
-            'Game Time ' + str(total_time) +  ' sec')
+            'Time ' + '{:>4}'.format(game.elapsed_time))
 
       plot_scores.append(score)
       total_score += score

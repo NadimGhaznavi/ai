@@ -3,6 +3,7 @@ import random
 from enum import Enum
 from collections import namedtuple
 import numpy as np
+import time
 
 random.seed(1970)
 
@@ -47,12 +48,15 @@ class SnakeGameAI:
     self.h = h
     # init display
     self.display = pygame.display.set_mode((self.w, self.h))
-    pygame.display.set_caption('Snake v' + str(version))
+    pygame.display.set_caption('Snake AI (v' + str(version) + ')')
     self.clock = pygame.time.Clock()
+    self.start_time = 'N/A'
+    self.elapsed_time = 'N/A'
     self.reset()
 
   def reset(self):
     # init game state
+    self.start_time = time.time()
     self.direction = Direction.RIGHT
         
     self.head = Point(self.w/2, self.h/2)
@@ -64,6 +68,20 @@ class SnakeGameAI:
     self.food = None
     self._place_food()
     self.frame_iteration = 0
+
+  def pause_game(self):
+    is_paused = True
+    # Create pause loop
+    while is_paused:
+      for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+          if event.key == pygame.K_SPACE:
+            is_paused = False
+        if event.type == pygame.QUIT:
+          is_paused = False
+          pygame.quit()
+          quit()
+
 
   def _place_food(self):
     x = random.randint(0, (self.w-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
@@ -80,6 +98,9 @@ class SnakeGameAI:
       if event.type == pygame.QUIT:
         pygame.quit()
         quit()
+      if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_p:
+          self.pause_game()
         
     # 2. move
     self._move(action) # update the head
@@ -108,6 +129,7 @@ class SnakeGameAI:
     # 5. update ui and clock
     self._update_ui()
     self.clock.tick(SPEED)
+    
     # 6. return game over and score
     return reward, game_over, self.score
     
@@ -138,8 +160,11 @@ class SnakeGameAI:
       pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x+4, pt.y+4, 12, 12))
             
       pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+      
+      score_string = "Score: " + str(self.score)
+      self.elapsed_time = str(int(time.time() - self.start_time)) + 's'
         
-      text = font.render("Score: " + str(self.score), True, WHITE)
+      text = font.render(score_string + ' (' + self.elapsed_time + ')', True, WHITE)
       self.display.blit(text, [0, 0])
       pygame.display.flip()
         

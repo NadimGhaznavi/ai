@@ -4,34 +4,41 @@ import torch.optim as optim
 import torch.nn.functional as F
 import os
 
+MODEL_DIR = './model'
+MODEL_FILE = 'ai_model_v'
+MODEL_FILE_SUFFIX = 'pth'
+
 class Linear_QNet(nn.Module):
   def __init__(self, input_nodes, hidden_nodes, hidden_layers, output_nodes, ai_version):
     super().__init__()
     self.ai_version = ai_version
-    self.linear_in = nn.Linear(input_nodes, hidden_nodes)
-    if self.ai_version > 2:
-      self.linear_hidden_1 = nn.Linear(hidden_nodes, hidden_nodes)
-    self.linear_out = nn.Linear(hidden_nodes, output_nodes)
-    
+    self.layer_stack = nn.Sequential()
+    self.layer_stack.append(nn.Linear(in_features=input_nodes, out_features=hidden_nodes))
+    self.layer_stack.append(nn.ReLU())
+    hidden_layer_count = 0
+    while hidden_layer_count != hidden_layers:
+      self.layer_stack.append(nn.Linear(in_features=hidden_nodes,
+                                        out_features=hidden_nodes))
+      self.layer_stack.append(nn.ReLU())
+      hidden_layer_count += 1
+    self.layer_stack.append(nn.Linear(in_features=hidden_nodes,
+                out_features=output_nodes))
   
   def forward(self, x):
-    x = F.relu(self.linear_in(x))
-    if self.ai_version > 2:
-      x = self.linear_hidden_1(x)
-    x = self.linear_out(x)
-    return x
+    return self.layer_stack(x)
   
   def save(self):
-    file_name = 'ai_model_v' + str(self.ai_version) + 'pth'
-    model_folder_path = './model'
-    if not os.path.exists(model_folder_path):
-      os.makedirs(model_folder_path)
-    file_name = os.path.join(model_folder_path, file_name)
+    file_name = MODEL_FILE + str(self.ai_version) + '.' + MODEL_FILE_SUFFIX
+    if not os.path.exists(MODEL_DIR):
+      os.makedirs(MODEL_DIR)
+    file_name = os.path.join(MODEL_DIR, file_name)
     torch.save(self.state_dict(), file_name)
 
-  def load(self, file_name='ai_model.pth'):
-    file_name = os.path.join('./ai_model', file_name)
-    self.load_state_dict(torch.load(file_name))
+  def load(self):
+    file_name = MODEL_FILE + str(self.ai_version) + '.' + MODEL_FILE_SUFFIX
+    file_name = os.path.join(MODEL_DIR, file_name)
+    if os.path.isfile(file_name):
+      self.load_state_dict(torch.load(file_name, weights_only=False))
     
 class QTrainer:
   def __init__(self, model, lr, gamma):
