@@ -1,9 +1,12 @@
 # AI Snake Game
 
+[Snake Game](/NadimGhaznavi/ai/blob/main/snake/images/snake.png)
+
 ## Table of Contents
 
 * [Snake Game Description](#snake-game-description)
 * [Development Environment](#development-environment)
+* [AI Training Visualization](#ai-training-visualization)
 * [Motivation for this Project](#motivation-for-this-project)
 * [A Bit About Me](#a-bit-about-me)
 * [Acknowlegements](#acknowlegements)
@@ -11,6 +14,10 @@
 ## Snake Game Description
 
 This project is an implementation of the *Snake* game with an AI agent playing it. The Snake game is a simple video game where the user controls a *Snake* using the arrow keys. The goal is to eat as many *food* blocks as possible. The game is over when the snake hits the edge of the game screen or hits itself.
+
+This project has the AI playing the game. You just get to watch and/or tweak the code to see what happens! The game automatically restarts whenever the AI crashes the snake into itself or the wall. Or if you close the window.
+
+You can pause the game by pressing **p** on your keyboard and restart it by pressing the **space** bar
 
 ## Development Environment
 
@@ -39,6 +46,11 @@ $ cd ai/snake
 # Run the game with the AI agent player
 $ python agent.py
 ```
+## AI Training Visualization
+
+Running the code cause a dynamic MatPlotLib window to popup. The window contains a graph showing the score and the average score over time.
+
+[AI Agent Performance](/NadimGhaznavi/ai/blob/main/snake/images/ai-agent-performance.png)
 
 ## Motivation for this Project
 
