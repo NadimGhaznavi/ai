@@ -19,27 +19,26 @@ DISCOUNT = 0.8 # Discount rate, must be smaller than 1
 LR = 0.003 # Learning rate
 EPSILON_VALUE = 200 # Epsilon value, for exploration (i.e. vs exploitation)
 EG_EPSILON_VALUE = 0.1 # EpsilonGreedy epsilon value
-MODEL_VERSION = 5
+MODEL_VERSION = 3
 
 if MODEL_VERSION > 0:
   LR = 0.001
   HIDDEN_SIZE = 256
-  EPSION_VALUE = 100
-
-if MODEL_VERSION > 1:
-  EPSILON_VALUE = 150
+  EPSION_VALUE = 150
 
 if MODEL_VERSION > 2:
   HIDDEN_SIZE = 1024
   EPSILON_VALUE = 500
 
 if MODEL_VERSION > 3:
-  HIDDEN_SIZE = 512
+  HIDDEN_SIZE = 2048
+
 
 
 class Agent:
 
-  def __init__(self):
+  def __init__(self, game):
+    self.game = game
     self.n_games = 0 # Number of games played
     self.epsilon = 0 # Epsilon value, for exploration (i.e. vs exploitation)
     self.gamma = DISCOUNT # Discount rate, for future rewards
@@ -50,7 +49,8 @@ class Agent:
     self.eg = EG(3, EG_EPSILON_VALUE)
     self.last_dirs = [ 0, 0, 1, 0 ]
 
-  def get_state(self, game):
+  def get_state(self):
+    game = self.game
     head = game.snake[0]
     point_l = Point(head.x - 20, head.y)
     point_r = Point(head.x + 20, head.y)
@@ -143,13 +143,30 @@ class Agent:
 
   def get_action(self, state):
     # Random move: exploration vs exploitation...
-    # The more games played, the less likely to explore i.e. 
-    self.epsilon = EPSILON_VALUE - self.n_games
+    # The more games played, the less likely to explore
     final_move = [0, 0, 0]
+    self.epsilon = EPSILON_VALUE - self.n_games
     if random.randint(0, EPSILON_VALUE) < self.epsilon:
       # Random move
-      move = random.randint(0, 2)
-      final_move[move] = 1
+      bad_move = True
+      x = self.game.head.x
+      y = self.game.head.y
+      bad_move_count = 1
+      while bad_move:
+        final_move = [0, 0, 0]
+        move = random.randint(0, 2)
+        final_move[move] = 1
+        test_direction = self.game.move_helper(final_move)
+        test_point = self.game.move_helper2(x, y, test_direction)
+        wall_collision = self.game.is_wall_collision(test_point)
+        self_collision = self.game.is_self_collision(test_point)
+        if bad_move_count > 10:
+          bad_move = False
+        elif wall_collision or self_collision:
+          bad_move = True
+          bad_move_count += 1
+        else:
+          bad_move = False
     else:
       state0 = torch.tensor(state, dtype=torch.float)
       prediction = self.model(state0)
@@ -159,23 +176,22 @@ class Agent:
     #self.last_dirs.append(final_move)
     return final_move
 
-def train():
+def train(game):
   plot_scores = [] # Scores for each game
   plot_mean_scores = [] # Average scores over a rolling window
   plot_game_times = []
   total_score = 0 # Score for the current game
   record = 0 # Best score
-  agent = Agent()
-  game = SnakeGameAI(MODEL_VERSION)
+  agent = Agent(game)
   while True:
     start_time = time()
     # Get old state
-    state_old = agent.get_state(game)
+    state_old = agent.get_state()
     # Get move
     final_move = agent.get_action(state_old)
     # Perform move and get new state
     reward, done, score = game.play_step(final_move)
-    state_new = agent.get_state(game)
+    state_new = agent.get_state()
     # Train short memory
     agent.train_short_memory(state_old, final_move, reward, state_new, done)
     # Remember
@@ -212,5 +228,6 @@ def train():
       plot(plot_scores, plot_mean_scores, plot_game_times, MODEL_VERSION)
 
 if __name__ == '__main__':
-  train()
+  game = SnakeGameAI(MODEL_VERSION)
+  train(game)
 

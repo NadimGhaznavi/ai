@@ -11,9 +11,10 @@ class Linear_QNet(nn.Module):
     self.linear_in = nn.Linear(input_size, hidden_size)
     if self.model_version > 3:
       self.linear_hidden_1 = nn.Linear(hidden_size, hidden_size)
-    if self.model_version > 4:
-      self.linear_hidden_2 = nn.Linear(hidden_size, hidden_size)
-    #self.linear_hidden_3 = nn.Linear(hidden_size, hidden_size)
+    #if self.model_version > 4:
+    #  self.linear_hidden_2 = nn.Linear(hidden_size, hidden_size)
+    #if self.model_version > 5:
+    #  self.linear_hidden_3 = nn.Linear(hidden_size, hidden_size)
     #self.linear_hidden_4 = nn.Linear(hidden_size, hidden_size)
     #self.linear_hidden_5 = nn.Linear(hidden_size, hidden_size)
     #self.linear_hidden_6 = nn.Linear(hidden_size, hidden_size)
@@ -23,10 +24,8 @@ class Linear_QNet(nn.Module):
   
   def forward(self, x):
     x = F.relu(self.linear_in(x))
-    if self.model_version > 3:
+    if self.model_version > 2:
       x = self.linear_hidden_1(x)
-    if self.model_version > 4:
-      x = self.linear_hidden_2(x)
     x = self.linear_out(x)
     return x
   

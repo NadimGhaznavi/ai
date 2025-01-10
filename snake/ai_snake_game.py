@@ -145,6 +145,12 @@ class SnakeGameAI:
         
   def _move(self, action):
     # action is an enum value [straight, right, left]
+    
+    self.direction = self.move_helper(action)
+    aPoint = self.move_helper2(self.head.x, self.head.y, self.direction)
+    self.head = aPoint
+
+  def move_helper(self, action):
     clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
     idx = clock_wise.index(self.direction)
 
@@ -156,20 +162,17 @@ class SnakeGameAI:
     else: # [0, 0, 1] ... there are only 3 actions
       next_idx = (idx - 1) % 4 # Again, MOD 4 to avoid out of index error
       new_dir = clock_wise[next_idx] # left turn r -> u -> l -> d
+    return new_dir
 
-    self.direction = new_dir
-
-    x = self.head.x
-    y = self.head.y
-    if self.direction == Direction.RIGHT:
+  def move_helper2(self, x, y, direction):
+    if direction == Direction.RIGHT:
       x += BLOCK_SIZE
-    elif self.direction == Direction.LEFT:
+    elif direction == Direction.LEFT:
       x -= BLOCK_SIZE
-    elif self.direction == Direction.DOWN:
+    elif direction == Direction.DOWN:
       y += BLOCK_SIZE
-    elif self.direction == Direction.UP:
+    elif direction == Direction.UP:
       y -= BLOCK_SIZE
-            
-    self.head = Point(x, y)
+    return Point(x, y)  
             
 
