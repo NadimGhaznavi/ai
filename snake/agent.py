@@ -220,7 +220,8 @@ def train(game):
       #  sec = str(total_time % 60)
       #  total_time = min + ' min ' + sec
 
-      print('Snake AI (v' + str(AI_VERSION) + '){:>4}'.format(agent.n_games) + ', ' + \
+      print('Snake AI (v' + str(AI_VERSION) + ')' + \
+            'Game' + '{:>4}'.format(agent.n_games) + ', ' + \
             'Score' + '{:>4}'.format(score) + ', ' + \
             'Record' + '{:>4}'.format(record) + ', ' + \
             'Time ' + '{:>4}'.format(game.elapsed_time))
