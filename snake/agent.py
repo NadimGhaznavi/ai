@@ -29,7 +29,7 @@ EG_EPSILON_VALUE = 0.1 # EpsilonGreedy epsilon value
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
-AI_VERSION = 6
+AI_VERSION = 2
 
 if AI_VERSION > 1:
   LR = 0.001
@@ -37,6 +37,10 @@ if AI_VERSION > 1:
 
 if AI_VERSION > 4:
   HIDDEN_LAYERS = 2
+
+if AI_VERSION > 6:
+  HIDDEN_NODES = 16
+  HIDDEN_LAYERS = 8
 
 class Agent:
 
