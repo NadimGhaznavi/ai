@@ -1,6 +1,6 @@
 # AI Snake Game
 
-![Snake Game](/NadimGhaznavi/ai/blob/main/snake/images/snake.png)
+![Snake Game](images/snake.png)
 
 ## Table of Contents
 
@@ -50,7 +50,7 @@ $ python agent.py
 
 Running the code cause a dynamic MatPlotLib window to popup. The window contains a graph showing the score and the average score over time.
 
-![AI Agent Performance](/NadimGhaznavi/ai/blob/main/snake/images/ai-agent-performance.png)
+![AI Agent Performance](images/ai-agent-performance.png)
           
 ## Motivation for this Project
 
