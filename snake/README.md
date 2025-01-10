@@ -1,6 +1,6 @@
 # AI Snake Game
 
-[Snake Game](/NadimGhaznavi/ai/blob/main/snake/images/snake.png)
+![Snake Game](/NadimGhaznavi/ai/blob/main/snake/images/snake.png)
 
 ## Table of Contents
 
@@ -50,8 +50,8 @@ $ python agent.py
 
 Running the code cause a dynamic MatPlotLib window to popup. The window contains a graph showing the score and the average score over time.
 
-[AI Agent Performance](/NadimGhaznavi/ai/blob/main/snake/images/ai-agent-performance.png)
-
+![AI Agent Performance](/NadimGhaznavi/ai/blob/main/snake/images/ai-agent-performance.png)
+          
 ## Motivation for this Project
 
 It has seemed clear to me that AI is the hottest technology on the planet and I wanted to get involved. Like when I was trying to learn Linux, learning AI didn't seem like it had a *steep learning curve*, it had a *learning cliff*. I'm not a mathematician, so that already seemed to present a significant handicap. I tried a number of tutorials and courses, but I coudn't seem to get any traction. Then I stumbled across a [YouTube video](https://www.youtube.com/watch?v=L8ypSXwyBds&t=1042s&ab_channel=freeCodeCamp.org) by [Patrick Loeber](https://www.youtube.com/channel/UCbXgNpp0jedKWcQiULLbDTA).
