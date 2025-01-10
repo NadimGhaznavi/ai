@@ -16,7 +16,7 @@ This project is an implementation of the *Snake* game with an AI agent playing i
 
 I'm running Debian Linux at home, but this project is totally portable. You can run the code on Linux, Windows or on Apple quite easily. The only pre-requisites are:
 
-* [Python 3](https://python.org) installation
+* [Python 3](https://python.org)
 * [Git](https://git-scm.com/)
 * [PyTorch](https://pytorch.org)
 * [PyGame](https://www.pygame.org/)
