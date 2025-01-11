@@ -266,7 +266,6 @@ def train(game):
         record = score
         agent.model.save()
         game.sim_high_score = record
-        agent.save_checkpoint()
 
       print('Snake AI (v' + str(AI_VERSION) + ') ' + \
             'Game' + '{:>4}'.format(agent.n_games) + ', ' + \
