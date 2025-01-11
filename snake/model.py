@@ -96,32 +96,31 @@ class Linear_QNet(nn.Module):
     return self.layer_stack(x)
   
   def save(self):
-    file_name = MODEL_FILE + str(self.ai_version) + '.' + MODEL_FILE_SUFFIX
+    file_name = MODEL_FILE + str(self.ai_version) + MODEL_FILE_SUFFIX
     if not os.path.exists(MODEL_DIR):
       os.makedirs(MODEL_DIR)
     file_name = os.path.join(MODEL_DIR, file_name)
     torch.save(self.state_dict(), file_name)
 
   def load(self):
-    file_name = MODEL_FILE + str(self.ai_version) + '.' + MODEL_FILE_SUFFIX
+    file_name = MODEL_FILE + str(self.ai_version) + MODEL_FILE_SUFFIX
     file_name = os.path.join(MODEL_DIR, file_name)
     if os.path.isfile(file_name):
       self.load_state_dict(torch.load(file_name, weights_only=False))
 
-  def save_checkpoint(model, optimizer, save_path, epoch):
+  def save_checkpoint(self, optimizer, save_path, epoch):
     torch.save({
-        'model_state_dict': model.state_dict(),
+        'model_state_dict': self.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
-        'epoch': epoch
+        'epoch': epoch,
+        'weights_only': False
     }, save_path)
 
-  def load_checkpoint(model, optimizer, load_path):
-    checkpoint = torch.load(load_path)
-    model.load_state_dict(checkpoint['model_state_dict'])
+  def load_checkpoint(self, optimizer, load_path):
+    checkpoint = torch.load(load_path, weights_only=False)
+    self.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     epoch = checkpoint['epoch']
-    
-    return model, optimizer, epoch  
     
 class QTrainer:
   def __init__(self, model, lr, gamma):

@@ -177,6 +177,7 @@ class Agent:
     if not os.path.exists(SIM_CHECKPOINT_DIR):
       os.makedirs(SIM_CHECKPOINT_DIR)
     self.model.save_checkpoint(self.trainer.optimizer, checkpoint_file, self.game.num_games)
+    print(f"Saved simulation checkpoint ({checkpoint_file})")
 
   def load_checkpoint(self):
     checkpoint_file = SIM_CHECKPOINT_FILE + str(AI_VERSION) + '.' + SIM_CHECKPOINT_FILE_SUFFIX
@@ -184,6 +185,7 @@ class Agent:
     if os.path.isfile(checkpoint_file):
       optimizer = self.trainer.optimizer
       self.model.load_checkpoint(optimizer, checkpoint_file)
+      print(f"Loaded simulation checkpoint ({checkpoint_file})")
 
   def train_long_memory(self):
     if len(self.memory) > BATCH_SIZE:
@@ -243,7 +245,6 @@ def train(game):
   agent.model.load()
   while True:
     if (game.num_games % SIM_CHECKPOINT_FREQ) == 0:
-      print('Performing simulation checkpoint')
       game.save_checkpoint()
     # Get old state
     state_old = agent.get_state()
@@ -265,7 +266,6 @@ def train(game):
         record = score
         agent.model.save()
         game.sim_high_score = record
-        print('Performing simulation checkpoint')
         agent.save_checkpoint()
 
       print('Snake AI (v' + str(AI_VERSION) + ') ' + \
