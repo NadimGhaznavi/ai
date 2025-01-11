@@ -61,9 +61,17 @@ class SnakeGameAI:
     self.score = 0
     self.num_games = 0
     self.lose_reason = 'N/A'
+    self.agent = None
+    self.sim_checkpoint_freq = 50
     self.reset()
 
-  def reset(self, agent, sim_checkpoint_freq):
+  def set_agent(self, agent):
+    self.agent = agent
+
+  def set_sim_checkpoint_freq(self, sim_checkpoint_freq):
+    self.sim_checkpoint_freq = sim_checkpoint_freq
+
+  def reset(self):
     # init game state
     self.sim_score += self.score
     self.score = 0
@@ -81,12 +89,11 @@ class SnakeGameAI:
                   Point(self.head.x-BLOCK_SIZE, self.head.y),
                   Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
     
-    
     self.food = None
     self._place_food()
     self.frame_iteration = 0
-    if (self.num_games % sim_checkpoint_freq) == 0:
-      agent.save_checkpoint()
+    if (self.num_games % self.sim_checkpoint_freq) == 0:
+      self.agent.save_checkpoint()
 
   def _pause_game(self):
     is_paused = True
@@ -106,7 +113,7 @@ class SnakeGameAI:
           self._quit_game()
 
   def _print_status(self):
-    avg_score = int(self.sim_score / self.num_games)
+    avg_score = round(self.sim_score / self.num_games, 2)
     sim_min = int(self.sim_time / 60)
     sim_sec = self.sim_time % 60
     print(f"Simulation time          : {sim_min} min {sim_sec} sec")

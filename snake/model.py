@@ -95,19 +95,6 @@ class Linear_QNet(nn.Module):
   def forward(self, x):
     return self.layer_stack(x)
   
-  def save(self):
-    file_name = MODEL_FILE + str(self.ai_version) + MODEL_FILE_SUFFIX
-    if not os.path.exists(MODEL_DIR):
-      os.makedirs(MODEL_DIR)
-    file_name = os.path.join(MODEL_DIR, file_name)
-    torch.save(self.state_dict(), file_name)
-
-  def load(self):
-    file_name = MODEL_FILE + str(self.ai_version) + MODEL_FILE_SUFFIX
-    file_name = os.path.join(MODEL_DIR, file_name)
-    if os.path.isfile(file_name):
-      self.load_state_dict(torch.load(file_name, weights_only=False))
-
   def save_checkpoint(self, optimizer, save_path, epoch):
     torch.save({
         'model_state_dict': self.state_dict(),

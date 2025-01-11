@@ -64,7 +64,16 @@ SIM_CHECKPOINT_FREQ = 50
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
-AI_VERSION = 15
+AI_VERSION = 17
+
+if AI_VERSION == 17:
+  B1_NODES = 1024
+  B1_LAYERS = 3
+  B2_NODES = 768
+  B2_LAYERS = 0
+  B3_NODES = 512
+  B3_LAYERS = 0
+  EPSILON_VALUE = 300
 
 if AI_VERSION == 15:
   B1_NODES = 256
@@ -211,7 +220,7 @@ class Agent:
       bad_move = True
       x = self.game.head.x
       y = self.game.head.y
-      bad_move_count = 1
+      bad_move_count = 1 
       while bad_move:
         final_move = [0, 0, 0]
         move = random.randint(0, 2)
@@ -220,7 +229,7 @@ class Agent:
         test_point = self.game.move_helper2(x, y, test_direction)
         wall_collision = self.game.is_wall_collision(test_point)
         self_collision = self.game.is_self_collision(test_point)
-        if bad_move_count > 10:
+        if bad_move_count > 3:
           bad_move = False
         elif wall_collision or self_collision:
           bad_move = True
@@ -242,7 +251,8 @@ def train(game):
   total_score = 0 # Score for the current game
   record = 0 # Best score
   agent = Agent(game)
-  agent.model.load()
+  game.set_agent(agent)
+  game.set_sim_checkpoint_freq(SIM_CHECKPOINT_FREQ)
   while True:
     # Get old state
     state_old = agent.get_state()
@@ -257,13 +267,13 @@ def train(game):
     agent.remember(state_old, final_move, reward, state_new, done)
     if done:
       # Train long memory
-      game.reset(agent, SIM_CHECKPOINT_FREQ)
+      game.reset()
       
       agent.n_games += 1
       agent.train_long_memory()
       if score > record:
         record = score
-        agent.model.save()
+        agent.save_checkpoint()
         game.sim_high_score = record
 
       print('Snake AI (v' + str(AI_VERSION) + ') ' + \
