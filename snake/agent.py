@@ -172,7 +172,7 @@ class Agent:
 
   def save_checkpoint(self):
     # Save the simulation state
-    checkpoint_file = SIM_CHECKPOINT_FILE + str(AI_VERSION) + '.' + SIM_CHECKPOINT_FILE_SUFFIX
+    checkpoint_file = SIM_CHECKPOINT_FILE + str(AI_VERSION) + SIM_CHECKPOINT_FILE_SUFFIX
     checkpoint_file = os.path.join(SIM_CHECKPOINT_DIR, checkpoint_file)
     if not os.path.exists(SIM_CHECKPOINT_DIR):
       os.makedirs(SIM_CHECKPOINT_DIR)
@@ -180,7 +180,7 @@ class Agent:
     print(f"Saved simulation checkpoint ({checkpoint_file})")
 
   def load_checkpoint(self):
-    checkpoint_file = SIM_CHECKPOINT_FILE + str(AI_VERSION) + '.' + SIM_CHECKPOINT_FILE_SUFFIX
+    checkpoint_file = SIM_CHECKPOINT_FILE + str(AI_VERSION) + SIM_CHECKPOINT_FILE_SUFFIX
     checkpoint_file = os.path.join(SIM_CHECKPOINT_DIR, checkpoint_file)
     if os.path.isfile(checkpoint_file):
       optimizer = self.trainer.optimizer
