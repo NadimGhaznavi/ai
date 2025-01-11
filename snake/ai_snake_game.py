@@ -97,7 +97,7 @@ class SnakeGameAI:
           self._quit_game()
 
   def _print_status(self):
-    print(f"Simulation time: {self.sim_time}")
+    print(f"Simulation time: {self.sim_time}s")
     print(f"Simulation high score: {self.sim_high_score}")
     print(f"Simulation total score: {self.sim_score}")
     

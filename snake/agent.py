@@ -18,38 +18,62 @@ BATCH_SIZE = 1000 # Batch size for the replay buffer
 # describe the state of the game
 INPUT_NODES = 18 
 
-B1_NODES = 512 # Nmber of nodes in the hidden layers in block one
-B1_LAYERS = 6 # Number of hidden layers in block one, must be at least 1
+## Block 1: There *MUST* be at least 1 layer
+B1_LAYERS = 1
+# Number of nodes in block 1 layer(s)
+B1_NODES = 512 
+
+
+## Block 2: Optional additional block (with different number of nodes than B1)
+# Number of nodes in block 2 layer(s)
 B2_NODES = 1024
-B2_LAYERS = 3
+# Number of block 2 layers
+B2_LAYERS = 0 # Can be zero
+
+## Block 3: Optional addition block. 
+# If you want to use this, then you must have at least 1 block 2 layer
+# Number of nodes in block 3 layer(s)
 B3_NODES = 512
+# Number of block 3 layers
 B3_LAYERS = 0
+
 # Number of nodes in the output layer. This corresponds to valid moves
 # that the snake can make i.e. left, right or continue straight
-OUTPUT_NODES = 3 
-DISCOUNT = 0.8 # Discount rate, must be smaller than 1  
-LR = 0.001 # Learning rate
-EPSILON_VALUE = 150 # Epsilon value, for exploration (i.e. vs exploitation)
-EG_EPSILON_VALUE = 0.1 # EpsilonGreedy epsilon value
+# You *CANNOT* change this.
+OUTPUT_NODES = 3
+
+# Discount rate, must be smaller than 1  
+DISCOUNT = 0.8 
+# Learning rate
+LR = 0.001
+# Epsilon value, for exploration. While the number of games is less than
+# this value then there is a random chance that there will be a random snake
+# i.e. not decided by the AI
+EPSILON_VALUE = 150
+
+# EpsilonGreedy epsilon value, NOT YET IMPLEMENTED
+EG_EPSILON_VALUE = 0.1 # 
+
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
-AI_VERSION = 3
-if AI_VERSION == 2:
-  B1_NODES = 2048
-  B1_LAYERS = 1
-  B2_NODES = 512
-  B2_LAYERS = 2
-  B3_NODES = 128
-  B3_LAERS = 6
+AI_VERSION = 5
 
-if AI_VERSION == 3:
-  B1_NODES = 2048
-  B1_LAYERS = 1
+if AI_VERSION == 5:
+  B1_NODES = 256
+  B1_LAYERS = 2
   B2_NODES = 512
+  B2_LAYERS = 4
+  B3_NODES = 256
+  B3_LAYERS = 2
+
+if AI_VERSION == 4:
+  B1_NODES = 288
+  B1_LAYERS = 3
+  B2_NODES = 432
   B2_LAYERS = 3
-  B3_NODES = 128
-  B3_LAERS = 6
+  B3_NODES = 288
+  B3_LAYERS = 4
 
 
 class Agent:
