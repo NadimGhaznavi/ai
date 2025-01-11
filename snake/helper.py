@@ -3,7 +3,7 @@ from IPython import display
 
 plt.ion()
 
-def plot(scores, mean_scores, game_times, ai_version):
+def plot(scores, mean_scores, ai_version):
   display.clear_output(wait=True)
   display.display(plt.gcf())
   plt.clf()

@@ -237,7 +237,6 @@ class Agent:
 def train(game):
   plot_scores = [] # Scores for each game
   plot_mean_scores = [] # Average scores over a rolling window
-  plot_game_times = []
   total_score = 0 # Score for the current game
   record = 0 # Best score
   agent = Agent(game)
@@ -269,11 +268,6 @@ def train(game):
         print('Performing simulation checkpoint')
         agent.save_checkpoint()
 
-      # Calculate elapsed game time
-      end_time = time()
-      total_time = round((end_time - start_time), 1)
-      plot_game_times.append(total_time)
-
       print('Snake AI (v' + str(AI_VERSION) + ') ' + \
             'Game' + '{:>4}'.format(agent.n_games) + ', ' + \
             'Score' + '{:>4}'.format(score) + ', ' + \
@@ -285,7 +279,7 @@ def train(game):
       total_score += score
       mean_score = total_score / agent.n_games
       plot_mean_scores.append(mean_score)
-      plot(plot_scores, plot_mean_scores, plot_game_times, AI_VERSION)
+      plot(plot_scores, plot_mean_scores, AI_VERSION)
 
 if __name__ == '__main__':
   game = SnakeGameAI(AI_VERSION)
