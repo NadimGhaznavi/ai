@@ -1,6 +1,7 @@
 import torch
 import random
 import numpy as np
+import os
 from collections import deque
 from time import time
 from ai_snake_game import SnakeGameAI, Direction, Point
@@ -54,27 +55,25 @@ EPSILON_VALUE = 150
 # EpsilonGreedy epsilon value, NOT YET IMPLEMENTED
 EG_EPSILON_VALUE = 0.1 # 
 
+## Simulation checkpoint save info
+SIM_CHECKPOINT_DIR = './models'
+SIM_CHECKPOINT_FILE = 'ai_checkpoint_v'
+SIM_CHECKPOINT_FILE_SUFFIX = '.ptc'
+SIM_CHECKPOINT_FREQ = 50
+
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
-AI_VERSION = 5
+AI_VERSION = 15
 
-if AI_VERSION == 5:
+if AI_VERSION == 15:
   B1_NODES = 256
-  B1_LAYERS = 2
-  B2_NODES = 512
-  B2_LAYERS = 4
-  B3_NODES = 256
-  B3_LAYERS = 2
-
-if AI_VERSION == 4:
-  B1_NODES = 288
-  B1_LAYERS = 3
-  B2_NODES = 432
-  B2_LAYERS = 3
-  B3_NODES = 288
-  B3_LAYERS = 4
-
+  B1_LAYERS = 5
+  B2_NODES = 128
+  B2_LAYERS = 5
+  B3_NODES = 64
+  B3_LAYERS = 5
+  EPSILON_VALUE = 300
 
 class Agent:
 
@@ -90,10 +89,11 @@ class Agent:
                              B2_NODES, B2_LAYERS, 
                              B3_NODES, B3_LAYERS, 
                              OUTPUT_NODES, AI_VERSION)
-    print(self.model.layer_stack)
     self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
     self.eg = EG(3, EG_EPSILON_VALUE)
     self.last_dirs = [ 0, 0, 1, 0 ]
+    # Load the simulation state from file if it exists
+    self.load_checkpoint()
 
   def get_state(self):
     game = self.game
@@ -170,6 +170,21 @@ class Agent:
     # if the memory exceeds MAX_MEMORY
     self.memory.append((state, action, reward, next_state, done))
 
+  def save_checkpoint(self):
+    # Save the simulation state
+    checkpoint_file = SIM_CHECKPOINT_FILE + str(AI_VERSION) + '.' + SIM_CHECKPOINT_FILE_SUFFIX
+    checkpoint_file = os.path.join(SIM_CHECKPOINT_DIR, checkpoint_file)
+    if not os.path.exists(SIM_CHECKPOINT_DIR):
+      os.makedirs(SIM_CHECKPOINT_DIR)
+    self.model.save_checkpoint(self.trainer.optimizer, checkpoint_file, self.game.num_games)
+
+  def load_checkpoint(self):
+    checkpoint_file = SIM_CHECKPOINT_FILE + str(AI_VERSION) + '.' + SIM_CHECKPOINT_FILE_SUFFIX
+    checkpoint_file = os.path.join(SIM_CHECKPOINT_DIR, checkpoint_file)
+    if os.path.isfile(checkpoint_file):
+      optimizer = self.trainer.optimizer
+      self.model.load_checkpoint(optimizer, checkpoint_file)
+
   def train_long_memory(self):
     if len(self.memory) > BATCH_SIZE:
       # Sample a random batch of memories
@@ -228,7 +243,9 @@ def train(game):
   agent = Agent(game)
   agent.model.load()
   while True:
-    start_time = time()
+    if (game.num_games % SIM_CHECKPOINT_FREQ) == 0:
+      print('Performing simulation checkpoint')
+      game.save_checkpoint()
     # Get old state
     state_old = agent.get_state()
     # Get move
@@ -249,6 +266,8 @@ def train(game):
         record = score
         agent.model.save()
         game.sim_high_score = record
+        print('Performing simulation checkpoint')
+        agent.save_checkpoint()
 
       # Calculate elapsed game time
       end_time = time()

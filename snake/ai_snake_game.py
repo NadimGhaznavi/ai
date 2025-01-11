@@ -40,7 +40,8 @@ BOARD_HEIGHT = 400
 
 BLOCK_SIZE = 20
 SPEED = 100
-MAX_ITER = 200
+MAX_ITER = 200 # Used to end the game if the AI goes into a looping pattern
+STATUS_ITER = 20 # Print out a simulation status message every STATUS_ITER games
 
 class SnakeGameAI:
     
@@ -58,6 +59,7 @@ class SnakeGameAI:
     self.sim_high_score = 0
     self.sim_time = 0
     self.score = 0
+    self.num_games = 0
     self.lose_reason = 'N/A'
     self.reset()
 
@@ -65,9 +67,14 @@ class SnakeGameAI:
     # init game state
     self.sim_score += self.score
     self.score = 0
+    self.num_games += 1
     self.sim_time += self.elapsed_time
     self.start_time = time.time()
     self.direction = Direction.RIGHT
+
+    # Print out a status message every STATUS_ITER games
+    if (self.num_games % STATUS_ITER) == 0:
+      self._print_status()
         
     self.head = Point(self.w/2, self.h/2)
     self.snake = [self.head, 
@@ -97,9 +104,13 @@ class SnakeGameAI:
           self._quit_game()
 
   def _print_status(self):
-    print(f"Simulation time: {self.sim_time}s")
-    print(f"Simulation high score: {self.sim_high_score}")
-    print(f"Simulation total score: {self.sim_score}")
+    avg_score = int(self.sim_score / self.num_games)
+    sim_min = int(self.sim_time / 60)
+    sim_sec = self.sim_time % 60
+    print(f"Simulation time          : {sim_min} min {sim_sec} sec")
+    print(f"Simulation high score    : {self.sim_high_score}")
+    print(f"Simulation total score   : {self.sim_score}")
+    print(f"Simulation average score : {avg_score}")
     
   def _quit_game(self):
     self.sim_score += self.score
