@@ -245,7 +245,7 @@ def train(game):
   agent.model.load()
   while True:
     if (game.num_games % SIM_CHECKPOINT_FREQ) == 0:
-      game.save_checkpoint()
+      agent.save_checkpoint()
     # Get old state
     state_old = agent.get_state()
     # Get move

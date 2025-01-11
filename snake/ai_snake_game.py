@@ -108,6 +108,7 @@ class SnakeGameAI:
     sim_min = int(self.sim_time / 60)
     sim_sec = self.sim_time % 60
     print(f"Simulation time          : {sim_min} min {sim_sec} sec")
+    print(f"Simulation games         : {self.num_games}")
     print(f"Simulation high score    : {self.sim_high_score}")
     print(f"Simulation total score   : {self.sim_score}")
     print(f"Simulation average score : {avg_score}")
