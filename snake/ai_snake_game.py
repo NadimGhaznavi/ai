@@ -63,7 +63,7 @@ class SnakeGameAI:
     self.lose_reason = 'N/A'
     self.reset()
 
-  def reset(self):
+  def reset(self, agent, sim_checkpoint_freq):
     # init game state
     self.sim_score += self.score
     self.score = 0
@@ -85,6 +85,8 @@ class SnakeGameAI:
     self.food = None
     self._place_food()
     self.frame_iteration = 0
+    if (self.num_games % sim_checkpoint_freq) == 0:
+      agent.save_checkpoint()
 
   def _pause_game(self):
     is_paused = True

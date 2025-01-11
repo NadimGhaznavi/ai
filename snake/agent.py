@@ -244,8 +244,6 @@ def train(game):
   agent = Agent(game)
   agent.model.load()
   while True:
-    if (game.num_games % SIM_CHECKPOINT_FREQ) == 0:
-      agent.save_checkpoint()
     # Get old state
     state_old = agent.get_state()
     # Get move
@@ -259,7 +257,8 @@ def train(game):
     agent.remember(state_old, final_move, reward, state_new, done)
     if done:
       # Train long memory
-      game.reset()
+      game.reset(agent, SIM_CHECKPOINT_FREQ)
+      
       agent.n_games += 1
       agent.train_long_memory()
       if score > record:
