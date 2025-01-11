@@ -89,17 +89,22 @@ class SnakeGameAI:
             is_paused = False
           if event.key == pygame.K_q:
             self._quit_game()
+          if event.key == pygame.K_s:
+            self._print_status()
       if event.type == pygame.KEYDOWN:
         if event.type == pygame.QUIT:
           is_paused = False
           self._quit_game()
 
-  def _quit_game(self):
-    self.sim_score += self.score
-    self.sim_time += self.elapsed_time
+  def _print_status(self):
     print(f"Simulation time: {self.sim_time}")
     print(f"Simulation high score: {self.sim_high_score}")
     print(f"Simulation total score: {self.sim_score}")
+    
+  def _quit_game(self):
+    self.sim_score += self.score
+    self.sim_time += self.elapsed_time
+    self._print_status()
     pygame.quit()
     quit()
 
@@ -120,9 +125,10 @@ class SnakeGameAI:
       if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_p:
           self._pause_game()
-      if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_q:
+        elif event.key == pygame.K_q:
           self._quit_game()
+        elif event.key == pygame.K_s:
+          self._print_status()
         
     # 2. move
     self._move(action) # update the head
