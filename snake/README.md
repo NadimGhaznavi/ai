@@ -18,7 +18,10 @@ This project is an implementation of the *Snake* game with an AI agent playing i
 
 This project has the AI playing the game. You just get to watch and/or tweak the code to see what happens! The game automatically restarts whenever the AI crashes the snake into itself or the wall. Or if you close the window.
 
-You can pause the game by pressing **p** on your keyboard and restart it by pressing the **space** bar
+Keyboard Shortcuts:
+* **p** - Pause the game
+* **spacebar** - Resume the game
+* **q** - Quit the game
 
 ## Development Environment
 
