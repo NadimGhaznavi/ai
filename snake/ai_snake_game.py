@@ -40,6 +40,7 @@ BOARD_HEIGHT = 400
 
 BLOCK_SIZE = 20
 SPEED = 100
+MAX_ITER = 200
 
 class SnakeGameAI:
     
@@ -50,12 +51,21 @@ class SnakeGameAI:
     self.display = pygame.display.set_mode((self.w, self.h))
     pygame.display.set_caption('Snake AI (v' + str(version) + ')')
     self.clock = pygame.time.Clock()
-    self.start_time = 'N/A'
-    self.elapsed_time = 'N/A'
+    self.start_time = 0
+    self.elapsed_time = 0
+    self.sim_start_time = time.time()
+    self.sim_score = 0
+    self.sim_high_score = 0
+    self.sim_time = 0
+    self.score = 0
+    self.lose_reason = 'N/A'
     self.reset()
 
   def reset(self):
     # init game state
+    self.sim_score += self.score
+    self.score = 0
+    self.sim_time += self.elapsed_time
     self.start_time = time.time()
     self.direction = Direction.RIGHT
         
@@ -63,13 +73,13 @@ class SnakeGameAI:
     self.snake = [self.head, 
                   Point(self.head.x-BLOCK_SIZE, self.head.y),
                   Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
-        
-    self.score = 0
+    
+    
     self.food = None
     self._place_food()
     self.frame_iteration = 0
 
-  def pause_game(self):
+  def _pause_game(self):
     is_paused = True
     # Create pause loop
     while is_paused:
@@ -77,11 +87,21 @@ class SnakeGameAI:
         if event.type == pygame.KEYDOWN:
           if event.key == pygame.K_SPACE:
             is_paused = False
+          if event.key == pygame.K_q:
+            self._quit_game()
+      if event.type == pygame.KEYDOWN:
         if event.type == pygame.QUIT:
           is_paused = False
-          pygame.quit()
-          quit()
+          self._quit_game()
 
+  def _quit_game(self):
+    self.sim_score += self.score
+    self.sim_time += self.elapsed_time
+    print(f"Simulation time: {self.sim_time}")
+    print(f"Simulation high score: {self.sim_high_score}")
+    print(f"Simulation total score: {self.sim_score}")
+    pygame.quit()
+    quit()
 
   def _place_food(self):
     x = random.randint(0, (self.w-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
@@ -96,11 +116,13 @@ class SnakeGameAI:
     # 1. collect user input
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
-        pygame.quit()
-        quit()
+        self._quit_game()
       if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_p:
-          self.pause_game()
+          self._pause_game()
+      if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_q:
+          self._quit_game()
         
     # 2. move
     self._move(action) # update the head
@@ -109,14 +131,22 @@ class SnakeGameAI:
     # 3. check if game over and track the reward
     reward = 0
     game_over = False
-    if self.is_wall_collision() or self.frame_iteration > 100*len(self.snake):
+    if self.is_wall_collision():
       game_over = True
       reward = -10
+      self.lose_reason = 'Hit the wall'
       return reward, game_over, self.score
-    elif self.is_self_collision() or self.frame_iteration > 100*len(self.snake):
+    elif self.is_self_collision():
       game_over = True
       reward = -10
+      self.lose_reason = 'Hit the snake'
       return reward, game_over, self.score
+    if self.frame_iteration > MAX_ITER*len(self.snake):
+      game_over = True
+      reward = -10
+      self.lose_reason = 'Excessive moves (' + str(MAX_ITER*len(self.snake)) + ')' 
+      return reward, game_over, self.score
+    
             
     # 4. place new food or just move
     if self.head == self.food:
@@ -162,9 +192,9 @@ class SnakeGameAI:
       pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
       
       score_string = "Score: " + str(self.score)
-      self.elapsed_time = str(int(time.time() - self.start_time)) + 's'
+      self.elapsed_time = int(time.time() - self.start_time)
         
-      text = font.render(score_string + ' (' + self.elapsed_time + ')', True, WHITE)
+      text = font.render(score_string + ' (' + str(self.elapsed_time) + 's)', True, WHITE)
       self.display.blit(text, [0, 0])
       pygame.display.flip()
         

@@ -5,25 +5,66 @@ import torch.nn.functional as F
 import numpy as np
 import os
 
-MODEL_DIR = './model'
+MODEL_DIR = './models'
 MODEL_FILE = 'ai_model_v'
 MODEL_FILE_SUFFIX = 'pth'
 
 class Linear_QNet(nn.Module):
-  def __init__(self, input_nodes, hidden_nodes, hidden_layers, output_nodes, ai_version):
+  def __init__(self, input_nodes, 
+               b1_nodes, b1_layers, 
+               b2_nodes, b2_layers,
+               b3_nodes, b3_layers,
+               output_nodes, ai_version):
     super().__init__()
+    print("{:>4} * {:>2} = {:>5}".format(b1_nodes, b1_layers, b1_nodes*b1_layers))
+    print("{:>4} * {:>2} = {:>5}".format(b2_nodes, b2_layers, b2_nodes*b2_layers))
+    print("{:>4} * {:>2} = {:>5}".format(b3_nodes, b3_layers, b3_nodes*b3_layers))
+    print(" Nodes    = {:>5}".format((b1_nodes*b1_layers)+(b2_nodes*b2_layers)+(b3_nodes*b3_layers)))
     self.ai_version = ai_version
     self.layer_stack = nn.Sequential()
-    self.layer_stack.append(nn.Linear(in_features=input_nodes, out_features=hidden_nodes))
+    self.layer_stack.append(nn.Linear(in_features=input_nodes, out_features=b1_nodes))
     self.layer_stack.append(nn.ReLU())
-    hidden_layer_count = 0
-    while hidden_layer_count != hidden_layers:
-      self.layer_stack.append(nn.Linear(in_features=hidden_nodes,
-                                        out_features=hidden_nodes))
-      self.layer_stack.append(nn.ReLU())
-      hidden_layer_count += 1
-    self.layer_stack.append(nn.Linear(in_features=hidden_nodes,
-                out_features=output_nodes))
+    b1_layer_count = 0
+    while b1_layer_count != b1_layers:
+      b1_layer_count += 1
+      if b1_layer_count == b1_layers:
+        # We need to figure out the out_features before we define the final B1layer
+        if b2_layers == 0:
+          # There are no B2 layers, define the final B1 layer
+          self.layer_stack.append(nn.Linear(in_features=b1_nodes, out_features=output_nodes))
+        else:
+          # There are some B2 layers
+          # Define the last B1 layer
+          self.layer_stack.append(nn.Linear(in_features=b1_nodes, out_features=b2_nodes))
+          self.layer_stack.append(nn.ReLU())
+          b2_layer_count = 0
+          while b2_layer_count != b2_layers:
+            b2_layer_count += 1
+            if b2_layer_count == b2_layers:
+              # We need to figure out the out_features before we define the final B2 layer
+              if b3_layers == 0:
+                # There are no B3 layers, define the final B2 layer
+                self.layer_stack.append(nn.Linear(in_features=b2_nodes, out_features=output_nodes))
+              else:
+                # There are some B3 layers
+                # Define the last B2 layer
+                self.layer_stack.append(nn.Linear(in_features=b2_nodes, out_features=b3_nodes))
+                self.layer_stack.append(nn.ReLU())
+                b3_layer_count = 0
+                while b3_layer_count != b3_layers:
+                  b3_layer_count += 1
+                  if b3_layer_count == b3_layers:
+                    # Final B3 layer
+                    self.layer_stack.append(nn.Linear(in_features=b3_nodes, out_features=output_nodes))
+                  else:
+                    self.layer_stack.append(nn.Linear(in_features=b3_nodes, out_features=b3_nodes))
+                    self.layer_stack.append(nn.ReLU())
+            else:
+              self.layer_stack.append(nn.Linear(in_features=b2_nodes, out_features=b2_nodes))
+              self.layer_stack.append(nn.ReLU())
+      else:
+        self.layer_stack.append(nn.Linear(in_features=b1_nodes, out_features=b1_nodes))
+        self.layer_stack.append(nn.ReLU())
   
   def forward(self, x):
     return self.layer_stack(x)

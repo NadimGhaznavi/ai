@@ -17,30 +17,32 @@ BATCH_SIZE = 1000 # Batch size for the replay buffer
 # Number of nodes in the input layer i.e. the number of nodes used to 
 # describe the state of the game
 INPUT_NODES = 18 
-HIDDEN_NODES = 32 # Number of nodes in the hidden layers
-HIDDEN_LAYERS = 0 # Number of hidden layers
+
+B1_NODES = 512 # Nmber of nodes in the hidden layers in block one
+B1_LAYERS = 6 # Number of hidden layers in block one, must be at least 1
+B2_NODES = 1024
+B2_LAYERS = 3
+B3_NODES = 512
+B3_LAYERS = 0
 # Number of nodes in the output layer. This corresponds to valid moves
 # that the snake can make i.e. left, right or continue straight
 OUTPUT_NODES = 3 
 DISCOUNT = 0.8 # Discount rate, must be smaller than 1  
-LR = 0.003 # Learning rate
-EPSILON_VALUE = 200 # Epsilon value, for exploration (i.e. vs exploitation)
+LR = 0.001 # Learning rate
+EPSILON_VALUE = 150 # Epsilon value, for exploration (i.e. vs exploitation)
 EG_EPSILON_VALUE = 0.1 # EpsilonGreedy epsilon value
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
 AI_VERSION = 2
+if AI_VERSION == 2:
+  B1_NODES = 2048
+  B1_LAYERS = 1
+  B2_NODES = 512
+  B2_LAYERS = 2
+  B3_NODES = 128
+  B3_LAERS = 6
 
-if AI_VERSION > 1:
-  LR = 0.001
-  HIDDEN_NODES = 64
-
-if AI_VERSION > 4:
-  HIDDEN_LAYERS = 2
-
-if AI_VERSION > 6:
-  HIDDEN_NODES = 16
-  HIDDEN_LAYERS = 8
 
 class Agent:
 
@@ -51,7 +53,11 @@ class Agent:
     self.gamma = DISCOUNT # Discount rate, for future rewards
     # If memory exceeds MAX_MEMORY, oldest memory is removed i.e. popleft()
     self.memory = deque(maxlen=MAX_MEMORY) 
-    self.model = Linear_QNet(INPUT_NODES, HIDDEN_NODES, HIDDEN_LAYERS, OUTPUT_NODES, AI_VERSION)
+    self.model = Linear_QNet(INPUT_NODES, 
+                             B1_NODES, B1_LAYERS, 
+                             B2_NODES, B2_LAYERS, 
+                             B3_NODES, B3_LAYERS, 
+                             OUTPUT_NODES, AI_VERSION)
     print(self.model.layer_stack)
     self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
     self.eg = EG(3, EG_EPSILON_VALUE)
@@ -121,12 +127,9 @@ class Agent:
       game.food.y < game.head.y, # Food up
       game.food.y > game.head.y, # Food down
     ]
-
     for aDir in self.last_dirs:
       state.append(aDir)
-
     self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
-
     return np.array(state, dtype=int)
 
   def remember(self, state, action, reward, next_state, done):
@@ -213,22 +216,19 @@ def train(game):
       if score > record:
         record = score
         agent.model.save()
+        game.sim_high_score = record
 
       # Calculate elapsed game time
       end_time = time()
       total_time = round((end_time - start_time), 1)
       plot_game_times.append(total_time)
 
-      #if total_time > 60:
-      #  min = str(total_time / 60)
-      #  sec = str(total_time % 60)
-      #  total_time = min + ' min ' + sec
-
-      print('Snake AI (v' + str(AI_VERSION) + ')' + \
+      print('Snake AI (v' + str(AI_VERSION) + ') ' + \
             'Game' + '{:>4}'.format(agent.n_games) + ', ' + \
             'Score' + '{:>4}'.format(score) + ', ' + \
             'Record' + '{:>4}'.format(record) + ', ' + \
-            'Time ' + '{:>4}'.format(game.elapsed_time))
+            'Time ' + '{:>4}'.format(game.elapsed_time) + 's' + \
+            ' - ' + game.lose_reason)
 
       plot_scores.append(score)
       total_score += score
