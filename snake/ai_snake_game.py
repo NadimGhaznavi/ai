@@ -100,17 +100,15 @@ class SnakeGameAI:
     # Create pause loop
     while is_paused:
       for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-          if event.key == pygame.K_SPACE:
-            is_paused = False
-          if event.key == pygame.K_q:
-            self._quit_game()
-          if event.key == pygame.K_s:
-            self._print_status()
-      if event.type == pygame.KEYDOWN:
         if event.type == pygame.QUIT:
-          is_paused = False
           self._quit_game()
+      keys = pygame.key.get_pressed()
+      if keys[pygame.K_SPACE]:
+        is_paused = False
+      if keys[pygame.K_q]:
+        self._quit_game()
+      if keys[pygame.K_s]:
+        self._print_status()
 
   def _print_status(self):
     avg_score = round(self.sim_score / self.num_games, 2)
@@ -143,13 +141,14 @@ class SnakeGameAI:
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
         self._quit_game()
-      if event.type == pygame.KEYDOWN:
-        if event.key == pygame.K_p:
-          self._pause_game()
-        elif event.key == pygame.K_q:
-          self._quit_game()
-        elif event.key == pygame.K_s:
-          self._print_status()
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_p]:
+      self._pause_game()
+    if keys[pygame.K_q]:
+      self._quit_game()
+    if keys[pygame.K_s]:
+      self._print_status()
         
     # 2. move
     self._move(action) # update the head

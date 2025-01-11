@@ -61,10 +61,13 @@ SIM_CHECKPOINT_FILE = 'ai_checkpoint_v'
 SIM_CHECKPOINT_FILE_SUFFIX = '.ptc'
 SIM_CHECKPOINT_FREQ = 50
 
+# Default is to disable the "look ahead" feature
+BAD_MOVE_LIMIT = 0
+
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
-AI_VERSION = 17
+AI_VERSION = 18
 
 if AI_VERSION == 17:
   B1_NODES = 1024
@@ -74,14 +77,15 @@ if AI_VERSION == 17:
   B3_NODES = 512
   B3_LAYERS = 0
   EPSILON_VALUE = 300
+  BAD_MOVE_LIMIT = 3
 
-if AI_VERSION == 15:
-  B1_NODES = 256
-  B1_LAYERS = 5
-  B2_NODES = 128
-  B2_LAYERS = 5
-  B3_NODES = 64
-  B3_LAYERS = 5
+if AI_VERSION == 18:
+  B1_NODES = 1024
+  B1_LAYERS = 3
+  B2_NODES = 768
+  B2_LAYERS = 0
+  B3_NODES = 512
+  B3_LAYERS = 0
   EPSILON_VALUE = 300
 
 class Agent:
@@ -229,7 +233,7 @@ class Agent:
         test_point = self.game.move_helper2(x, y, test_direction)
         wall_collision = self.game.is_wall_collision(test_point)
         self_collision = self.game.is_self_collision(test_point)
-        if bad_move_count > 3:
+        if bad_move_count > BAD_MOVE_LIMIT:
           bad_move = False
         elif wall_collision or self_collision:
           bad_move = True
