@@ -4,6 +4,7 @@
 ## Table of Contents
 
 * [Snake Game Description](#snake-game-description)
+* [Keybaord Shortcuts](#keyboard-shotcuts)
 * [Development Environment](#development-environment)
 * [AI Training Visualization](#ai-training-visualization)
 * [Motivation for this Project](#motivation-for-this-project)
@@ -18,10 +19,14 @@ This project is an implementation of the *Snake* game with an AI agent playing i
 
 This project has the AI playing the game. You just get to watch and/or tweak the code to see what happens! The game automatically restarts whenever the AI crashes the snake into itself or the wall. Or if you close the window.
 
-Keyboard Shortcuts:
-* **p** - Pause the game
-* **spacebar** - Resume the game
-* **q** - Quit the game
+## Keyboard Shortcuts
+
+| Key      | Description                      |
+|----------|----------------------------------|
+| p        | Pause the game                   |
+| spacebar | Resume the game                  |
+| q        | Quit the game                    |
+| s        | Print status info in the console |
 
 ## Development Environment
 
