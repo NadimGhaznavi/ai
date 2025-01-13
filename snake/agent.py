@@ -78,17 +78,36 @@ BAD_MOVE_LIMIT = 0
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
-AI_VERSION = 126
+AI_VERSION = 131
 
-if AI_VERSION == 125:
+if AI_VERSION == 131:
   B1_NODES = 500
-  B1_LAYERS = 4
+  B1_LAYERS = 1
   EPSILON_VALUE = 0
 
-if AI_VERSION == 125:
+if AI_VERSION == 130:
   B1_NODES = 500
-  B1_LAYERS = 4
-  EPSILON_VALUE = 120
+  B1_LAYERS = 1
+  B2_NODES = 750
+  B2_LAYERS = 1
+  B3_NODES = 1000
+  B3_LAYERS = 1
+  EPSILON_VALUE = 0
+
+
+
+### Game #/Score
+# 767/2, 770/5, 857/12, 883/25, 891/32, 929/37, 940/51
+#if AI_VERSION == 127:
+#  B1_NODES = 500
+#  B1_LAYERS = 4
+#  EPSILON_VALUE = 0
+
+### Good model! Takes off after about 150 games.
+#if AI_VERSION == 125:
+#  B1_NODES = 500
+#  B1_LAYERS = 1
+#  EPSILON_VALUE = 0
 
 ### Interesting model
 #if AI_VERSION == 122:
@@ -300,7 +319,7 @@ def train(game):
   agent = Agent(game)
   game.set_agent(agent)
   game.set_sim_checkpoint_freq(SIM_CHECKPOINT_FREQ)
-  fig = plt.figure(figsize=(6,4), layout="tight")
+  fig = plt.figure(figsize=(12,4), layout="tight")
   spec = fig.add_gridspec(ncols=1, nrows=2)
       
   while True:
