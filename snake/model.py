@@ -14,7 +14,7 @@ class Linear_QNet(nn.Module):
                b1_nodes, b1_layers, 
                b2_nodes, b2_layers,
                b3_nodes, b3_layers,
-               output_nodes, ai_version):
+               output_nodes, enable_relu, ai_version):
     super().__init__()
     print("{:>4} * {:>2} = {:>5}".format(b1_nodes, b1_layers, b1_nodes*b1_layers))
     print("{:>4} * {:>2} = {:>5}".format(b2_nodes, b2_layers, b2_nodes*b2_layers))
@@ -26,16 +26,20 @@ class Linear_QNet(nn.Module):
     main_block = nn.Sequential()
 
     # Input layer
+    if enable_relu:
+      main_block.append(nn.ReLU())
     main_block.append(nn.Linear(in_features=input_nodes, out_features=b1_nodes))
+
 
     ### B1 Block ------------------------------------------------------
     b1_block = nn.Sequential()
-    b1_layer_count = 0
+    b1_layer_count = 1
     while b1_layer_count != b1_layers:
       b1_layer_count += 1
       if b1_layer_count != b1_layers:
         # There are more B1 layers...
-        b1_block.append(nn.ReLU())
+        if enable_relu:
+          b1_block.append(nn.ReLU())
         b1_block.append(nn.Linear(in_features=b1_nodes, out_features=b1_nodes))
     
     # There are no more B1 to B1 layers
@@ -43,12 +47,14 @@ class Linear_QNet(nn.Module):
     # Check if there are any B2 layers
     if b2_layers != 0:
       # There are some B2 layers
-      b1_block.append(nn.ReLU())
+      if enable_relu:
+        b1_block.append(nn.ReLU())
       b1_block.append(nn.Linear(in_features=b1_nodes, out_features=b2_nodes))
       main_block.append(b1_block)
     else:
       # There are no B2 layers, so append an output layer. Model is complete.
-      b1_block.append(nn.ReLU())
+      if enable_relu:
+        b1_block.append(nn.ReLU())
       b1_block.append(nn.Linear(in_features=b1_nodes, out_features=output_nodes))
       main_block.append(b1_block)
 

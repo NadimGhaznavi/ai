@@ -61,7 +61,6 @@ class SnakeGameAI:
     self.score = 0
     self.num_games = 0
     self.lose_reason = 'N/A'
-    self.agent = None
     self.sim_checkpoint_freq = 50
     self.reset()
 
@@ -109,16 +108,24 @@ class SnakeGameAI:
         self._quit_game()
       if keys[pygame.K_s]:
         self._print_status()
+      if keys[pygame.K_m]:
+        self._print_model()
 
   def _print_status(self):
     avg_score = round(self.sim_score / self.num_games, 2)
     sim_min = int(self.sim_time / 60)
     sim_sec = self.sim_time % 60
-    print(f"Simulation time          : {sim_min} min {sim_sec} sec")
-    print(f"Simulation games         : {self.num_games}")
-    print(f"Simulation high score    : {self.sim_high_score}")
-    print(f"Simulation total score   : {self.sim_score}")
-    print(f"Simulation average score : {avg_score}")
+    tmp_sim_sec = int(sim_sec)
+    avg_time = round(self.sim_time / self.num_games, 2)
+    print(f"Total simulation time  : {sim_min} min {tmp_sim_sec} sec")
+    print(f"Total number of games  : {self.num_games}")
+    print(f"High score             : {self.sim_high_score}")
+    print(f"Total simulation score : {self.sim_score}")
+    print(f"Average game score     : {avg_score}")
+    print(f"Average game time      : {avg_time}")
+
+  def _print_model(self):
+    print(self.agent.model)
     
   def _quit_game(self):
     self.sim_score += self.score
@@ -149,6 +156,8 @@ class SnakeGameAI:
       self._quit_game()
     if keys[pygame.K_s]:
       self._print_status()
+    if keys[pygame.K_m]:
+      self._print_model()
         
     # 2. move
     self._move(action) # update the head
@@ -218,9 +227,11 @@ class SnakeGameAI:
       pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
       
       score_string = "Score: " + str(self.score)
-      self.elapsed_time = int(time.time() - self.start_time)
-        
-      text = font.render(score_string + ' (' + str(self.elapsed_time) + 's)', True, WHITE)
+      self.elapsed_time = round(float((time.time() - self.start_time)), 2)
+      
+
+      text = font.render(score_string + ', Moves ' + str(self.frame_iteration) + ', ' + \
+                         str(self.elapsed_time) + 's', True, WHITE)
       self.display.blit(text, [0, 0])
       pygame.display.flip()
         

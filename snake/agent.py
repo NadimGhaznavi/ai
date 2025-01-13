@@ -6,7 +6,7 @@ from collections import deque
 from time import time
 from ai_snake_game import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer
-from helper import plot
+from helper import plot, plot2
 from epsilon_greedy import EpsilonGreedy as EG
 
 
@@ -17,7 +17,16 @@ MAX_MEMORY = 100_000 # Maximum memory for the replay buffer
 BATCH_SIZE = 1000 # Batch size for the replay buffer
 # Number of nodes in the input layer i.e. the number of nodes used to 
 # describe the state of the game
-INPUT_NODES = 18 
+INPUT_NODES = 40
+
+# Include previous directioni in the state map.
+# Only enable in the "if AI_VERSION == <ver>:" block as this changes
+# the shape. DO NOT CHANGE HERE.
+ENABLE_HISTORY = True
+ENABLE_LONG_HISTORY = False
+
+# Enable the adding nn.ReLU() layers before the linear layers
+ENABLE_RELU = True
 
 ## Block 1: There *MUST* be at least 1 layer
 B1_LAYERS = 1
@@ -32,7 +41,7 @@ B2_NODES = 1024
 B2_LAYERS = 0 # Can be zero
 
 ## Block 3: Optional addition block. 
-# If you want to use this, then you must have at least 1 block 2 layer
+# If you want to use36 this, then you must have at least 1 block 2 layer
 # Number of nodes in block 3 layer(s)
 B3_NODES = 512
 # Number of block 3 layers
@@ -51,9 +60,11 @@ LR = 0.001
 # this value then there is a random chance that there will be a random snake
 # i.e. not decided by the AI
 EPSILON_VALUE = 150
+ENABLE_EPSILON = True
 
-# EpsilonGreedy epsilon value, NOT YET IMPLEMENTED
-EG_EPSILON_VALUE = 0.1 # 
+# Random move value
+RANDOM_MOVE_VALUE = 20
+ENABLE_RANDOM_MOVES = False
 
 ## Simulation checkpoint save info
 SIM_CHECKPOINT_DIR = './models'
@@ -67,29 +78,28 @@ BAD_MOVE_LIMIT = 0
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
-AI_VERSION = 18
+AI_VERSION = 122
 
-if AI_VERSION == 17:
-  B1_NODES = 1024
-  B1_LAYERS = 3
-  B2_NODES = 768
-  B2_LAYERS = 0
-  B3_NODES = 512
-  B3_LAYERS = 0
-  EPSILON_VALUE = 300
-  BAD_MOVE_LIMIT = 3
+if AI_VERSION == 122:
+  B1_NODES = 500
+  B1_LAYERS = 4
+  EPSILON_VALUE = 100
 
-if AI_VERSION == 18:
-  B1_NODES = 1024
-  B1_LAYERS = 3
-  B2_NODES = 768
-  B2_LAYERS = 0
-  B3_NODES = 512
-  B3_LAYERS = 0
-  EPSILON_VALUE = 300
+### Well trained, high score is 71
+#if AI_VERSION == 116:
+#  B1_NODES = 500
+#  B1_LAYERS = 3
+#  EPSILON_VALUE = 0
+
+
+# Enable historical moves
+if not ENABLE_HISTORY:
+  INPUT_NODES = 36
+
+if ENABLE_LONG_HISTORY:
+  INPUT_NODES = 52
 
 class Agent:
-
   def __init__(self, game):
     self.game = game
     self.n_games = 0 # Number of games played
@@ -101,12 +111,27 @@ class Agent:
                              B1_NODES, B1_LAYERS, 
                              B2_NODES, B2_LAYERS, 
                              B3_NODES, B3_LAYERS, 
-                             OUTPUT_NODES, AI_VERSION)
+                             OUTPUT_NODES, 
+                             ENABLE_RELU, AI_VERSION)
     self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-    self.eg = EG(3, EG_EPSILON_VALUE)
     self.last_dirs = [ 0, 0, 1, 0 ]
+    self.second_last_dirs = [ 0, 0, 1, 0 ]
+    self.third_last_dirs = [ 0, 0, 1, 0 ]
+    self.random_move_count = 0
     # Load the simulation state from file if it exists
     self.load_checkpoint()
+    print(f"Epsilon value is {EPSILON_VALUE}")
+
+  def get_snake_length_in_binary(self):
+    bin_str = format(len(self.game.snake), 'b')
+    out_list = []
+    for bit in range(len(bin_str)):
+      out_list.append(bin_str[bit])
+    for zero in range(7 - len(out_list)):
+      out_list.insert(0, '0')
+    for x in range(7):
+      out_list[x] = int(out_list[x])
+    return out_list
 
   def get_state(self):
     game = self.game
@@ -121,37 +146,39 @@ class Agent:
     dir_u = game.direction == Direction.UP
     dir_d = game.direction == Direction.DOWN
 
+    slb = self.get_snake_length_in_binary()
+
     state = [
       ## Wall collision danger
       # Danger straight 
-      (dir_r and game.is_wall_collision(point_r)) or
-      (dir_l and game.is_wall_collision(point_l)) or
-      (dir_u and game.is_wall_collision(point_u)) or
+      (dir_r and game.is_wall_collision(point_r)),
+      (dir_l and game.is_wall_collision(point_l)),
+      (dir_u and game.is_wall_collision(point_u)),
       (dir_d and game.is_wall_collision(point_d)),
 
       # Danger right
-      (dir_u and game.is_wall_collision(point_r)) or
-      (dir_d and game.is_wall_collision(point_l)) or
-      (dir_l and game.is_wall_collision(point_u)) or
+      (dir_u and game.is_wall_collision(point_r)),
+      (dir_d and game.is_wall_collision(point_l)),
+      (dir_l and game.is_wall_collision(point_u)),
       (dir_r and game.is_wall_collision(point_d)),
 
       # Danger left
-      (dir_d and game.is_wall_collision(point_r)) or
-      (dir_u and game.is_wall_collision(point_l)) or
-      (dir_r and game.is_wall_collision(point_u)) or
+      (dir_d and game.is_wall_collision(point_r)),
+      (dir_u and game.is_wall_collision(point_l)),
+      (dir_r and game.is_wall_collision(point_u)),
       (dir_l and game.is_wall_collision(point_d)),
 
       ## Self collision danger
       # Danger straight
-      (dir_r and game.is_self_collision(point_r)) or
-      (dir_l and game.is_self_collision(point_l)) or
-      (dir_u and game.is_self_collision(point_u)) or
+      (dir_r and game.is_self_collision(point_r)),
+      (dir_l and game.is_self_collision(point_l)),
+      (dir_u and game.is_self_collision(point_u)),
       (dir_d and game.is_self_collision(point_d)),
 
       # Danger right
-      (dir_u and game.is_self_collision(point_r)) or
-      (dir_d and game.is_self_collision(point_l)) or
-      (dir_l and game.is_self_collision(point_u)) or
+      (dir_u and game.is_self_collision(point_r)),
+      (dir_d and game.is_self_collision(point_l)),
+      (dir_l and game.is_self_collision(point_u)),
       (dir_r and game.is_self_collision(point_d)),
 
       # Danger left
@@ -161,20 +188,33 @@ class Agent:
       (dir_l and game.is_self_collision(point_d)),
 
       # Move direction
-      dir_l,
-      dir_r,
-      dir_u,
-      dir_d,
+      dir_l, dir_r, dir_u, dir_d,
 
       # Food location
       game.food.x < game.head.x, # Food left
       game.food.x > game.head.x, # Food right
       game.food.y < game.head.y, # Food up
       game.food.y > game.head.y, # Food down
+
+      # Snake length in binary using 7 bits
+      slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6],
     ]
-    for aDir in self.last_dirs:
-      state.append(aDir)
-    self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
+    if ENABLE_HISTORY:
+      for aDir in self.last_dirs:
+        state.append(aDir)
+      self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ] 
+
+    if ENABLE_LONG_HISTORY:
+      for aDir in self.third_last_dirs:
+        state.append(aDir)
+      for aDir in self.second_last_dirs:
+        state.append(aDir)
+      for aDir in self.last_dirs:
+        state.append(aDir)
+      self.third_last_dirs = self.second_last_dirs
+      self.second_last_dirs = self.last_dirs
+      self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ] 
+
     return np.array(state, dtype=int)
 
   def remember(self, state, action, reward, next_state, done):
@@ -219,39 +259,31 @@ class Agent:
     # The more games played, the less likely to explore
     final_move = [0, 0, 0]
     self.epsilon = EPSILON_VALUE - self.n_games
-    if random.randint(0, EPSILON_VALUE) < self.epsilon:
+    if ENABLE_EPSILON and \
+      random.randint(0, EPSILON_VALUE) < self.epsilon:
+      # Random move based on the epsilon value
+      final_move = [0, 0, 0]
+      move = random.randint(0, 2)
+      final_move[move] = 1
+    elif ENABLE_RANDOM_MOVES and \
+      (self.game.frame_iteration % RANDOM_MOVE_VALUE) == 0:
       # Random move
-      bad_move = True
-      x = self.game.head.x
-      y = self.game.head.y
-      bad_move_count = 1 
-      while bad_move:
-        final_move = [0, 0, 0]
-        move = random.randint(0, 2)
-        final_move[move] = 1
-        test_direction = self.game.move_helper(final_move)
-        test_point = self.game.move_helper2(x, y, test_direction)
-        wall_collision = self.game.is_wall_collision(test_point)
-        self_collision = self.game.is_self_collision(test_point)
-        if bad_move_count > BAD_MOVE_LIMIT:
-          bad_move = False
-        elif wall_collision or self_collision:
-          bad_move = True
-          bad_move_count += 1
-        else:
-          bad_move = False
+      self.random_move_count += 1
+      final_move = [0, 0, 0]
+      move = random.randint(0, 2)
+      final_move[move] = 1
     else:
       state0 = torch.tensor(state, dtype=torch.float)
       prediction = self.model(state0)
       move = torch.argmax(prediction).item()
-      final_move[move] = 1
-   
-    #self.last_dirs.append(final_move)
+      final_move[move] = 1 
     return final_move
 
 def train(game):
   plot_scores = [] # Scores for each game
   plot_mean_scores = [] # Average scores over a rolling window
+  plot_times = [] # Times for each game
+  plot_mean_times = [] # Average times over a rolling window
   total_score = 0 # Score for the current game
   record = 0 # Best score
   agent = Agent(game)
@@ -284,14 +316,19 @@ def train(game):
             'Game' + '{:>4}'.format(agent.n_games) + ', ' + \
             'Score' + '{:>4}'.format(score) + ', ' + \
             'Record' + '{:>4}'.format(record) + ', ' + \
-            'Time ' + '{:>4}'.format(game.elapsed_time) + 's' + \
+            'Time ' + '{:>7}'.format(game.elapsed_time) + 's' + \
             ' - ' + game.lose_reason)
 
       plot_scores.append(score)
       total_score += score
       mean_score = total_score / agent.n_games
       plot_mean_scores.append(mean_score)
-      plot(plot_scores, plot_mean_scores, AI_VERSION)
+      plot_times.append(game.elapsed_time)
+      mean_time = game.sim_time / agent.n_games
+      plot_mean_times.append(mean_time)
+      
+      plot(plot_scores, plot_mean_scores, plot_times, plot_mean_times, AI_VERSION)
+  
 
 if __name__ == '__main__':
   game = SnakeGameAI(AI_VERSION)
