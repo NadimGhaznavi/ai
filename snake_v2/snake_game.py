@@ -19,14 +19,14 @@ GREEN = (0, 255, 0)
 BLACK = (0,0,0)
 
 # Board Size
-BOARD_WIDTH = 200
-BOARD_HEIGHT = 200
+BOARD_WIDTH = 400
+BOARD_HEIGHT = 400
 
 # Size of the food blocks and snake segments
-BLOCK_SIZE = 10
+BLOCK_SIZE = 20
 
 # Speed of the game
-SPEED = 7
+SPEED = 4
 
 # The font file used to render the writing on the game screen
 FONT = pygame.font.Font('arial.ttf', 25)
@@ -73,7 +73,17 @@ class SnakeGame:
     self._place_food()
 
   def _pause_game(self):
-    pass
+    is_paused = True
+    # Create the pause loop
+    while is_paused:
+      for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+          self._quit_game()
+      keys = pygame.key.get_pressed()
+      if keys[pygame.K_SPACE]:
+        is_paused = False
+      if keys[pygame.K_q]:
+        self._quit_game()
 
   def _place_food(self):
     x = random.randint(0, (self.w-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
@@ -87,8 +97,7 @@ class SnakeGame:
     # 1. Collect user input
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
-        pygame.quit()
-        quit()
+        self._quit_game()
       if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_LEFT:
           self.direction = Direction.LEFT
@@ -98,7 +107,9 @@ class SnakeGame:
           self.direction = Direction.UP
         elif event.key == pygame.K_DOWN:
           self.direction = Direction.DOWN
-        elif event.key == pygame.K_SPACE:
+        elif event.key == pygame.K_p:
+          self._pause_game()
+        elif event.key == pygame.K_q:
           self._pause_game()
         
     # 2. move
@@ -141,16 +152,20 @@ class SnakeGame:
       return True
         
     return False
-        
+
+  def _quit_game(self):
+    pygame.quit()
+    quit()
+
   def _update_ui(self):
     # Paint the background black
     self.display.fill(BLACK)
     
     # Draw the snake
     for pt in self.snake:
-      pygame.draw.rect(self.display, GREEN, pygame.Rect(pt.x-1, pt.y-1, BLOCK_SIZE - 2, BLOCK_SIZE - 2))
+      pygame.draw.rect(self.display, GREEN, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
       # TBD What are 2 and 12???
-      pygame.draw.rect(self.display, BLUE, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+      pygame.draw.rect(self.display, BLUE, pygame.Rect(pt.x+1, pt.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
 
     # Draw the food            
     pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
