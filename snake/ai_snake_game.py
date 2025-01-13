@@ -40,7 +40,7 @@ BOARD_HEIGHT = 400
 
 BLOCK_SIZE = 20
 SPEED = 100
-MAX_ITER = 200 # Used to end the game if the AI goes into a looping pattern
+MAX_ITER = 100 # Used to end the game if the AI goes into a looping pattern
 STATUS_ITER = 20 # Print out a simulation status message every STATUS_ITER games
 
 class SnakeGameAI:
@@ -230,8 +230,8 @@ class SnakeGameAI:
       self.elapsed_time = round(float((time.time() - self.start_time)), 2)
       
 
-      text = font.render(score_string + ', Moves ' + str(self.frame_iteration) + ', ' + \
-                         str(self.elapsed_time) + 's', True, WHITE)
+      text = font.render(score_string + ', Moves ' + str(self.frame_iteration) + \
+                         ', Time ' + str(self.elapsed_time) + 's', True, WHITE)
       self.display.blit(text, [0, 0])
       pygame.display.flip()
         

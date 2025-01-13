@@ -13,9 +13,9 @@ def plot(fig, spec, x, y):
 
   fig.suptitle('Simulation Metrics')
   ax0 = fig.add_subplot(spec[0])
-  annotate_axes(ax0, 'xdata')
+  annotate_axes(ax0, 'Game Times')
   ax1 = fig.add_subplot(spec[1])
-  annotate_axes(ax1, 'ydata')
+  annotate_axes(ax1, 'Game Scores')
 
   ax0.plot(x, 'b-')
   ax1.plot(y, 'b-')

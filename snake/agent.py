@@ -7,7 +7,7 @@ from time import time
 from ai_snake_game import SnakeGameAI, Direction, Point
 from model import Linear_QNet, QTrainer
 from helper import plot, plot2
-from epsilon_greedy import EpsilonGreedy as EG
+import matplotlib.pyplot as plt
 
 
 random.seed(42)
@@ -78,12 +78,23 @@ BAD_MOVE_LIMIT = 0
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
-AI_VERSION = 122
+AI_VERSION = 126
 
-if AI_VERSION == 122:
+if AI_VERSION == 125:
   B1_NODES = 500
   B1_LAYERS = 4
-  EPSILON_VALUE = 100
+  EPSILON_VALUE = 0
+
+if AI_VERSION == 125:
+  B1_NODES = 500
+  B1_LAYERS = 4
+  EPSILON_VALUE = 120
+
+### Interesting model
+#if AI_VERSION == 122:
+#  B1_NODES = 500
+#  B1_LAYERS = 4
+#  EPSILON_VALUE = 100
 
 ### Well trained, high score is 71
 #if AI_VERSION == 116:
@@ -289,6 +300,9 @@ def train(game):
   agent = Agent(game)
   game.set_agent(agent)
   game.set_sim_checkpoint_freq(SIM_CHECKPOINT_FREQ)
+  fig = plt.figure(figsize=(6,4), layout="tight")
+  spec = fig.add_gridspec(ncols=1, nrows=2)
+      
   while True:
     # Get old state
     state_old = agent.get_state()
@@ -321,13 +335,13 @@ def train(game):
 
       plot_scores.append(score)
       total_score += score
-      mean_score = total_score / agent.n_games
+      mean_score = round(total_score / agent.n_games, 1)
       plot_mean_scores.append(mean_score)
       plot_times.append(game.elapsed_time)
-      mean_time = game.sim_time / agent.n_games
+      mean_time = round(game.sim_time / agent.n_games, 1)
       plot_mean_times.append(mean_time)
-      
       plot(plot_scores, plot_mean_scores, plot_times, plot_mean_times, AI_VERSION)
+      #plot2(fig, spec, plot_scores, plot_mean_scores, plot_times, plot_mean_times, AI_VERSION)
   
 
 if __name__ == '__main__':
