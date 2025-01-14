@@ -14,6 +14,10 @@ lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 
+ini = AISnakeGameConfig()
+
+torch.manual_seed(ini.random_seed())
+
 class QTrainer:
   def __init__(self, model):
     """

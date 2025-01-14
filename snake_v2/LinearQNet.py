@@ -6,6 +6,15 @@ model that the AI agent uses when playing the Snake Game.
 """
 import torch
 import torch.nn as nn
+import os, sys
+
+lib_dir = os.path.dirname(__file__)
+sys.path.append(lib_dir)
+from AISnakeGameConfig import AISnakeGameConfig
+
+ini = AISnakeGameConfig()
+
+torch.manual_seed(ini.random_seed())
 
 class Linear_QNet(nn.Module):
   def __init__(self, input_nodes, 
@@ -168,25 +177,26 @@ class Linear_QNet(nn.Module):
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     state_dict['num_games'] = 0
 
-  def save_checkpoint(self, optimizer, save_path, epoch):
+  def save_checkpoint(self, optimizer, save_path, num_games):
     """
     Saves the model including the weights, epoch and model version.
     """
     torch.save({
         'model_state_dict': self.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
-        'weights_only': False
+        'weights_only': False,
+        'num_games': num_games
     }, save_path)
 
-def save_model(self, optimizer, save_path):
+  def save_model(self, optimizer, save_path):
     """
     Saves only the model i.e. not including the weights.
     Save the epoch value as zero.
     """
-    self.state_dict['num_games'] = 0
     torch.save({
         'model_state_dict': self.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
-        'weights_only': True
+        'weights_only': True,
+        'num_games': 0
     }, save_path)
 

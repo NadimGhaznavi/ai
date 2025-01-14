@@ -15,16 +15,13 @@ import configparser
 base_dir = os.path.dirname(__file__)
 
 # Global variables
-ini_file = base_dir + 'AISnakeGame.ini'
-default_environment = 'prod'
+ini_file = os.path.join(base_dir, 'AISnakeGame.ini')
 
 class AISnakeGameConfig():
 
   def __init__(self):
     # Setup the expected script arguments
     parser = argparse.ArgumentParser(description='AI Snake Game')
-    parser.add_argument('-d', '--debug', type=int, default=0, help='debug level')
-    parser.add_argument('--environ', type=str, default=default_environment, help='prod or dev')
     parser.add_argument('--epsilon', type=int, default=0, help='epsilon value for exploration')
     parser.add_argument('-b1n', '--b1_nodes', type=int, help='number of nodes in the first block 1 layer')
     parser.add_argument('-b1l', '--b1_layers', type=int, default=1, help='number of hidden block 1 layers')
@@ -36,22 +33,6 @@ class AISnakeGameConfig():
 
     # Parse arguments
     args = parser.parse_args()
-    self._args = args
-
-    # Get the debug level from the command line switch or it's default
-    self._debug = args.debug
-
-    # Override the debug level if the AISNAKEGAME_DEBUG variable
-    # has been set
-    try:
-      environ_var = os.environ['AISNAKEGAME_DEBUG']
-      self._debug = environ_var
-    except KeyError:
-      os.environ['AISNAKEGAME_DEBUG'] = self._debug
-    
-    # prod or dev
-    environ = args.environ
-    self._environ = environ
 
     # Block 1, 2, 3 nodes and layers
     self._b1_nodes = args.b1_nodes
@@ -69,95 +50,106 @@ class AISnakeGameConfig():
 
     # Access the INI file 
     config = configparser.ConfigParser()
-    config.read(args.ini_file)
+    if not os.path.isfile(ini_file):
+      print(f"ERROR: Cannot find INI file ({ini_file}), exiting")
+    config.read(ini_file)
 
     # Read the INI file settings
-    self._ai_version_file = config[environ]['ai_version_file']
-    self._batch_size = config[environ]['batch_size']
-    self._board_height = config[environ]['board_height']
-    self._board_width = config[environ]['board_width']
-    self._discount = config[environ]['discount']
-    self._enable_relu = config[environ]['enable_relu']
-    self._epsilon_value = config[environ]['epsilon_value']
-    self._game_speed = config[environ]['game_speed']
-    self._in_features = config[environ]['in_features']
-    self._learning_rate = config[environ]['learning_rate']
-    self._max_iter = config[environ]['max_iter']
-    self._max_memory = config[environ]['max_memory']
-    self._max_moves = config[environ]['max_moves']
-    self._out_features = config[environ]['out_features']
-    self._random_seed = config[environ]['random_seed']
-    self._sim_checkpoint_basename = config[environ]['sim_checkpoint_basename']
-    self._sim_checkpoint_dir = config[environ]['sim_checkpoint_dir']
-    self._sim_checkpoint_file_suffix = config[environ]['sim_checkpoint_file_suffix']
-    self._sim_model_basename = config[environ]['sim_model_basename']
-    self._sim_model_dir = config[environ]['sim_model_dir']
-    self._sim_model_file_suffix = config[environ]['sim_model_file_suffix']
-    self._sim_save_checkpoint_freq = config[environ]['sim_save_checkpoint_freq']
-    self._status_iter = config[environ]['status_iter']
+    self._ai_version_file = config['default']['ai_version_file']
+    self._batch_size = config['default']['batch_size']
+    self._board_height = config['default']['board_height']
+    self._board_width = config['default']['board_width']
+    self._discount = config['default']['discount']
+    self._enable_relu = config['default']['enable_relu']
+    self._epsilon_value = config['default']['epsilon_value']
+    self._game_speed = config['default']['game_speed']
+    self._in_features = config['default']['in_features']
+    self._learning_rate = config['default']['learning_rate']
+    self._max_iter = config['default']['max_iter']
+    self._max_memory = config['default']['max_memory']
+    self._max_moves = config['default']['max_moves']
+    self._out_features = config['default']['out_features']
+    self._random_seed = config['default']['random_seed']
+    self._sim_checkpoint_basename = config['default']['sim_checkpoint_basename']
+    self._sim_checkpoint_dir = config['default']['sim_checkpoint_dir']
+    self._sim_checkpoint_file_suffix = config['default']['sim_checkpoint_file_suffix']
+    self._sim_model_basename = config['default']['sim_model_basename']
+    self._sim_model_dir = config['default']['sim_model_dir']
+    self._sim_model_file_suffix = config['default']['sim_model_file_suffix']
+    self._sim_save_checkpoint_freq = config['default']['sim_save_checkpoint_freq']
+    self._status_iter = config['default']['status_iter']
   
   def ai_version(self):
-    return self._ai_version
+    if self._ai_version:
+      return int(self._ai_version)
+    else:
+      return None
   
   def ai_version_file(self):
     return self._ai_version_file
   
   def b1_nodes(self):
-    return self._b1_nodes
+    return int(self._b1_nodes)
 
   def b1_layers(self):
-    return self._b1_layers
+    return int(self._b1_layers)
 
   def b2_nodes(self):
-    return self._b2_nodes
+    return int(self._b2_nodes)
 
   def b2_layers(self):
-    return self._b2_layers
+    return int(self._b2_layers)
 
   def b3_nodes(self):
-    return self._b3_nodes
+    return int(self._b3_nodes)
 
   def b3_layers(self):
-    return self._b3_layers
+    return int(self._b3_layers)
+  
+  def batch_size(self):
+    return int(self._batch_size)
 
   def board_height(self):
-    return self._board_height
+    return int(self._board_height)
 
   def board_width(self):
-    return self._board_width
+    return int(self._board_width)
   
   def discount(self):
-    return self._discount
+    return float(self._discount)
   
   def enable_relu(self):
-    return self._enable_relu
+    return bool(self._enable_relu)
 
   def epsilon_value(self):
-    return self._epsilon_value
+    return int(self._epsilon_value)
 
   def game_speed(self):
-    return self._game_speed
+    return int(self._game_speed)
   
   def in_features(self):
-    return self._in_features
+    return int(self._in_features)
 
   def learning_rate(self):
-    return self._learning_rate
+    return float(self._learning_rate)
 
   def max_iter(self):
-    return self._max_iter
+    return int(self._max_iter)
   
   def max_memory(self):
-    return self._max_memory
+    return int(self._max_memory)
 
   def max_moves(self):
-    return self._max_moves
+    return int(self._max_moves)
   
   def out_features(self):
-    return self._out_features
+    return int(self._out_features)
 
   def random_seed(self):
-    return self._random_seed
+    return int(self._random_seed)
+  
+  def save_checkpoint_freq(self):
+    return int(self._sim_save_checkpoint_freq)
   
   def sim_checkpoint_basename(self):
     return self._sim_checkpoint_basename
@@ -178,8 +170,8 @@ class AISnakeGameConfig():
     return self._sim_model_file_suffix
   
   def sim_save_checkpoint_freq(self):
-    return self._sim_save_checkpoint_freq
+    return int(self._sim_save_checkpoint_freq)
   
   def status_iter(self):
-    return self._status_iter
+    return int(self._status_iter)
   

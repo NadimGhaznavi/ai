@@ -42,19 +42,19 @@ def get_next_ai_version():
       file_handle.write(str(ai_version + 1))
       file_handle.close()
   else:
+    ai_version = 1
     with open(ai_version_file, 'w') as file_handle:
       file_handle.write('2')
       file_handle.close()
+  print(f"AI version is {ai_version}")
   return ai_version
 
-def train(game, ai_version):
+def train(ai_version, new_sim_run):
   """
   This is the AI Snake Game main training loop.
   """
   # Get a mew instance of the AI Snake Game
-  game = AISnakeGame(ai_version, new_sim_version)
-  # Get a new instance of the AI Agent
-  agent = AIAgent(game, ai_version)
+  game = AISnakeGame(ai_version)
   # The number of elements in the state map
   in_features = ini.in_features()
   # The number of valid snake moves i.e. straight, left or right
@@ -66,7 +66,7 @@ def train(game, ai_version):
   plot_times = [] # Times for each game
   plot_mean_times = [] # Average times over a rolling window
 
-  if new_sim_version:
+  if new_sim_run:
     # This is a new simulation
     b1n = ini.b1_nodes()
     b1l = ini.b1_layers()
@@ -78,8 +78,10 @@ def train(game, ai_version):
     # Get a new model
     model = Linear_QNet(in_features, 
                         b1n, b1l, b2n, b2l, b3n, b3l,
+                        out_features,
                         enable_relu, ai_version)
-    agent.model(model)
+    # Get a new instance of the AI Agent
+    agent = AIAgent(game, model, ai_version)
     agent.save_model()
 
   total_score = 0 # Score for the current game
@@ -134,9 +136,9 @@ def train(game, ai_version):
 if __name__ == '__main__':
   # Get the ai_version from a command line switch
   ai_version = ini.ai_version()
-  new_sim_version = True
+  new_sim_run = True
   if ai_version:
-    new_sim_version = False
+    new_sim_run = False
   else:
     ### New AI Snake Game simulation...
     b1_nodes = ini.b1_nodes()
@@ -148,7 +150,7 @@ if __name__ == '__main__':
       # Get a new AI version for this simulation
       ai_version = get_next_ai_version()
   
-  train(ai_version, new_sim_version)
+  train(ai_version, new_sim_run)
 
 
 

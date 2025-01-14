@@ -37,9 +37,6 @@ GAME_TITLE = 'AI Snake Game'
 # The font file used to render the writing on the game screen
 FONT = pygame.font.Font('arial.ttf', 25)
 
-# A point on the board
-Point = namedtuple('Point', 'x, y')
-
 class AISnakeGame():
   """
   The AI Snake Game class. This class implements a version of the Snake
@@ -57,18 +54,24 @@ class AISnakeGame():
     # Board Size
     self.board_width = ini.board_width()
     self.board_height = ini.board_height()
-        
+
     # Game speed
     self.game_speed = ini.game_speed()
 
     # Initialize the display
     self.display = pygame.display.set_mode((self.board_width, self.board_height))
-    pygame.display.set_caption(GAME_TITLE + '(' + str(ai_version) + ')')
+    pygame.display.set_caption(GAME_TITLE + ' (v' + str(ai_version) + ')')
     self.clock = pygame.time.Clock()
 
     # Simulation metrics
-    self.start_time = 0
     self.elapsed_time = 0
+    self.food = None
+    self.game_score = 0
+    self.game_moves = 0
+    self.lose_reason = 'N/A'
+    self.max_moves = ini.max_moves()
+    self.num_games = 0
+    self.score = 0
     self.sim_start_time = time.time()
     self.sim_score = 0
     self.sim_high_score = 0
@@ -76,14 +79,9 @@ class AISnakeGame():
     self.sim_wall_collision_count = 0
     self.sim_snake_collision_count = 0
     self.sim_exceeded_max_moves_count = 0
-    self.num_games = 0
-    self.max_moves = ini.max_moves()
-    self.lose_reason = 'N/A'
+    self.start_time = 0
     self.sim_save_checkpoint_freq = ini.sim_save_checkpoint_freq()
-    self.game_score = 0
-    self.game_moves = 0
     self.status_iter = ini.status_iter()
-    self.food = None
     self.reset()
 
   def agent(self, agent):
@@ -109,8 +107,8 @@ class AISnakeGame():
     if pt is None:
       pt = self.head
     # hits boundary
-    if pt.x > self.w - BLOCK_SIZE or pt.x < 0 or \
-      pt.y > self.h - BLOCK_SIZE or pt.y < 0:
+    if pt.x > self.board_width - BLOCK_SIZE or pt.x < 0 or \
+      pt.y > self.board_height - BLOCK_SIZE or pt.y < 0:
       return True
     return False
 
@@ -133,7 +131,7 @@ class AISnakeGame():
     if np.array_equal(action, [1, 0, 0]):
       new_dir = clock_wise[idx] # no change
     elif np.array_equal(action, [0, 1, 0]):
-      next_idx = (idx + 1) % 4 # MOD 4 to avoid out of index error
+      next_idx = (idx + 1) % 4 # Mod 4 to avoid out of index error
       new_dir = clock_wise[next_idx] # right turn r -> d -> l -> u
     else: # [0, 0, 1] ... there are only 3 actions
       next_idx = (idx - 1) % 4 # Again, MOD 4 to avoid out of index error
@@ -192,13 +190,13 @@ class AISnakeGame():
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_p]:
-      self._pause_game()
+      self.pause_game()
     if keys[pygame.K_q]:
-      self._quit_game()
+      self.quit_game()
     if keys[pygame.K_s]:
-      self._print_status()
+      self.print_status()
     if keys[pygame.K_m]:
-      self._print_model()
+      self.print_model()
 
     # 2. move
     self.move(action) # update the head
@@ -270,6 +268,7 @@ class AISnakeGame():
     self.sim_score += self.score
     self.sim_time += self.elapsed_time
     self.print_status()
+    self.agent.save_checkpoint()
     pygame.quit()
     quit()
 
@@ -303,7 +302,7 @@ class AISnakeGame():
     self.direction = Direction.RIGHT
 
     # Start the snake in the middle of the board
-    self.head = self.Point(self._board_width/2, self._board_height/2)
+    self.head = Point(self.board_width/2, self.board_height/2)
     # Give the snake 3 segments at the beginning of the game
     self.snake = [self.head,
       Point(self.head.x-BLOCK_SIZE, self.head.y),

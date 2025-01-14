@@ -19,16 +19,18 @@ from SnakeGameElement import Direction
 from SnakeGameElement import Point
 
 class AIAgent:
-  def __init__(self, game, ai_version):
+  def __init__(self, game, model, ai_version):
     ini = AISnakeGameConfig()
     self.ai_version = ai_version
-    self.game = game
+    self.batch_size = ini.batch_size()
     self.epsilon_value = ini.epsilon_value() # Epsilon value, for exploration (i.e. vs exploitation)
     self.gamma = ini.discount() # Discount rate, for future rewards
+    self.game = game
     self.last_dirs = [ 0, 0, 1, 0 ]
+    self.learning_rate = ini.learning_rate()
     self.memory = deque(maxlen=ini.max_memory())
+    self.model = model
     self.n_games = 0 # Number of games played
-    self.model = None
     self.random_move_count = 0
     self.sim_checkpoint_basename = ini.sim_checkpoint_basename()
     self.sim_checkpoint_dir = ini.sim_checkpoint_dir()
@@ -36,7 +38,8 @@ class AIAgent:
     self.sim_model_basename = ini.sim_model_basename()
     self.sim_model_file_file_suffix = ini.sim_model_file_suffix()
     self.sim_model_dir = ini.sim_model_dir()
-    self.trainer = QTrainer(self.model, lr=self.learning_rate, gamma=self.gamma)
+    self.trainer = QTrainer(self.model)
+
     self.load_checkpoint() # Load the simulation state from file if it exists
     print(f"Epsilon value is {self.epsilon_value}")
 
@@ -88,22 +91,22 @@ class AIAgent:
 
       ## Self collision danger
       # Danger straight
-      (dir_r and game.is_self_collision(point_r)),
-      (dir_l and game.is_self_collision(point_l)),
-      (dir_u and game.is_self_collision(point_u)),
-      (dir_d and game.is_self_collision(point_d)),
+      (dir_r and game.is_snake_collision(point_r)),
+      (dir_l and game.is_snake_collision(point_l)),
+      (dir_u and game.is_snake_collision(point_u)),
+      (dir_d and game.is_snake_collision(point_d)),
 
       # Danger right
-      (dir_u and game.is_self_collision(point_r)),
-      (dir_d and game.is_self_collision(point_l)),
-      (dir_l and game.is_self_collision(point_u)),
-      (dir_r and game.is_self_collision(point_d)),
+      (dir_u and game.is_snake_collision(point_r)),
+      (dir_d and game.is_snake_collision(point_l)),
+      (dir_l and game.is_snake_collision(point_u)),
+      (dir_r and game.is_snake_collision(point_d)),
 
       # Danger left
-      (dir_d and game.is_self_collision(point_r)) or
-      (dir_u and game.is_self_collision(point_l)) or
-      (dir_r and game.is_self_collision(point_u)) or
-      (dir_l and game.is_self_collision(point_d)),
+      (dir_d and game.is_snake_collision(point_r)) or
+      (dir_u and game.is_snake_collision(point_l)) or
+      (dir_r and game.is_snake_collision(point_u)) or
+      (dir_l and game.is_snake_collision(point_d)),
 
       # Move direction
       dir_l, dir_r, dir_u, dir_d,
@@ -141,10 +144,6 @@ class AIAgent:
       self.model.load_model(optimizer, model_file)
       print(f"Loaded simulation model ({model_file})")
 
-  def model(self, model):
-    if model:
-        self.model = model
-
   def remember(self, state, action, reward, next_state, done):
     # Store the state, action, reward, next_state, and done in memory
     # Recall that memory is a deque, so it will automatically remove the oldest memory 
@@ -153,12 +152,10 @@ class AIAgent:
 
   def save_checkpoint(self):
     # Save the simulation state
-    checkpoint_file = self._sim_checkpoint_basename + str(self.ai_version) + self.sim_checkpoint_suffix
+    checkpoint_file = self.sim_checkpoint_basename + str(self.ai_version) + '.' + self.sim_checkpoint_file_suffix
     checkpoint_file = os.path.join(self.sim_checkpoint_dir, checkpoint_file)
     if not os.path.exists(self.sim_checkpoint_dir):
       os.makedirs(self.sim_checkpoint_dir)
-    state_dict = self.model['model_state_dict']
-    state_dict['num_games'] = self.n_games
     self.model.save_checkpoint(self.trainer.optimizer, checkpoint_file, self.game.num_games)
     print(f"Saved simulation checkpoint ({checkpoint_file})")
   
