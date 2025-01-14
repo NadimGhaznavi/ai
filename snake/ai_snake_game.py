@@ -224,16 +224,16 @@ class SnakeGameAI:
       pygame.draw.rect(self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
       pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x+4, pt.y+4, 12, 12))
             
-      pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+    pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
       
-      score_string = "Score: " + str(self.score)
-      self.elapsed_time = round(float((time.time() - self.start_time)), 2)
+    score_string = "Score: " + str(self.score)
+    self.elapsed_time = round(float((time.time() - self.start_time)), 2)
       
 
-      text = font.render(score_string + ', Moves ' + str(self.frame_iteration) + \
+    text = font.render(score_string + ', Moves ' + str(self.frame_iteration) + \
                          ', Time ' + str(self.elapsed_time) + 's', True, WHITE)
-      self.display.blit(text, [0, 0])
-      pygame.display.flip()
+    self.display.blit(text, [0, 0])
+    pygame.display.flip()
         
   def _move(self, action):
     # action is an enum value [straight, right, left]
