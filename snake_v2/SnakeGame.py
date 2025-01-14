@@ -1,15 +1,17 @@
+"""
+SnakeGame.py
+
+This contains the original Snake Game where a user uses the arrow keys
+to control the snake.
+"""
+
 import pygame
 import random
+import time
 from enum import Enum
 from collections import namedtuple
 
 pygame.init()
-
-# reset
-# reward
-# play(action) -> direction
-# game_iteration
-# is_collision
 
 # RGB colors
 WHITE = (255, 255, 255)
@@ -52,6 +54,11 @@ class SnakeGame:
     self.display = pygame.display.set_mode((self.w, self.h))
     pygame.display.set_caption('Snake Game')
     self.clock = pygame.time.Clock()
+
+    # Simulation metrics
+    self.start_time = 0
+    self.elapsed_time = 0
+    self.sim_start_time = time.time()
 
     # init game state
     self.direction = Direction.RIGHT

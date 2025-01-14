@@ -78,25 +78,32 @@ BAD_MOVE_LIMIT = 0
 # The version of this codebase. This is used to allow me to have code branching and
 # model changes depending on the version of the code base. This allows me to easily
 # revert back or select specific versions of the AI code to be run.
-AI_VERSION = 138
+AI_VERSION = 142
 
-if AI_VERSION == 137:
+if AI_VERSION == 147:
   B1_NODES = 300
-  B1_LAYERS = 1
-  B2_NODES = 400
-  B2_LAYERS = 1
-  B3_NODES = 500
-  B3_LAYERS = 1
-  EPSILON_VALUE = 0
+  B1_LAYERS = 5
+  EPSILON_VALUE = 2000
 
-if AI_VERSION == 138:
+# LR = 0.0005 is TERRIBLE!!!
+# LR = 0.005 is also TERRIBLE!!!
+
+# Restarted after 1800 to see data more clearly
+if AI_VERSION == 142:
   B1_NODES = 300
   B1_LAYERS = 1
   B2_NODES = 500
   B2_LAYERS = 1
   B3_NODES = 700
-  B3_LAYERS = 1
+  B3_LAYERS = 2
   EPSILON_VALUE = 0
+
+### Reference version
+### It started to really take off at game 150
+#if AI_VERSION == 145:
+#  B1_NODES = 300
+#  B1_LAYERS = 4
+#  EPSILON_VALUE = 100
 
 ### Reference version #1
 ### This configuration achieves the circling solution around game 300, but this strategy
