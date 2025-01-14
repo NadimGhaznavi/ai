@@ -129,6 +129,9 @@ class AISnakeGameConfig():
   def discount(self):
     return self._discount
   
+  def enable_relu(self):
+    return self._enable_relu
+
   def epsilon_value(self):
     return self._epsilon_value
 
