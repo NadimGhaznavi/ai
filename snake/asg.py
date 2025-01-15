@@ -133,6 +133,7 @@ def train(ai_version, new_sim_run):
         agent.save_checkpoint()
         game.sim_high_score = record
         agent.save_highscore(record)
+        agent.set_config('highscore', record)
         if agent.max_score != 0 and score >= agent.max_score:
           agent.max_score_num_count += 1
         if agent.max_score != 0 and \
