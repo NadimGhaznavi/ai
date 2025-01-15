@@ -7,7 +7,7 @@ constants into the code.
 """
 
 # Import supporting modules
-import os
+import os, sys
 import argparse
 import configparser
 
@@ -22,7 +22,7 @@ class AISnakeGameConfig():
   def __init__(self):
     # Setup the expected script arguments
     parser = argparse.ArgumentParser(description='AI Snake Game')
-    parser.add_argument('-e', '--epsilon', type=int, default=0, help='epsilon value for exploration')
+    parser.add_argument('-e', '--epsilon', type=int, help='epsilon value for exploration')
     parser.add_argument('-b1n', '--b1_nodes', type=int, help='number of nodes in the first block 1 layer')
     parser.add_argument('-b1l', '--b1_layers', type=int, default=1, help='number of hidden block 1 layers')
     parser.add_argument('-b2n', '--b2_nodes', type=int, default=0, help='number of nodes in the hidden block 2 layer(s)')
@@ -44,7 +44,7 @@ class AISnakeGameConfig():
 
     # Epsilon value for exploration
     self._epsilon_value = args.epsilon
-
+    
     # AI version
     self._ai_version = args.ai_version
 
@@ -61,7 +61,8 @@ class AISnakeGameConfig():
     self._board_width = config['default']['board_width']
     self._discount = config['default']['discount']
     self._enable_relu = config['default']['enable_relu']
-    self._epsilon_value = config['default']['epsilon_value']
+    if not args.epsilon:
+      self._epsilon_value = config['default']['epsilon_value']
     self._game_speed = config['default']['game_speed']
     self._in_features = config['default']['in_features']
     self._learning_rate = config['default']['learning_rate']
@@ -78,7 +79,7 @@ class AISnakeGameConfig():
     self._sim_model_dir = config['default']['sim_model_dir']
     self._sim_model_file_suffix = config['default']['sim_model_file_suffix']
     self._sim_save_checkpoint_freq = config['default']['sim_save_checkpoint_freq']
-    self._status_iter = config['default']['status_iter']
+    self._status_iter = config['default']['status_iter']    
   
   def ai_version(self):
     if self._ai_version:

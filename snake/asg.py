@@ -84,6 +84,7 @@ def train(ai_version, new_sim_run):
       'enable_relu': ini.enable_relu(),
       'num_games': 0,
       'epsilon_value': ini.epsilon_value(),
+      'initial_epsilon_value': ini.epsilon_value(),
       'ai_version': ai_version
     }
     # Get a new model
