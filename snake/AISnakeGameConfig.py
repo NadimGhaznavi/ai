@@ -29,7 +29,8 @@ class AISnakeGameConfig():
     parser.add_argument('-b2l', '--b2_layers', type=int, default=0, help='number of hidden block 2 layers')
     parser.add_argument('-b3n', '--b3_nodes', type=int, default=0, help='number of nodes in the block 3 hidden layer(s)')
     parser.add_argument('-b3l', '--b3_layers', type=int, default=0, help='number of block 3 hidden layers')
-    parser.add_argument('-m', '--max_games', type=int, default=0, help='exit the simulation after max_games')
+    parser.add_argument('--max_games', type=int, default=0, help='exit the simulation after max_games games')
+    parser.add_argument('--max_score', type=int, default=0, help='exit the simulation if a score of max_score is achieved')
     parser.add_argument('--metrics_dir', type=str, default=None, help='set a custom metrics directory')
     parser.add_argument('-v', '--ai_version', type=int, default=None, help='number of block 3 hidden layers')
 
@@ -56,9 +57,12 @@ class AISnakeGameConfig():
       print(f"ERROR: Cannot find INI file ({ini_file}), exiting")
     config.read(ini_file)
     
-    # Exit the simulation after max_games
+    # Exit the simulation after max_games games
     self._max_games = args.max_games
     
+    # Exit the simulation if a score of max_score is achieved
+    self._max_score = args.max_score
+
     # Set a custom metrics directory
     self._sim_metrics_dir = args.metrics_dir
 
@@ -79,6 +83,8 @@ class AISnakeGameConfig():
     self._max_moves = config['default']['max_moves']
     if not args.max_games:
       self._max_games = config['default']['max_games']
+    if not args.max_score:
+      self._max_score = config['default']['max_score']
     self._out_features = config['default']['out_features']
     self._random_seed = config['default']['random_seed']
     self._sim_checkpoint_basename = config['default']['sim_checkpoint_basename']
@@ -163,6 +169,9 @@ class AISnakeGameConfig():
   def max_moves(self):
     return int(self._max_moves)
   
+  def max_score(self):
+    return int(self._max_score)
+
   def out_features(self):
     return int(self._out_features)
 

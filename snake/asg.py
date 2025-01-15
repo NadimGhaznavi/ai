@@ -117,6 +117,9 @@ def train(ai_version, new_sim_run):
         agent.save_checkpoint()
         game.sim_high_score = record
         agent.save_highscore(record)
+        if score > agent.max_score:
+          # Exit the simulation if a score of max_score is achieved
+          game.quit_game()
 
       print('Snake AI (v' + str(ai_version) + ') ' + \
             'Game' + '{:>4}'.format(agent.n_games) + ', ' + \

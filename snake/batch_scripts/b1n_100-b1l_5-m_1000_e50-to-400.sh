@@ -1,14 +1,13 @@
 #!/bin/bash
 #
-#b1n_100-b1l_4-m_600_e50-to-250.sh
 
 B1_NODES=100
-B1_LAYERS=4
-MAX_GAMES=600
+B1_LAYERS=5
+MAX_GAMES=1000
 
 # Epsilon values
 MIN_E=50
-MAX_E=250
+MAX_E=400
 
 # Epsilon step value
 STEP_E=10
