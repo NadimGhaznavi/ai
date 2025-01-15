@@ -23,9 +23,10 @@ pygame.init()
 
 # RGB colors
 WHITE = (255, 255, 255)
-RED = (200,0,0)
+RED = (200, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
+YELLOW = (255, 0, 255)
 BLACK = (0,0,0)
 
 # Size of the food blocks and snake segments
@@ -320,7 +321,8 @@ class AISnakeGame():
       pygame.draw.rect(self.display, BLUE, pygame.Rect(pt.x+1, pt.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
 
     # Draw the food            
-    pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+    pygame.draw.rect(self.display, GREEN, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+    pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x+1, self.food.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
 
     # Render the score, number of moves and the game time
     score_string = "Score: " + str(self.score)

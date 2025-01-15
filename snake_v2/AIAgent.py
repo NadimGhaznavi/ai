@@ -36,6 +36,7 @@ class AIAgent:
     self.sim_checkpoint_dir = ini.sim_checkpoint_dir()
     self.sim_checkpoint_file_suffix = ini.sim_checkpoint_file_suffix()
     self.sim_model_basename = ini.sim_model_basename()
+    self.sim_model_desc_basename = ini.sim_model_desc_basename()
     self.sim_model_file_file_suffix = ini.sim_model_file_suffix()
     self.sim_model_dir = ini.sim_model_dir()
     self.trainer = QTrainer(self.model)
@@ -132,8 +133,7 @@ class AIAgent:
     if os.path.isfile(checkpoint_file):
       optimizer = self.trainer.optimizer
       self.model.load_checkpoint(optimizer, checkpoint_file)
-      state_dict = self.model['model_state_dict']
-      self.n_games = state_dict['num_games']
+      #self.n_games = self.model['num_games']
       print(f"Loaded simulation checkpoint ({checkpoint_file})")
 
   def load_model(self):
@@ -167,6 +167,29 @@ class AIAgent:
       os.makedirs(self.sim_model_dir)
     self.model.save_model(self.trainer.optimizer, model_file)
     print(f"Saved simulation model ({model_file})")
+
+  def save_model_desc(self, in_features,
+                      b1n, b1l, b2n, b2l, b3n, b3l,
+                      out_features,
+                      enable_relu, ai_version):
+    # Save a descrion of the simulation model
+    model_desc_file = self.sim_model_desc_basename + str(ai_version) + '.txt'
+    model_desc_file = os.path.join(self.sim_model_dir, model_desc_file)
+    if not os.path.exists(self.sim_model_dir):
+      os.makedirs(self.sim_model_dir)
+    with open(model_desc_file, 'w') as file_handle:
+      file_handle.write("[default]\n")
+      file_handle.write("in_features = " + str(in_features) + "\n")
+      file_handle.write("b1n = " + str(b1n) + "\n")
+      file_handle.write("b1l = " + str(b1l) + "\n")
+      file_handle.write("b2n = " + str(b2n) + "\n")
+      file_handle.write("b2l = " + str(b2l) + "\n")
+      file_handle.write("b3n = " + str(b3n) + "\n")
+      file_handle.write("b3l = " + str(b3l) + "\n")
+      file_handle.write("out_features = " + str(out_features) + "\n")
+      file_handle.write("enable_relu = " + str(enable_relu) + "\n")
+      file_handle.close()
+    print(f"Saved simulation model description ({model_desc_file})")
 
   def train_long_memory(self):
     if len(self.memory) > self.batch_size:

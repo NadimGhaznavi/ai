@@ -14,7 +14,9 @@ self.ai_version)
 """
 import os, sys
 import matplotlib.pyplot as plt
-
+import torch.nn as nn
+from QTrainer import QTrainer
+import configparser
 
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
@@ -25,6 +27,30 @@ from AIAgent import AIAgent
 from SnakeGamePlots import plot
 
 ini = AISnakeGameConfig()
+
+def get_new_model(ai_version):
+  sim_model_desc_basename = ini.sim_model_desc_basename()
+  sim_model_dir = ini.sim_model_dir()
+  model_desc_file = sim_model_desc_basename + str(ai_version) + '.txt'
+  model_desc_file = os.path.join(sim_model_dir, model_desc_file)
+  if not os.path.isfile(model_desc_file):
+    print(f"ERROR: Unable to open model description file ({model_desc_file}), exiting")
+    sys.exit(1)
+  config = configparser.ConfigParser()
+  config.read(model_desc_file)
+  in_features = int(config['default']['in_features'])
+  b1n = int(config['default']['b1n'])
+  b1l = int(config['default']['b1l'])
+  b2n = int(config['default']['b2n'])
+  b2l = int(config['default']['b2l'])
+  b3n = int(config['default']['b3n'])
+  b3l = int(config['default']['b3l'])
+  out_features = int(config['default']['out_features'])
+  enable_relu = bool(config['default']['enable_relu'])
+  return Linear_QNet(in_features,
+                     b1n, b1l, b2n, b2l, b3n, b3l,
+                     out_features,
+                     enable_relu, ai_version)
 
 def get_next_ai_version():
   """
@@ -83,6 +109,17 @@ def train(ai_version, new_sim_run):
     # Get a new instance of the AI Agent
     agent = AIAgent(game, model, ai_version)
     agent.save_model()
+    agent.save_model_desc(in_features, 
+                          b1n, b1l, b2n, b2l, b3n, b3l,
+                          out_features,
+                          enable_relu, ai_version)
+
+  else:
+    # A version was passed into this script
+    model = get_new_model(ai_version)
+    agent = AIAgent(game, model, ai_version)
+    agent.load_checkpoint()
+    agent.n_games = model['num_games']
 
   total_score = 0 # Score for the current game
   record = 0 # Best score

@@ -74,6 +74,7 @@ class AISnakeGameConfig():
     self._sim_checkpoint_dir = config['default']['sim_checkpoint_dir']
     self._sim_checkpoint_file_suffix = config['default']['sim_checkpoint_file_suffix']
     self._sim_model_basename = config['default']['sim_model_basename']
+    self._sim_model_desc_basename = config['default']['sim_model_desc_basename']
     self._sim_model_dir = config['default']['sim_model_dir']
     self._sim_model_file_suffix = config['default']['sim_model_file_suffix']
     self._sim_save_checkpoint_freq = config['default']['sim_save_checkpoint_freq']
@@ -89,7 +90,10 @@ class AISnakeGameConfig():
     return self._ai_version_file
   
   def b1_nodes(self):
-    return int(self._b1_nodes)
+    if self._b1_nodes:
+      return int(self._b1_nodes)
+    else:
+      return 100
 
   def b1_layers(self):
     return int(self._b1_layers)
@@ -162,6 +166,9 @@ class AISnakeGameConfig():
   
   def sim_model_basename(self):
     return self._sim_model_basename
+  
+  def sim_model_desc_basename(self):
+    return self._sim_model_desc_basename
   
   def sim_model_dir(self):
     return self._sim_model_dir
