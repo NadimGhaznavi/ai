@@ -202,8 +202,8 @@ class AIAgent:
     # Save a descrion of the simulation model
     sim_desc_file = self.sim_desc_basename + str(self.ai_version) + '.txt'
     sim_desc_file = os.path.join(self.sim_desc_dir, sim_desc_file)
-    if not os.path.exists(self.sim_model_dir):
-      os.makedirs(self.sim_model_dir)
+    if not os.path.exists(self.sim_desc_dir):
+      os.makedirs(self.sim_desc_dir)
     # Update the epsilon value
     self.set_config('epsilon_value', str(self.epsilon_value - self.n_games))
     self.set_config('num_games', str(self.n_games))
