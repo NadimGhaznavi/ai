@@ -30,7 +30,7 @@ class AISnakeGameConfig():
     parser.add_argument('-b3n', '--b3_nodes', type=int, default=0, help='number of nodes in the block 3 hidden layer(s)')
     parser.add_argument('-b3l', '--b3_layers', type=int, default=0, help='number of block 3 hidden layers')
     parser.add_argument('--max_games', type=int, default=0, help='exit the simulation after max_games games')
-    parser.add_argument('--max_score', type=int, default=0, help='exit the simulation if a score of max_score is achieved')
+    parser.add_argument('-ms', '--max_score', type=int, default=0, help='exit the simulation if a score of max_score is achieved')
     parser.add_argument('--metrics_dir', type=str, default=None, help='set a custom metrics directory')
     parser.add_argument('-v', '--ai_version', type=int, default=None, help='number of block 3 hidden layers')
 
@@ -62,7 +62,7 @@ class AISnakeGameConfig():
     
     # Exit the simulation if a score of max_score is achieved
     self._max_score = args.max_score
-
+    
     # Set a custom metrics directory
     self._sim_metrics_dir = args.metrics_dir
 

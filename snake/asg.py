@@ -29,6 +29,14 @@ from AISnakeGameUtils import get_new_model, get_sim_desc, get_next_ai_version
 
 ini = AISnakeGameConfig()
 
+def print_game_summary(ai_version, agent, score, record, game):
+  print('Snake AI (v' + str(ai_version) + ') ' + \
+    'Game' + '{:>4}'.format(agent.n_games) + ', ' + \
+    'Score' + '{:>4}'.format(score) + ', ' + \
+    'Record' + '{:>4}'.format(record) + ', ' + \
+    'Time ' + '{:>7}'.format(game.elapsed_time) + 's' + \
+    ' - ' + game.lose_reason)
+
 def train(ai_version, new_sim_run):
   """
   This is the AI Snake Game main training loop.
@@ -109,6 +117,8 @@ def train(ai_version, new_sim_run):
       # Implement the max_games feature where the simulation ends when the number 
       # of games reaches the max_games threashold
       if agent.max_games != 0 and agent.n_games == agent.max_games:
+        game.lose_reason = "Executed max_games value of " + str(agent.max_games)
+        print_game_summary(ai_version, agent, score, record, game)
         game.quit_game()
 
       agent.train_long_memory()
@@ -117,16 +127,13 @@ def train(ai_version, new_sim_run):
         agent.save_checkpoint()
         game.sim_high_score = record
         agent.save_highscore(record)
-        if score > agent.max_score:
+        if agent.max_score != 0 and score > agent.max_score:
           # Exit the simulation if a score of max_score is achieved
+          game.lose_reason = "Achieved max_score value of " + str(agent.max_score)
+          print_game_summary(ai_version, agent, score, record, game)
           game.quit_game()
 
-      print('Snake AI (v' + str(ai_version) + ') ' + \
-            'Game' + '{:>4}'.format(agent.n_games) + ', ' + \
-            'Score' + '{:>4}'.format(score) + ', ' + \
-            'Record' + '{:>4}'.format(record) + ', ' + \
-            'Time ' + '{:>7}'.format(game.elapsed_time) + 's' + \
-            ' - ' + game.lose_reason)
+      print_game_summary(ai_version, agent, score, record, game)
 
       plot_scores.append(score)
       total_score += score
