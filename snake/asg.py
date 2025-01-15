@@ -106,6 +106,11 @@ def train(ai_version, new_sim_run):
       game.reset()
       
       agent.n_games += 1
+      # Implement the max_games feature where the simulation ends when the number 
+      # of games reaches the max_games threashold
+      if agent.n_games == agent.max_games:
+        game.quit_game()
+
       agent.train_long_memory()
       if score > record:
         record = score

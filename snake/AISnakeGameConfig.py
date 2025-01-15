@@ -29,6 +29,8 @@ class AISnakeGameConfig():
     parser.add_argument('-b2l', '--b2_layers', type=int, default=0, help='number of hidden block 2 layers')
     parser.add_argument('-b3n', '--b3_nodes', type=int, default=0, help='number of nodes in the block 3 hidden layer(s)')
     parser.add_argument('-b3l', '--b3_layers', type=int, default=0, help='number of block 3 hidden layers')
+    parser.add_argument('-b3l', '--b3_layers', type=int, default=0, help='number of block 3 hidden layers')
+    parser.add_argument('-m', '--max_games', type=int, default=0, help='exit the simulation after max_games')
     parser.add_argument('-v', '--ai_version', type=int, default=None, help='number of block 3 hidden layers')
 
     # Parse arguments
@@ -54,6 +56,9 @@ class AISnakeGameConfig():
       print(f"ERROR: Cannot find INI file ({ini_file}), exiting")
     config.read(ini_file)
 
+    # Exit the simulation after max_games, disable if max_games is zero
+    self.max_games = args.max_games
+    
     # Read the INI file settings
     self._ai_version_file = config['default']['ai_version_file']
     self._batch_size = config['default']['batch_size']
