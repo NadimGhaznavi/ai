@@ -37,6 +37,8 @@ class AIAgent:
     self.sim_checkpoint_basename = ini.sim_checkpoint_basename()
     self.sim_checkpoint_dir = ini.sim_checkpoint_dir()
     self.sim_checkpoint_file_suffix = ini.sim_checkpoint_file_suffix()
+    self.sim_highscore_basename = ini.sim_highscore_basename()
+    self.sim_metrics_dir = ini.sim_metrics_dir()
     self.sim_model_basename = ini.sim_model_basename()
     self.sim_desc_basename = ini.sim_desc_basename()
     self.sim_model_file_file_suffix = ini.sim_model_file_suffix()
@@ -44,6 +46,7 @@ class AIAgent:
     self.trainer = QTrainer(self.model)
 
     self.load_checkpoint() # Load the simulation state from file if it exists
+    self.save_highscore(0) # Save the "game #, highscore" metrics
     
   def get_snake_length_in_binary(self):
     bin_str = format(len(self.game.snake), 'b')
@@ -161,6 +164,22 @@ class AIAgent:
     print(f"Saved simulation checkpoint ({checkpoint_file})")
     self.save_sim_desc()
   
+  def save_highscore(self, highscore):
+    # Track when a new highscore is achieved
+    highscore_file = self.sim_highscore_basename + str(self.ai_version) + '.csv'
+    highscore_file = os.path.join(self.sim_metrics_dir, highscore_file)
+    if not os.path.exists(self.sim_metrics_dir):
+      os.makedirs(self.sim_metrics_dir)
+    if not os.path.exists(highscore_file):
+      # Create a new highscore file
+      with open(highscore_file, 'w') as file_handle:
+        file_handle.write("Game Number,High Score\n")
+        file_handle.write("0,0\n")
+    else:
+      # Append the current game number and score to the highscore file
+      with open(highscore_file, 'a') as file_handle:
+        file_handle.write(str(self.n_games) + ',' + str(highscore) + "\n")
+
   def save_model(self):
     # Save the simulation model
     model_file = self.sim_model_basename + str(self.ai_version) + '.' + self.sim_model_file_file_suffix

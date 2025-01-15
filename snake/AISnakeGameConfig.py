@@ -74,8 +74,10 @@ class AISnakeGameConfig():
     self._sim_checkpoint_basename = config['default']['sim_checkpoint_basename']
     self._sim_checkpoint_dir = config['default']['sim_checkpoint_dir']
     self._sim_checkpoint_file_suffix = config['default']['sim_checkpoint_file_suffix']
-    self._sim_model_basename = config['default']['sim_model_basename']
     self._sim_desc_basename = config['default']['sim_desc_basename']
+    self._sim_highscore_basename = config['default']['sim_highscore_basename']
+    self._sim_metrics_dir = config['default']['sim_metrics_dir']
+    self._sim_model_basename = config['default']['sim_model_basename']
     self._sim_model_dir = config['default']['sim_model_dir']
     self._sim_model_file_suffix = config['default']['sim_model_file_suffix']
     self._sim_save_checkpoint_freq = config['default']['sim_save_checkpoint_freq']
@@ -164,6 +166,12 @@ class AISnakeGameConfig():
 
   def sim_checkpoint_file_suffix(self):
     return self._sim_checkpoint_file_suffix
+  
+  def sim_highscore_basename(self):
+    return self._sim_highscore_basename
+  
+  def sim_metrics_dir(self):
+    return self._sim_metrics_dir
   
   def sim_model_basename(self):
     return self._sim_model_basename

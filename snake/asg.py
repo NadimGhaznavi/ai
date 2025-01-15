@@ -25,33 +25,10 @@ from AISnakeGame import AISnakeGame
 from LinearQNet import Linear_QNet
 from AIAgent import AIAgent
 from SnakeGamePlots import plot
-from AISnakeGameUtils import get_new_model, get_sim_desc
+from AISnakeGameUtils import get_new_model, get_sim_desc, get_next_ai_version
 
 ini = AISnakeGameConfig()
 
-def get_next_ai_version():
-  """
-  Get the next available version number from the ai_version file.
-  If the file doesn't exist, write '2' to the file an return '1'.
-  """
-  ai_version_file = ini.ai_version_file()
-  ai_version_file = os.path.join(lib_dir, ai_version_file)
-  if os.path.isfile(ai_version_file):
-    file_handle = open(ai_version_file, 'r')
-    for line in file_handle:
-      ai_version = int(line.strip())
-    file_handle.close()
-    with open(ai_version_file, 'w') as file_handle:
-      file_handle.write(str(ai_version + 1))
-      file_handle.close()
-  else:
-    ai_version = 1
-    with open(ai_version_file, 'w') as file_handle:
-      file_handle.write('2')
-      file_handle.close()
-  print(f"AI version is {ai_version}")
-  return ai_version
- 
 def train(ai_version, new_sim_run):
   """
   This is the AI Snake Game main training loop.
@@ -134,6 +111,7 @@ def train(ai_version, new_sim_run):
         record = score
         agent.save_checkpoint()
         game.sim_high_score = record
+        agent.save_highscore(record)
 
       print('Snake AI (v' + str(ai_version) + ') ' + \
             'Game' + '{:>4}'.format(agent.n_games) + ', ' + \
