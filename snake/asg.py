@@ -127,7 +127,7 @@ def train(ai_version, new_sim_run):
 
       plot_scores.append(score)
       total_score += score
-      mean_score = round(total_score / agent.n_games, 1)
+      mean_score = round(total_score / agent.n_games, 2)
       plot_mean_scores.append(mean_score)
       plot_times.append(game.elapsed_time)
       mean_time = round(game.sim_time / agent.n_games, 1)
