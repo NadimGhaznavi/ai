@@ -8,7 +8,7 @@ MAX_SCORE=50
 MAX_SCORE_NUM=5
 
 # Epsilon values
-MIN_E=100
+MIN_E=110
 MAX_E=400
 
 # Epsilon step value
