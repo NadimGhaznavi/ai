@@ -21,13 +21,18 @@ from SnakeGameElement import Point
 from AISnakeGameUtils import get_sim_desc
 
 class AIAgent:
-  def __init__(self, game, model, ai_version):
+  def __init__(self, game, model, config, ai_version):
     ini = AISnakeGameConfig()
+    self.game = game
+    self.model = model
+    self.config = config
     self.ai_version = ai_version
+
     self.batch_size = ini.batch_size()
     self.epsilon_value = ini.epsilon_value() # Epsilon value, for exploration (i.e. vs exploitation)
     self.gamma = ini.discount() # Discount rate, for future rewards
-    self.game = game
+    self.highscore = 0
+
     self.last_dirs = [ 0, 0, 1, 0 ]
     self.learning_rate = ini.learning_rate()
     self.max_games = ini.max_games()
@@ -35,7 +40,6 @@ class AIAgent:
     self.max_score_num = ini.max_score_num()
     self.max_score_num_count = 0
     self.memory = deque(maxlen=ini.max_memory())
-    self.model = model
     self.n_games = 0 # Number of games played
     self.random_move_count = 0
     self.sim_checkpoint_basename = ini.sim_checkpoint_basename()
@@ -45,6 +49,7 @@ class AIAgent:
     self.sim_metrics_dir = ini.sim_metrics_dir()
     self.sim_model_basename = ini.sim_model_basename()
     self.sim_desc_basename = ini.sim_desc_basename()
+    self.sim_desc_dir = ini.sim_desc_dir()
     self.sim_model_file_file_suffix = ini.sim_model_file_suffix()
     self.sim_model_dir = ini.sim_model_dir()
     self.trainer = QTrainer(self.model)
@@ -193,20 +198,23 @@ class AIAgent:
     self.model.save_model(self.trainer.optimizer, model_file)
     print(f"Saved simulation model ({model_file})")
 
-  def save_sim_desc(self, config=None):
-    if not config:
-      config = get_sim_desc(self.ai_version)
+  def save_sim_desc(self):
     # Save a descrion of the simulation model
     sim_desc_file = self.sim_desc_basename + str(self.ai_version) + '.txt'
-    sim_desc_file = os.path.join(self.sim_model_dir, sim_desc_file)
+    sim_desc_file = os.path.join(self.sim_desc_dir, sim_desc_file)
     if not os.path.exists(self.sim_model_dir):
       os.makedirs(self.sim_model_dir)
     # Update the epsilon value
-    config['default']['epsilon_value'] = str(self.epsilon_value - self.n_games)
+    self.set_config('epsilon_value', str(self.epsilon_value - self.n_games))
+    self.set_config('num_games', str(self.n_games))
+    self.set_config('highscore', str(self.highscore))
     with open(sim_desc_file, 'w') as config_file:
-      config.write(config_file)
+      self.config.write(config_file)
 
     print(f"Saved simulation description ({sim_desc_file})")
+
+  def set_config(self, key, value):
+    self.config['default'][key] = value
 
   def train_long_memory(self):
     if len(self.memory) > self.batch_size:

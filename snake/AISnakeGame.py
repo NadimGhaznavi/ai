@@ -83,13 +83,6 @@ class AISnakeGame():
     self.start_time = 0
     self.sim_save_checkpoint_freq = ini.sim_save_checkpoint_freq()
     self.status_iter = ini.status_iter()
-    self.reset()
-
-  def agent(self, agent):
-    """
-    The Trainer uses this to pass in the current instance of the AI agent.
-    """
-    self.agent = agent
 
   def is_snake_collision(self, pt=None):
     """
@@ -209,20 +202,29 @@ class AISnakeGame():
     if self.is_wall_collision():
       game_over = True
       reward = -10
-      self.lose_reason = 'Hit the wall'
+      lose_reason = 'Hit the wall'
+      self.lose_reason = lose_reason
+      self.agent.set_config('lose_reason', lose_reason)
       self.sim_wall_collision_count += 1
+      self.agent.set_config('wall_collision_count', str(self.sim_wall_collision_count))
       return reward, game_over, self.score
     elif self.is_snake_collision():
       game_over = True
       reward = -10
-      self.lose_reason = 'Hit the snake'
+      lose_reason = 'Hit the snake'
+      self.lose_reason = lose_reason
+      self.agent.set_config('lose_reason', lose_reason)
       self.sim_snake_collision_count += 1
+      self.agent.set_config('snake_collision_count', str(self.sim_snake_collision_count))
       return reward, game_over, self.score
     if self.game_moves > self.max_moves*len(self.snake):
       game_over = True
       reward = -10
-      self.lose_reason = 'Excessive moves (' + str(self.max_moves*len(self.snake)) + ')' 
+      lose_reason = 'Excessive moves (' + str(self.max_moves*len(self.snake)) + ')'
+      self.lose_reason = lose_reason
+      self.agent.set_config('lose_reason', lose_reason)
       self.sim_exceeded_max_moves_count += 1
+      self.agent.set_config('exceeded_max_moves_count', str(self.sim_exceeded_max_moves_count))
       return reward, game_over, self.score    
 
     # 4. place new food or just move
@@ -250,20 +252,15 @@ class AISnakeGame():
     """
     Print simulation metrics.
     """
-    avg_score = round(self.sim_score / self.num_games, 2)
-    sim_min = int(self.sim_time / 60)
-    sim_sec = self.sim_time % 60
-    tmp_sim_sec = int(sim_sec)
-    avg_time = round(self.sim_time / self.num_games, 2)
-    print(f"Total simulation time    : {sim_min} min {tmp_sim_sec} sec")
+    print(f"Total simulation time    : {self.total_sim_time}")
     print(f"Total number of games    : {self.num_games}")
     print(f"High score               : {self.sim_high_score}")
     print(f"Total simulation score   : {self.sim_score}")
     print(f"Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
     print(f"Wall collision count     : {self.sim_wall_collision_count}")
     print(f"Snake collision count    : {self.sim_snake_collision_count}")
-    print(f"Average game score       : {avg_score}")
-    print(f"Average game time        : {avg_time}")
+    print(f"Average game score       : {self.avg_game_score}")
+    print(f"Average game time        : {self.avg_game_time}")
 
   def quit_game(self):
     self.sim_score += self.score
@@ -279,6 +276,24 @@ class AISnakeGame():
     """
     # Total score of all games in this simulation run
     self.sim_score += self.score
+    self.agent.set_config('total_sim_score', str(self.sim_score))
+    # Total simulation time
+    sim_min = int(self.sim_time / 60)
+    sim_sec = round(self.sim_time % 60, 2)
+    self.total_sim_time = str(sim_min) + " min " + str(sim_sec) + " sec"
+    self.agent.set_config('total_sim_time', str(self.total_sim_time))
+    # Average game score
+    if self.num_games == 0:
+      self.avg_game_score = 0
+    else:
+      self.avg_game_score = round(self.sim_score / self.num_games, 2)
+    self.agent.set_config('avg_game_score', str(self.avg_game_score))
+    # Average game time
+    if self.num_games == 0:
+      self.avg_game_time = 0
+    else:
+      self.avg_game_time = round(self.sim_time / self.num_games, 2)
+    self.agent.set_config('avg_game_time', str(self.avg_game_time))
     # Current game score
     self.score = 0
     # Number of games
@@ -309,7 +324,14 @@ class AISnakeGame():
       Point(self.head.x-BLOCK_SIZE, self.head.y),
       Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
     
+    
     self.place_food()
+
+  def set_agent(self, agent):
+    """
+    The Trainer uses this to pass in the current instance of the AI agent.
+    """
+    self.agent = agent
 
   def update_ui(self):
     # Paint the background black

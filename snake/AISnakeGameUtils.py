@@ -57,9 +57,9 @@ def get_sim_desc(ai_version):
   """
   ini = AISnakeGameConfig()
   sim_desc_basename = ini.sim_desc_basename()
-  sim_model_dir = ini.sim_model_dir()
+  sim_desc_dir = ini.sim_desc_dir()
   sim_desc_file = sim_desc_basename + str(ai_version) + '.txt'
-  sim_desc_file = os.path.join(sim_model_dir, sim_desc_file)
+  sim_desc_file = os.path.join(sim_desc_dir, sim_desc_file)
   if not os.path.isfile(sim_desc_file):
     print(f"ERROR: Unable to find simulation description file ({sim_desc_file}), exiting")
     sys.exit(1)

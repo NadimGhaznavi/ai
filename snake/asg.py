@@ -67,7 +67,6 @@ def train(ai_version, new_sim_run):
       'b3l': ini.b3_layers(),
       'out_features': out_features,
       'enable_relu': ini.enable_relu(),
-      'num_games': 0,
       'epsilon_value': ini.epsilon_value(),
       'initial_epsilon_value': ini.epsilon_value(),
       'ai_version': ai_version
@@ -75,22 +74,26 @@ def train(ai_version, new_sim_run):
     # Get a new model
     model = get_new_model(config)
     # Get a new instance of the AI Agent
-    agent = AIAgent(game, model, ai_version)
+    agent = AIAgent(game, model, config, ai_version)
+    game.set_agent(agent)
+    game.reset()
     agent.save_model()
-    agent.save_sim_desc(config)
+    agent.save_sim_desc()
 
   else:
     # A version was passed into this script
     config = get_sim_desc(ai_version)
     model = get_new_model(config)
-    agent = AIAgent(game, model, ai_version)
+    agent = AIAgent(game, model, config, ai_version)
+    game.set_agent(agent)
+    game.reset()
     agent.load_checkpoint()
     agent.n_games = int(config['default']['num_games'])
     agent.epsilon_value = int(config['default']['epsilon_value'])
 
   total_score = 0 # Score for the current game
   record = 0 # Best score
-  game.agent(agent) # Pass the agent to the game
+  game.set_agent(agent) # Pass the agent to the game
 
   # Generate a new matplotlib figure and spec
   fig = plt.figure(figsize=(12,4), layout="tight")
@@ -117,7 +120,10 @@ def train(ai_version, new_sim_run):
       # Implement the max_games feature where the simulation ends when the number 
       # of games reaches the max_games threashold
       if agent.max_games != 0 and agent.n_games == agent.max_games:
-        game.lose_reason = "Executed max_games value of " + str(agent.max_games)
+        lose_reason = "Executed max_games value of " + str(agent.max_games)
+        game.lose_reason = lose_reason
+        agent.set_config('lose_reason', lose_reason)
+        agent.save_sim_desc()
         print_game_summary(ai_version, agent, score, record, game)
         game.quit_game()
 
@@ -133,8 +139,11 @@ def train(ai_version, new_sim_run):
           score > agent.max_score and \
           agent.max_score_num_count >= agent.max_score_num:
           # Exit the simulation if a score of max_score is achieved
-          game.lose_reason = "Achieved max_score value of " + str(agent.max_score) + \
+          lose_reason = "Achieved max_score value of " + str(agent.max_score) + \
             " " + str(agent.max_score_num_count) + " times"
+          game.lose_reason = lose_reason
+          agent.set_config('lose_reason', lose_reason)
+          agent.save_sim_desc()
           print_game_summary(ai_version, agent, score, record, game)
           game.quit_game()
 
