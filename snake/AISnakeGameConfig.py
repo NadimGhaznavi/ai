@@ -30,6 +30,7 @@ class AISnakeGameConfig():
     parser.add_argument('-b3n', '--b3_nodes', type=int, default=0, help='number of nodes in the block 3 hidden layer(s)')
     parser.add_argument('-b3l', '--b3_layers', type=int, default=0, help='number of block 3 hidden layers')
     parser.add_argument('-m', '--max_games', type=int, default=0, help='exit the simulation after max_games')
+    parser.add_argument('--metrics_dir', type=str, default=None, help='set a custom metrics directory')
     parser.add_argument('-v', '--ai_version', type=int, default=None, help='number of block 3 hidden layers')
 
     # Parse arguments
@@ -58,6 +59,9 @@ class AISnakeGameConfig():
     # Exit the simulation after max_games
     self._max_games = args.max_games
     
+    # Set a custom metrics directory
+    self._sim_metrics_dir = args.metrics_dir
+
     # Read the INI file settings
     self._ai_version_file = config['default']['ai_version_file']
     self._batch_size = config['default']['batch_size']
@@ -82,7 +86,8 @@ class AISnakeGameConfig():
     self._sim_checkpoint_file_suffix = config['default']['sim_checkpoint_file_suffix']
     self._sim_desc_basename = config['default']['sim_desc_basename']
     self._sim_highscore_basename = config['default']['sim_highscore_basename']
-    self._sim_metrics_dir = config['default']['sim_metrics_dir']
+    if not args.metrics_dir:
+      self._sim_metrics_dir = config['default']['sim_metrics_dir']
     self._sim_model_basename = config['default']['sim_model_basename']
     self._sim_model_dir = config['default']['sim_model_dir']
     self._sim_model_file_suffix = config['default']['sim_model_file_suffix']
