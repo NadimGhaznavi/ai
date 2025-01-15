@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 from IPython import display
+from IPython.utils import io
 
 # Enable interactive mode
 plt.ion()
@@ -25,7 +26,9 @@ def annotate_axes(ax, text, fontsize=18):
 
 def plot(scores, mean_scores, times, mean_times, ai_version):
   display.clear_output(wait=True)
-  display.display(plt.gcf())
+  with io.capture_output() as captured:
+    # Suppress the output to STDOUT in this context
+    display.display(plt.gcf())
   plt.clf()
   plt.title('Snake AI Training (v' + str(ai_version) + ')')
   plt.xlabel('Number of games')
