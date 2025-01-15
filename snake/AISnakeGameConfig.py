@@ -22,7 +22,7 @@ class AISnakeGameConfig():
   def __init__(self):
     # Setup the expected script arguments
     parser = argparse.ArgumentParser(description='AI Snake Game')
-    parser.add_argument('--epsilon', type=int, default=0, help='epsilon value for exploration')
+    parser.add_argument('-e', '--epsilon', type=int, default=0, help='epsilon value for exploration')
     parser.add_argument('-b1n', '--b1_nodes', type=int, help='number of nodes in the first block 1 layer')
     parser.add_argument('-b1l', '--b1_layers', type=int, default=1, help='number of hidden block 1 layers')
     parser.add_argument('-b2n', '--b2_nodes', type=int, default=0, help='number of nodes in the hidden block 2 layer(s)')
