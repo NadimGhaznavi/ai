@@ -127,9 +127,14 @@ def train(ai_version, new_sim_run):
         agent.save_checkpoint()
         game.sim_high_score = record
         agent.save_highscore(record)
-        if agent.max_score != 0 and score > agent.max_score:
+        if agent.max_score != 0 and score >= agent.max_score:
+          agent.max_score_num_count += 1
+        if agent.max_score != 0 and \
+          score > agent.max_score and \
+          agent.max_score_num_count >= agent.max_score_num:
           # Exit the simulation if a score of max_score is achieved
-          game.lose_reason = "Achieved max_score value of " + str(agent.max_score)
+          game.lose_reason = "Achieved max_score value of " + str(agent.max_score) + \
+            " " + str(agent.max_score_num_count) + " times"
           print_game_summary(ai_version, agent, score, record, game)
           game.quit_game()
 

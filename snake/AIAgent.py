@@ -32,6 +32,8 @@ class AIAgent:
     self.learning_rate = ini.learning_rate()
     self.max_games = ini.max_games()
     self.max_score = ini.max_score()
+    self.max_score_num = ini.max_score_num()
+    self.max_score_num_count = 0
     self.memory = deque(maxlen=ini.max_memory())
     self.model = model
     self.n_games = 0 # Number of games played
