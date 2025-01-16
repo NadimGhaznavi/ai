@@ -14,7 +14,7 @@ from AISnakeGameConfig import AISnakeGameConfig
 
 ini = AISnakeGameConfig()
 
-torch.manual_seed(ini.random_seed())
+torch.manual_seed(ini.get('random_seed'))
 
 class Linear_QNet(nn.Module):
   def __init__(self, in_features, 

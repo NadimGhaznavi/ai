@@ -28,30 +28,25 @@ class AIAgent:
     self.config = config
     self.ai_version = ai_version
 
-    self.batch_size = ini.batch_size()
-    self.epsilon_value = ini.epsilon_value() # Epsilon value, for exploration (i.e. vs exploitation)
-    self.gamma = ini.discount() # Discount rate, for future rewards
+    self.batch_size = ini.get('batch_size')
+    self.epsilon_value = ini.get('epsilon_value') # Epsilon value, for exploration (i.e. vs exploitation)
+    self.gamma = ini.get('discount') # Discount rate, for future rewards
     self.highscore = 0
 
     self.last_dirs = [ 0, 0, 1, 0 ]
-    self.learning_rate = ini.learning_rate()
-    self.max_games = ini.max_games()
-    self.max_score = ini.max_score()
-    self.max_score_num = ini.max_score_num()
+    self.learning_rate = ini.get('learning_rate')
+    self.max_games = ini.get('max_games')
+    self.max_score = ini.get('max_score')
+    self.max_score_num = ini.get('max_score_num')
     self.max_score_num_count = 0
-    self.memory = deque(maxlen=ini.max_memory())
+    self.memory = deque(maxlen=ini.get('max_memory'))
     self.n_games = 0 # Number of games played
     self.random_move_count = 0
-    self.sim_checkpoint_basename = ini.sim_checkpoint_basename()
-    self.sim_checkpoint_dir = ini.sim_checkpoint_dir()
-    self.sim_checkpoint_file_suffix = ini.sim_checkpoint_file_suffix()
-    self.sim_highscore_basename = ini.sim_highscore_basename()
-    self.sim_metrics_dir = ini.sim_metrics_dir()
-    self.sim_model_basename = ini.sim_model_basename()
-    self.sim_desc_basename = ini.sim_desc_basename()
-    self.sim_desc_dir = ini.sim_desc_dir()
-    self.sim_model_file_file_suffix = ini.sim_model_file_suffix()
-    self.sim_model_dir = ini.sim_model_dir()
+    self.sim_checkpoint_basename = ini.get('sim_checkpoint_basename')
+    self.sim_data_dir = ini.get('sim_data_dir')
+    self.sim_highscore_basename = ini.get('sim_highscore_basename')
+    self.sim_model_basename = ini.get('sim_model_basename')
+    self.sim_desc_basename = ini.get('sim_desc_basename')
     self.trainer = QTrainer(self.model)
 
     self.load_checkpoint() # Load the simulation state from file if it exists
@@ -137,12 +132,12 @@ class AIAgent:
     # Include the previous direction of the snake
     for aDir in self.last_dirs:
       state.append(aDir)
-    self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ] 
+    self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
     return np.array(state, dtype=int)
 
   def load_checkpoint(self):
-    checkpoint_file = self.sim_checkpoint_basename + str(self.ai_version) + '.' + self.sim_checkpoint_file_suffix
-    checkpoint_file = os.path.join(self.sim_checkpoint_dir, checkpoint_file)
+    checkpoint_file = str(self.ai_version) + '_' + self.sim_checkpoint_basename
+    checkpoint_file = os.path.join(self.sim_data_dir, checkpoint_file)
     if os.path.isfile(checkpoint_file):
       optimizer = self.trainer.optimizer
       self.model.load_checkpoint(optimizer, checkpoint_file)
@@ -150,8 +145,8 @@ class AIAgent:
       print(f"Loaded simulation checkpoint ({checkpoint_file})")
 
   def load_model(self):
-    model_file = self.sim_model_basename + str(self.ai_version) + '.' + self.sim_model_file_file_suffix
-    model_file = os.path.join(self.sim_model_dir, model_file)
+    model_file = str(self.ai_version) + self.sim_model_basename
+    model_file = os.path.join(self.sim_data_dir, model_file)
     if os.path.isfile(model_file):
       optimizer = self.trainer.optimizer
       self.model.load_model(optimizer, model_file)
@@ -165,20 +160,20 @@ class AIAgent:
 
   def save_checkpoint(self):
     # Save the simulation state
-    checkpoint_file = self.sim_checkpoint_basename + str(self.ai_version) + '.' + self.sim_checkpoint_file_suffix
-    checkpoint_file = os.path.join(self.sim_checkpoint_dir, checkpoint_file)
-    if not os.path.exists(self.sim_checkpoint_dir):
-      os.makedirs(self.sim_checkpoint_dir)
+    checkpoint_file = str(self.ai_version) + self.sim_checkpoint_basename
+    checkpoint_file = os.path.join(self.sim_data_dir, checkpoint_file)
+    if not os.path.exists(self.sim_data_dir):
+      os.makedirs(self.sim_data_dir)
     self.model.save_checkpoint(self.trainer.optimizer, checkpoint_file, self.game.num_games)
     print(f"Saved simulation checkpoint ({checkpoint_file})")
     self.save_sim_desc()
   
   def save_highscore(self, highscore):
     # Track when a new highscore is achieved
-    highscore_file = self.sim_highscore_basename + str(self.ai_version) + '.csv'
-    highscore_file = os.path.join(self.sim_metrics_dir, highscore_file)
-    if not os.path.exists(self.sim_metrics_dir):
-      os.makedirs(self.sim_metrics_dir)
+    highscore_file = str(self.ai_version) + self.sim_highscore_basename
+    highscore_file = os.path.join(self.sim_data_dir, highscore_file)
+    if not os.path.exists(self.sim_data_dir):
+      os.makedirs(self.sim_data_dir)
     if not os.path.exists(highscore_file):
       # Create a new highscore file
       with open(highscore_file, 'w') as file_handle:
@@ -191,19 +186,19 @@ class AIAgent:
 
   def save_model(self):
     # Save the simulation model
-    model_file = self.sim_model_basename + str(self.ai_version) + '.' + self.sim_model_file_file_suffix
-    model_file = os.path.join(self.sim_model_dir, model_file)
-    if not os.path.exists(self.sim_model_dir):
-      os.makedirs(self.sim_model_dir)
+    model_file = str(self.ai_version) + self.sim_model_basename
+    model_file = os.path.join(self.sim_data_dir, model_file)
+    if not os.path.exists(self.sim_data_dir):
+      os.makedirs(self.sim_data_dir)
     self.model.save_model(self.trainer.optimizer, model_file)
     print(f"Saved simulation model ({model_file})")
 
   def save_sim_desc(self):
     # Save a descrion of the simulation model
-    sim_desc_file = self.sim_desc_basename + str(self.ai_version) + '.txt'
-    sim_desc_file = os.path.join(self.sim_desc_dir, sim_desc_file)
-    if not os.path.exists(self.sim_desc_dir):
-      os.makedirs(self.sim_desc_dir)
+    sim_desc_file = str(self.ai_version) + self.sim_desc_basename
+    sim_desc_file = os.path.join(self.sim_data_dir, sim_desc_file)
+    if not os.path.exists(self.sim_data_dir):
+      os.makedirs(self.sim_data_dir)
     # Update the epsilon value
     self.set_config('epsilon_value', str(self.epsilon_value - self.n_games))
     self.set_config('num_games', str(self.n_games))

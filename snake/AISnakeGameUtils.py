@@ -32,7 +32,7 @@ def get_next_ai_version():
   If the file doesn't exist, write '2' to the file an return '1'.
   """
   ini = AISnakeGameConfig()
-  ai_version_file = ini.ai_version_file()
+  ai_version_file = ini.get('ai_version_file')
   ai_version_file = os.path.join(lib_dir, ai_version_file)
   if os.path.isfile(ai_version_file):
     file_handle = open(ai_version_file, 'r')
@@ -56,10 +56,10 @@ def get_sim_desc(ai_version):
   the simulation description file (e.g. models/sim_desc_v38.txt)
   """
   ini = AISnakeGameConfig()
-  sim_desc_basename = ini.sim_desc_basename()
-  sim_desc_dir = ini.sim_desc_dir()
-  sim_desc_file = sim_desc_basename + str(ai_version) + '.txt'
-  sim_desc_file = os.path.join(sim_desc_dir, sim_desc_file)
+  sim_desc_basename = ini.get('sim_desc_basename')
+  sim_data_dir = ini.get('sim_data_dir')
+  sim_desc_file = str(ai_version) + sim_desc_basename
+  sim_desc_file = os.path.join(sim_data_dir, sim_desc_file)
   if not os.path.isfile(sim_desc_file):
     print(f"ERROR: Unable to find simulation description file ({sim_desc_file}), exiting")
     sys.exit(1)

@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import torch.nn as nn
 from QTrainer import QTrainer
 import configparser
+import contextlib
 
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
@@ -26,8 +27,6 @@ from LinearQNet import Linear_QNet
 from AIAgent import AIAgent
 from SnakeGamePlots import plot
 from AISnakeGameUtils import get_new_model, get_sim_desc, get_next_ai_version
-
-ini = AISnakeGameConfig()
 
 def print_game_summary(ai_version, agent, score, record, game):
   print('Snake AI (v' + str(ai_version) + ') ' + \
@@ -41,12 +40,14 @@ def train(ai_version, new_sim_run):
   """
   This is the AI Snake Game main training loop.
   """
+  ini = AISnakeGameConfig()
+
   # Get a mew instance of the AI Snake Game
   game = AISnakeGame(ai_version)
   # The number of elements in the state map
-  in_features = ini.in_features()
+  in_features = ini.get('in_features')
   # The number of valid snake moves i.e. straight, left or right
-  out_features = ini.out_features()
+  out_features = ini.get('out_features')
 
   # Initialize the simulation metrics
   plot_scores = [] # Scores for each game
@@ -59,16 +60,16 @@ def train(ai_version, new_sim_run):
     config = configparser.ConfigParser()
     config['default'] = {
       'in_features': in_features,
-      'b1n': ini.b1_nodes(),
-      'b1l': ini.b1_layers(),
-      'b2n': ini.b2_nodes(),
-      'b2l': ini.b2_layers(),
-      'b3n': ini.b3_nodes(),
-      'b3l': ini.b3_layers(),
+      'b1n': ini.get('b1_nodes'),
+      'b1l': ini.get('b1_layers'),
+      'b2n': ini.get('b2_nodes'),
+      'b2l': ini.get('b2_layers'),
+      'b3n': ini.get('b3_nodes'),
+      'b3l': ini.get('b3_layers'),
       'out_features': out_features,
-      'enable_relu': ini.enable_relu(),
-      'epsilon_value': ini.epsilon_value(),
-      'initial_epsilon_value': ini.epsilon_value(),
+      'enable_relu': ini.get('enable_relu'),
+      'epsilon_value': ini.get('epsilon_value'),
+      'initial_epsilon_value': ini.get('epsilon_value'),
       'ai_version': ai_version
     }
     # Get a new model
@@ -133,7 +134,7 @@ def train(ai_version, new_sim_run):
         agent.save_checkpoint()
         game.sim_high_score = record
         agent.save_highscore(record)
-        agent.set_config('highscore', str(record))
+        agent.highscore = record
         if agent.max_score != 0 and score >= agent.max_score:
           agent.max_score_num_count += 1
         if agent.max_score != 0 and \
@@ -157,18 +158,21 @@ def train(ai_version, new_sim_run):
       plot_times.append(game.elapsed_time)
       mean_time = round(game.sim_time / agent.n_games, 1)
       plot_mean_times.append(mean_time)
-      plot(plot_scores, plot_mean_scores, plot_times, plot_mean_times, ai_version)
-      #plot2(fig, spec, plot_scores, plot_mean_scores, plot_times, plot_mean_times, AI_VERSION)
+
+      plot(plot_scores, plot_mean_scores, 
+           plot_times, plot_mean_times, 
+           ai_version)
 
 if __name__ == '__main__':
+  ini = AISnakeGameConfig()
   # Get the ai_version from a command line switch
-  ai_version = ini.ai_version()
+  ai_version = ini.get('ai_version')
   new_sim_run = True
   if ai_version:
     new_sim_run = False
   else:
     ### New AI Snake Game simulation...
-    b1_nodes = ini.b1_nodes()
+    b1_nodes = ini.get('b1_nodes')
     if not b1_nodes:
       print("ERROR: You need to provide the number of nodes for the initial Linear layer:")
       print("  Use the -b1n switch to do this")

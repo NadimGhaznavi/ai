@@ -22,12 +22,13 @@ from SnakeGameElement import Point
 pygame.init()
 
 # RGB colors
-WHITE = (255, 255, 255)
-RED = (200, 0, 0)
-BLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
-YELLOW = (255, 0, 255)
+WHITE = (255,255,255)
+RED = (200,0,0)
+BLUE = (0,0,255)
+GREEN = (0,255,0)
+YELLOW = (255,0,255)
 BLACK = (0,0,0)
+GREY = (25,25,25)
 
 # Size of the food blocks and snake segments
 BLOCK_SIZE = 20
@@ -50,16 +51,18 @@ class AISnakeGame():
     ini = AISnakeGameConfig()
         
     # This is so that our simulations are repeatable
-    random.seed(ini.random_seed())
+    random.seed(ini.get('random_seed'))
 
-    # Board Size
-    self.board_width = ini.board_width()
-    self.board_height = ini.board_height()
-
+    # Board size
+    self.board_width = ini.get('board_width')
+    self.board_height = ini.get('board_height')
+    
     # Game speed
-    self.game_speed = ini.game_speed()
+    self.game_speed = ini.get('game_speed')
 
     # Initialize the display
+    self.screen_width = self.board_width
+    self.screen_height = self.board_height
     self.display = pygame.display.set_mode((self.board_width, self.board_height))
     pygame.display.set_caption(GAME_TITLE + ' (v' + str(ai_version) + ')')
     self.clock = pygame.time.Clock()
@@ -70,7 +73,7 @@ class AISnakeGame():
     self.game_score = 0
     self.game_moves = 0
     self.lose_reason = 'N/A'
-    self.max_moves = ini.max_moves()
+    self.max_moves = ini.get('max_moves')
     self.num_games = 0
     self.score = 0
     self.sim_start_time = time.time()
@@ -81,8 +84,8 @@ class AISnakeGame():
     self.sim_snake_collision_count = 0
     self.sim_exceeded_max_moves_count = 0
     self.start_time = 0
-    self.sim_save_checkpoint_freq = ini.sim_save_checkpoint_freq()
-    self.status_iter = ini.status_iter()
+    self.sim_save_checkpoint_freq = ini.get('sim_save_checkpoint_freq')
+    self.status_iter = ini.get('status_iter')
 
   def is_snake_collision(self, pt=None):
     """
@@ -103,6 +106,7 @@ class AISnakeGame():
     # hits boundary
     if pt.x > self.board_width - BLOCK_SIZE or pt.x < 0 or \
       pt.y > self.board_height - BLOCK_SIZE or pt.y < 0:
+
       return True
     return False
 
@@ -316,14 +320,10 @@ class AISnakeGame():
     ## (Re)initialize the game state
     # The direction of the snake
     self.direction = Direction.RIGHT
-
-    # Start the snake in the middle of the board
     self.head = Point(self.board_width/2, self.board_height/2)
-    # Give the snake 3 segments at the beginning of the game
     self.snake = [self.head,
       Point(self.head.x-BLOCK_SIZE, self.head.y),
       Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
-    
     
     self.place_food()
 

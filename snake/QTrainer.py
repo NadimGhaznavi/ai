@@ -16,7 +16,7 @@ from AISnakeGameConfig import AISnakeGameConfig
 
 ini = AISnakeGameConfig()
 
-torch.manual_seed(ini.random_seed())
+torch.manual_seed(ini.get('random_seed'))
 
 class QTrainer:
   def __init__(self, model):
@@ -27,8 +27,8 @@ class QTrainer:
         * gamma - The gamma value
     """
     ini = AISnakeGameConfig()
-    self.lr = ini.learning_rate()
-    self.gamma = ini.discount()
+    self.lr = ini.get('learning_rate')
+    self.gamma = ini.get('discount')
     self.model = model
     self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
     # Mean Squared Error Loss... 
