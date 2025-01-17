@@ -87,6 +87,12 @@ class AISnakeGame():
     self.sim_save_checkpoint_freq = ini.get('sim_save_checkpoint_freq')
     self.status_iter = ini.get('status_iter')
 
+  def game_speed_decrease(self):
+    self.game_speed = self.game_speed - 1
+
+  def game_speed_increase(self):
+    self.game_speed = self.game_speed + 1
+
   def is_snake_collision(self, pt=None):
     """
     Check for collisions with the snake.
@@ -169,6 +175,11 @@ class AISnakeGame():
         self.print_status()
       if keys[pygame.K_m]:
         self.print_model()    
+      if keys[pygame.K_PLUS]:
+        self.game_speed_increase()
+      if keys[pygame.K_MINUS]:
+        self.game_speed_decrease()
+
 
   def place_food(self):
     x = random.randint(0, (self.board_width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
@@ -195,6 +206,10 @@ class AISnakeGame():
       self.print_status()
     if keys[pygame.K_m]:
       self.print_model()
+    if keys[pygame.K_PLUS]:
+      self.game_speed_increase()
+    if keys[pygame.K_MINUS]:
+      self.game_speed_decrease()
 
     # 2. move
     self.move(action) # update the head

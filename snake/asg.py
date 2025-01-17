@@ -132,9 +132,11 @@ def train(ai_version, new_sim_run):
     if done:
       # Train long memory
       game.reset()
-      
+      # Number of games the agent has played
       agent.n_games += 1
-      agent.nu_num_games_same_score += 1
+      # Increment number of games for the nu algorithm, this gets reset when a 
+      # new record is achieved.
+      agent.nu_num_games_same_score_count += 1
       # Implement the max_games feature where the simulation ends when the number 
       # of games reaches the max_games threashold
       if agent.max_games != 0 and agent.n_games == agent.max_games:
@@ -147,7 +149,15 @@ def train(ai_version, new_sim_run):
 
       agent.train_long_memory()
       if score > record:
-        agent.nu_num_games_same_score = 1
+        # We got a new high score, reset this counter
+        agent.nu_num_games_same_score_count = 0
+        # Reset this counter too (the number of times the AI got stuck)
+        agent.nu_num_games_same_score_reset_count = 0
+        # Reset the nu_value to nu_value_max to give the AI the full amount of
+        # random moves
+        agent.nu_value = agent.nu_value_max
+        agent.initial_nu_value = agent.nu_value_max
+
         record = score
         agent.save_checkpoint()
         game.sim_high_score = record
