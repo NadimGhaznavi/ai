@@ -30,10 +30,10 @@ from AISnakeGameUtils import get_new_model, get_sim_desc, get_next_ai_version
 
 def print_game_summary(ai_version, agent, score, record, game):
   print('Snake AI (v' + str(ai_version) + ') ' + \
-    'Game' + '{:>4}'.format(agent.n_games) + ', ' + \
+    'Game' + '{:>5}'.format(agent.n_games) + ', ' + \
     'Score' + '{:>4}'.format(score) + ', ' + \
-    'Record' + '{:>4}'.format(record) + ', ' + \
-    'Time ' + '{:>7}'.format(game.elapsed_time) + 's' + \
+    'Highscore' + '{:>4}'.format(record) + ', ' + \
+    'Time ' + '{:>6}'.format(game.elapsed_time) + 's' + \
     ' - ' + game.lose_reason)
 
 def train(ai_version, new_sim_run):
@@ -70,6 +70,8 @@ def train(ai_version, new_sim_run):
       'enable_relu': ini.get('enable_relu'),
       'epsilon_value': ini.get('epsilon_value'),
       'initial_epsilon_value': ini.get('epsilon_value'),
+      'initial_nu_score': ini.get('nu_score'),
+      'initial_nu_value': ini.get('nu_value'),
       'ai_version': ai_version
     }
     # Get a new model
@@ -83,15 +85,29 @@ def train(ai_version, new_sim_run):
 
   else:
     # A version was passed into this script
-    config = get_sim_desc(ai_version)
+    old_ai_version = ai_version
+    config = get_sim_desc(old_ai_version)
     model = get_new_model(config)
+    ai_version = get_next_ai_version()
+    game = AISnakeGame(ai_version)
     agent = AIAgent(game, model, config, ai_version)
     game.set_agent(agent)
     game.reset()
+    agent.ai_version = old_ai_version
     agent.load_checkpoint()
-    agent.n_games = int(config['default']['num_games'])
+    agent.ai_version = ai_version
     agent.epsilon_value = int(config['default']['epsilon_value'])
-
+    if agent.epsilon_value < 0:
+      agent.epsilon_value = 0
+    desc = configparser.ConfigParser()
+    desc_basename = ini.get('sim_desc_basename')
+    data_dir = ini.get('sim_data_dir')
+    desc_file = str(old_ai_version) + desc_basename
+    desc_file = os.path.join(data_dir, desc_file)
+    desc.read(desc_file)
+    agent.nu_score = int(desc['default']['nu_score'])
+    agent.nu_value = int(desc['default']['nu_value'])
+    
   total_score = 0 # Score for the current game
   record = 0 # Best score
   game.set_agent(agent) # Pass the agent to the game
@@ -137,17 +153,16 @@ def train(ai_version, new_sim_run):
         agent.highscore = record
         if agent.max_score != 0 and score >= agent.max_score:
           agent.max_score_num_count += 1
-        if agent.max_score != 0 and \
-          score > agent.max_score and \
-          agent.max_score_num_count >= agent.max_score_num:
+        if agent.max_score != 0 and score >= agent.max_score:
           # Exit the simulation if a score of max_score is achieved
-          lose_reason = "Achieved max_score value of " + str(agent.max_score) + \
-            " " + str(agent.max_score_num_count) + " times"
+          lose_reason = "Achieved max_score value of " + str(agent.max_score)
+            
           game.lose_reason = lose_reason
           agent.set_config('lose_reason', lose_reason)
           agent.save_sim_desc()
           print_game_summary(ai_version, agent, score, record, game)
           game.quit_game()
+        #" a total of " + str(agent.max_score_num_count) + " times"
 
       print_game_summary(ai_version, agent, score, record, game)
 

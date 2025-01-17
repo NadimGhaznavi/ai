@@ -49,6 +49,13 @@ class AIAgent:
     self.sim_desc_basename = ini.get('sim_desc_basename')
     self.trainer = QTrainer(self.model)
 
+    self.nu_value = ini.get('nu_value')
+    self.initial_nu_value = self.nu_value
+    self.nu_score = ini.get('nu_score')
+    self.initial_nu_score = self.nu_score
+    self.nu_count = 0
+    
+
     self.load_checkpoint() # Load the simulation state from file if it exists
     self.save_highscore(0) # Save the "game #, highscore" metrics
     
@@ -136,12 +143,11 @@ class AIAgent:
     return np.array(state, dtype=int)
 
   def load_checkpoint(self):
-    checkpoint_file = str(self.ai_version) + '_' + self.sim_checkpoint_basename
+    checkpoint_file = str(self.ai_version) + self.sim_checkpoint_basename
     checkpoint_file = os.path.join(self.sim_data_dir, checkpoint_file)
     if os.path.isfile(checkpoint_file):
       optimizer = self.trainer.optimizer
       self.model.load_checkpoint(optimizer, checkpoint_file)
-      #self.n_games = self.model['num_games']
       print(f"Loaded simulation checkpoint ({checkpoint_file})")
 
   def load_model(self):
@@ -201,11 +207,12 @@ class AIAgent:
       os.makedirs(self.sim_data_dir)
     # Update the epsilon value
     self.set_config('epsilon_value', str(self.epsilon_value - self.n_games))
+    self.set_config('nu_score', str(self.nu_score))
+    self.set_config('nu_value', str(self.nu_value))
     self.set_config('num_games', str(self.n_games))
     self.set_config('highscore', str(self.highscore))
     with open(sim_desc_file, 'w') as config_file:
       self.config.write(config_file)
-
     print(f"Saved simulation description ({sim_desc_file})")
 
   def set_config(self, key, value):
@@ -227,7 +234,8 @@ class AIAgent:
 
   def get_action(self, state):
     # Random move: exploration vs exploitation...
-    # The more games played, the less likely to explore
+
+    ## Epsilon - the more games played, the less likely to explore
     final_move = [0, 0, 0]
     epsilon = self.epsilon_value - self.n_games
     if random.randint(0, self.epsilon_value) < epsilon:
@@ -240,4 +248,38 @@ class AIAgent:
       prediction = self.model(state0)
       move = torch.argmax(prediction).item()
       final_move[move] = 1 
+
+    ## Nu - Inject random moves
+    nu = self.nu_value - self.nu_count
+    if nu == 0:
+      # nu has been depleted, re-initialize with higher nu score and nu value
+      self.nu_count = 0
+      self.nu_score += 1
+      self.initial_nu_value += 1
+      # nu value increased more as scores get higher
+      if self.highscore > 10:
+        self.initial_nu_value += 1
+      if self.highscore > 20:
+        self.initial_nu_value += 2
+      if self.highscore > 30:
+        self.initial_nu_value += 3
+      if self.highscore > 40:
+        self.initial_nu_value += 4
+      if self.highscore > 50:
+        self.initial_nu_value += 5
+      self.nu_value = self.initial_nu_value
+      print(f"Nu depleted. Re-initializing with nu value {self.nu_value}, nu score {self.nu_score}")
+
+    nu_rand = random.randint(0, nu)
+    if nu_rand < nu and self.game.score >= self.nu_score:
+      self.nu_count += 1
+      final_move = [0, 0, 0]
+      move = random.randint(0, 2)
+      final_move[move] = 1
+    else:
+      state0 = torch.tensor(state, dtype=torch.float)
+      prediction = self.model(state0)
+      move = torch.argmax(prediction).item()
+      final_move[move] = 1 
+ 
     return final_move
