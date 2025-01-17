@@ -34,6 +34,7 @@ class AISnakeGameConfig():
     parser.add_argument('-msn', '--max_score_num', type=int, default=0, help='Exit the simulation if a score of max_score is achieved max_num times.')
     parser.add_argument('-ns', '--nu_score', type=int, default=0, help='The nu algorithm is triggered when the score exceeds nu_score.')
     parser.add_argument('-nv', '--nu_value', type=int, default=0, help='The initial amount of randomness the nu algorithm injects.')
+    parser.add_argument('-nvm', '--nu_value_max', type=int, default=0, help='Number of random moves to add to the nu pool if nu_num_games_same_score_count_max is exceeded')
     parser.add_argument('-s', '--speed', type=int, default=0, help='Set the game speed.')
     parser.add_argument('-sd', '--sim_data_dir', type=str, default=None, help='Set a custom directory to store simulation results.')
     parser.add_argument('-v', '--ai_version', type=int, default=None, help='Load a previous simulation with version ai_version.')
@@ -75,6 +76,8 @@ class AISnakeGameConfig():
       default['nu_score'] = str(args.nu_score)
     if args.nu_value:
       default['nu_value'] = str(args.nu_value)
+    if args.nu_value_max:
+      default['nu_value_max'] = str(args.nu_value_max)
     if args.speed:
       default['game_speed'] = str(args.speed)
     if args.ai_version:
@@ -99,7 +102,7 @@ class AISnakeGameConfig():
                       'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
                       'max_score_num', 'out_features', 'random_seed', 'score_height', 
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
-                      'nu_score', 'nu_value']
+                      'nu_score', 'nu_value', 'nu_value_max']
     # Key/value pairs where the value is a float
     float_values = ['discount', 'learning_rate']
     # Key/value pairs where the value is a boolean

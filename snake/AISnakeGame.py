@@ -278,8 +278,10 @@ class AISnakeGame():
     print(f"Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
     print(f"Wall collision count     : {self.sim_wall_collision_count}")
     print(f"Snake collision count    : {self.sim_snake_collision_count}")
+    print(f"NU value                 : {self.agent.nu_value}")
+    print(f"NU score                 : {self.agent.nu_score}")
     print(f"Average game score       : {self.avg_game_score}")
-    print(f"Average game time        : {self.avg_game_time}")
+    print(f"Average game time        : {self.avg_game_time} sec")
 
   def quit_game(self):
     self.sim_score += self.score

@@ -55,7 +55,7 @@ class AIAgent:
     self.initial_nu_score = self.nu_score
     self.nu_count = 0
     # Number of random moves we impose with the nu algorithm
-    self.nu_value_max = 60
+    self.nu_value_max = ini.get('nu_value_max')
     
     # Counter to track how many games were played without improvement
     self.nu_num_games_same_score_count = 0
@@ -66,7 +66,7 @@ class AIAgent:
     self.nu_num_games_same_score_reset_count = 0
     # If the nu_num_games_same_score_reset_count is higher than this "max", then 
     # reduce the nu_score by one
-    self.nu_num_games_same_score_reset_count_max = 10
+    self.nu_num_games_same_score_reset_count_max = 3
 
     self.load_checkpoint() # Load the simulation state from file if it exists
     self.save_highscore(0) # Save the "game #, highscore" metrics
@@ -279,13 +279,13 @@ class AIAgent:
       else:
         # Set maximum initial_nu_value to nu_value_max
         self.initial_nu_value = self.nu_value_max
-      print(f"Nu depleted. Re-initializing with nu value {self.nu_value}, nu threshold score {self.nu_score}")
+      print(f"Random move pool depleted, adding {self.nu_value} moves to the random pool and setting nu_score to {self.nu_score}")
     
     if self.nu_num_games_same_score_count >= self.nu_num_games_same_score_count_max:
       # Track how many times we've been here (AI is stuck)
       self.nu_num_games_same_score_reset_count += 1
       num_games_no_learning = self.nu_num_games_same_score_reset_count * self.nu_num_games_same_score_count_max
-      print(f"AI played {num_games_no_learning} games without improvement, injecting {self.nu_value_max} random moves")
+      print(f"AI played {num_games_no_learning} games without improvement, adding {self.nu_value_max} random moves to the nu pool")
       # Reset the nu_num_games_same_score_count counter
       self.nu_num_games_same_score_count = 0
       # -and reset the nu_value to nu_value_max
@@ -294,8 +294,9 @@ class AIAgent:
       if self.nu_num_games_same_score_reset_count >= self.nu_num_games_same_score_reset_count_max:
         # We've allowed the AI to try nu_num_games_same_score_reset_count_max times with the 
         # current nu_score. Reduce the nu_score.
-        print(f"AI seems stuck with nu_score at {self.nu_score}, reducing nu_score by one")
-        self.nu_score -= 1
+        if self.nu_score > 2:
+          print(f"AI seems stuck with nu_score at {self.nu_score}, reducing nu_score by one")
+          self.nu_score -= 1
 
       
     nu_rand = random.randint(0, nu)
