@@ -54,7 +54,7 @@ class AIAgent:
     self.nu_score = ini.get('nu_score')
     self.initial_nu_score = self.nu_score
     self.nu_count = 0
-    
+    self.nu_num_games_same_score = 1
 
     self.load_checkpoint() # Load the simulation state from file if it exists
     self.save_highscore(0) # Save the "game #, highscore" metrics
@@ -253,22 +253,27 @@ class AIAgent:
     nu = self.nu_value - self.nu_count
     if nu == 0:
       # nu has been depleted, re-initialize with higher nu score and nu value
+      self.nu_num_games_same_score = 1
       self.nu_count = 0
       self.nu_score += 1
       self.initial_nu_value += 1
-      # nu value increased more as scores get higher
+      # nu value increases by 2 if the scoreis 10+
       if self.highscore > 10:
         self.initial_nu_value += 1
-      if self.highscore > 20:
-        self.initial_nu_value += 2
-      if self.highscore > 30:
-        self.initial_nu_value += 3
-      if self.highscore > 40:
-        self.initial_nu_value += 4
-      if self.highscore > 50:
-        self.initial_nu_value += 5
-      self.nu_value = self.initial_nu_value
-      print(f"Nu depleted. Re-initializing with nu value {self.nu_value}, nu score {self.nu_score}")
+      if self.initial_nu_value > 40:
+        self.initial_nu_value = 40
+      else:
+        self.nu_value = self.initial_nu_value
+      print(f"Nu depleted. Re-initializing with nu value {self.nu_value}, nu threshold score {self.nu_score}")
+    
+    if self.nu_num_games_same_score >= 30:
+      print(f"AI played 30 games without improvement, forcing it back into learning mode")
+      self.nu_num_games_same_score = 1
+      if self.nu_score > 30:
+        print(f"Reducing nu threshold score by 1")
+        self.nu_score -= 1
+      self.initial_nu_value = 40
+      self.nu_value = 40
 
     nu_rand = random.randint(0, nu)
     if nu_rand < nu and self.game.score >= self.nu_score:
