@@ -53,7 +53,8 @@ def get_next_ai_version():
 def get_sim_desc(ai_version):
   """
   Get the key/value pairs that desribe a simulation run from 
-  the simulation description file (e.g. models/sim_desc_v38.txt)
+  the simulation description file (e.g. models/sim_desc_v38.txt).
+  The file is in configparser.ConfigParser() format.
   """
   ini = AISnakeGameConfig()
   sim_desc_basename = ini.get('sim_desc_basename')

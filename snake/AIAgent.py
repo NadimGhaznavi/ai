@@ -19,6 +19,8 @@ from QTrainer import QTrainer
 from SnakeGameElement import Direction
 from SnakeGameElement import Point
 from AISnakeGameUtils import get_sim_desc
+from EpsilonAlgo import EpsilonAlgo
+from NuAlgo import NuAlgo
 
 class AIAgent:
   def __init__(self, game, model, config, ai_version):
@@ -29,7 +31,6 @@ class AIAgent:
     self.ai_version = ai_version
 
     self.batch_size = ini.get('batch_size')
-    self.epsilon_value = ini.get('epsilon_value') # Epsilon value, for exploration (i.e. vs exploitation)
     self.gamma = ini.get('discount') # Discount rate, for future rewards
     self.highscore = 0
 
@@ -49,25 +50,12 @@ class AIAgent:
     self.sim_desc_basename = ini.get('sim_desc_basename')
     self.trainer = QTrainer(self.model)
 
-    self.nu_value = ini.get('nu_value')
-    self.initial_nu_value = self.nu_value
-    self.nu_score = ini.get('nu_score')
-    self.initial_nu_score = self.nu_score
-    self.nu_count = 0
-    # Number of random moves we impose with the nu algorithm
-    self.nu_value_max = ini.get('nu_value_max')
-    
-    # Counter to track how many games were played without improvement
-    self.nu_num_games_same_score_count = 0
-    # If this many games were played, then reset the nu_value to nu_value_max
-    self.nu_num_games_same_score_count_max = 30
-    # Counter to track how many times the nu_num_games_same_score_count_max threshold
-    # has been reached
-    self.nu_num_games_same_score_reset_count = 0
-    # If the nu_num_games_same_score_reset_count is higher than this "max", then 
-    # reduce the nu_score by one
-    self.nu_num_games_same_score_reset_count_max = 3
+    # Nu Algorithm for exploration/exploitation
+    self.nu_algo = NuAlgo()
 
+    # Epsilon Algorithm for exploration/exploitation
+    self.epsilon_algo = EpsilonAlgo()
+    
     self.load_checkpoint() # Load the simulation state from file if it exists
     self.save_highscore(0) # Save the "game #, highscore" metrics
     
@@ -218,9 +206,9 @@ class AIAgent:
     if not os.path.exists(self.sim_data_dir):
       os.makedirs(self.sim_data_dir)
     # Update the epsilon value
-    self.set_config('epsilon_value', str(self.epsilon_value - self.n_games))
-    self.set_config('nu_score', str(self.nu_score))
-    self.set_config('nu_value', str(self.nu_value))
+    self.set_config('epsilon_value', str(self.epsilon_algo.get_epsilon()))
+    self.set_config('nu_score', str(self.nu_algo.get_nu_score()))
+    self.set_config('nu_value', str(self.nu_algo.get_nu_value()))
     self.set_config('num_games', str(self.n_games))
     self.set_config('highscore', str(self.highscore))
     with open(sim_desc_file, 'w') as config_file:
@@ -245,70 +233,20 @@ class AIAgent:
     self.trainer.train_step(state, action, reward, next_state, done)
 
   def get_action(self, state):
-    # Random move: exploration vs exploitation...
-
-    ## Epsilon - the more games played, the less likely to explore
-    final_move = [0, 0, 0]
-    epsilon = self.epsilon_value - self.n_games
-    if random.randint(0, self.epsilon_value) < epsilon:
-      # Random move based on the epsilon value
-      final_move = [0, 0, 0]
-      move = random.randint(0, 2)
-      final_move[move] = 1
-    else:
-      state0 = torch.tensor(state, dtype=torch.float)
-      prediction = self.model(state0)
-      move = torch.argmax(prediction).item()
-      final_move[move] = 1 
-
-    ## Nu - Inject random moves
-    nu = self.nu_value - self.nu_count
-    if nu == 0:
-      # nu has been depleted, re-initialize with higher nu score and nu value
-      self.nu_num_games_same_score = 1
-      self.nu_count = 0
-      self.nu_score += 1
-      self.initial_nu_value += 1
-      # nu value increases by 2 if the scoreis 10+
-      if self.highscore > 10:
-        self.initial_nu_value += 1
-      
-      if self.initial_nu_value < self.nu_value_max:
-        # Increased nu_value...
-        self.nu_value = self.initial_nu_value
-      else:
-        # Set maximum initial_nu_value to nu_value_max
-        self.initial_nu_value = self.nu_value_max
-      print(f"Random move pool depleted, adding {self.nu_value} moves to the random pool and setting nu_score to {self.nu_score}")
+    # Epsilon exploration
+    random_move = self.epsilon_algo.get_move()
+    if random_move:
+      return random_move
     
-    if self.nu_num_games_same_score_count >= self.nu_num_games_same_score_count_max:
-      # Track how many times we've been here (AI is stuck)
-      self.nu_num_games_same_score_reset_count += 1
-      num_games_no_learning = self.nu_num_games_same_score_reset_count * self.nu_num_games_same_score_count_max
-      print(f"AI played {num_games_no_learning} games without improvement, adding {self.nu_value_max} random moves to the nu pool")
-      # Reset the nu_num_games_same_score_count counter
-      self.nu_num_games_same_score_count = 0
-      # -and reset the nu_value to nu_value_max
-      self.initial_nu_value = self.nu_value_max
-      self.nu_value = self.nu_value_max
-      if self.nu_num_games_same_score_reset_count >= self.nu_num_games_same_score_reset_count_max:
-        # We've allowed the AI to try nu_num_games_same_score_reset_count_max times with the 
-        # current nu_score. Reduce the nu_score.
-        if self.nu_score > 2:
-          print(f"AI seems stuck with nu_score at {self.nu_score}, reducing nu_score by one")
-          self.nu_score -= 1
-
+    # Nu exploration
+    random_move = self.nu_algo.get_move(self.game.score)
+    if random_move:
+      return random_move
+    
+    final_move = [0, 0, 0]
+    state0 = torch.tensor(state, dtype=torch.float)
+    prediction = self.model(state0)
+    move = torch.argmax(prediction).item()
+    final_move[move] = 1 
       
-    nu_rand = random.randint(0, nu)
-    if nu_rand < nu and self.game.score >= self.nu_score:
-      self.nu_count += 1
-      final_move = [0, 0, 0]
-      move = random.randint(0, 2)
-      final_move[move] = 1
-    else:
-      state0 = torch.tensor(state, dtype=torch.float)
-      prediction = self.model(state0)
-      move = torch.argmax(prediction).item()
-      final_move[move] = 1 
- 
     return final_move
