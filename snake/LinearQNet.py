@@ -162,6 +162,7 @@ class Linear_QNet(nn.Module):
 
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
+    print("============ Neural Network Architecture =============")
     print("Blocks       Nodes   Layers  Total  Nodes")
     print("------------------------------------------------------")
     print("Input block  {:>5} {:>8} {:>13}".format(self.in_features, 1, self.in_features))
@@ -180,13 +181,36 @@ class Linear_QNet(nn.Module):
     """
     return self.main_block(x)
   
-  def insert_layer(self):
-    print("LinearQNet: Inserting new layer")
+  def insert_layer(self, block_num):
+    # Insert the new layer
+    print(f"LinearQNet: Inserting new B{block_num} layer")
     print("----- Before -------------------------------------------------")
     self.ascii_print()
+
     self.main_block[0].append(nn.ReLU())
-    self.main_block[0].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
-    self.b1_layers += 1
+
+    if block_num == 1:
+      self.b1_layers += 1
+      self.main_block[0].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
+
+    elif block_num == 2:
+      self.b2_layers += 1
+      self.main_block[0].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b2_nodes))
+      # Replace the output block, because the output layer shape needs to match the new B2 layer
+      self.main_block[1] = nn.Sequential()
+      # Insert a new layer with the right shape
+      self.main_block[1].append(nn.ReLU())
+      self.main_block[1].append(nn.Linear(in_features=self.b2_nodes, out_features=self.out_features))
+
+    elif block_num == 3:
+      self.b3_layers += 1
+      self.main_block[0].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b3_nodes))
+      # Replace the output block, because the output layer shape needs to match the new B2 layer
+      self.main_block[1] = nn.Sequential()
+      # Insert a new layer with the right shape
+      self.main_block[1].append(nn.ReLU())
+      self.main_block[1].append(nn.Linear(in_features=self.b3_nodes, out_features=self.out_features))
+
     print("----- After --------------------------------------------------")
     self.ascii_print()
     

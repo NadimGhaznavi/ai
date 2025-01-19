@@ -135,12 +135,16 @@ def train(ai_version, new_sim_run):
     # Remember
     agent.remember(state_old, final_move, reward, state_new, done)
     if done:
-      if agent.new_layer_score > 0 and \
-        score >= agent.new_layer_score and \
-        not agent.new_layer_added_flag:
-        # Add a new B1 layer
-        agent.new_layer_added()
-        agent.model.insert_layer()
+      # Add a new layer when a specific score is reached
+      if agent.b1_score > 0 and score >= agent.b1_score:
+        agent.b1_score = 0
+        agent.model.insert_layer(1)
+      if agent.b2_score > 0 and score >= agent.b2_score:
+        agent.b2_score = 0
+        agent.model.insert_layer(2)
+      if agent.b3_score > 0 and score >= agent.b3_score:
+        agent.b3_score = 0
+        agent.model.insert_layer(3)
         
       agent.epsilon_algo.played_game()
       agent.nu_algo.played_game(score)

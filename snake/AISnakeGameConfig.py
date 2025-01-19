@@ -24,10 +24,13 @@ class AISnakeGameConfig():
     parser = argparse.ArgumentParser(description='AI Snake Game')
     parser.add_argument('-b1n', '--b1_nodes', type=int, help='Number of nodes in the first block 1 layer.')
     parser.add_argument('-b1l', '--b1_layers', type=int, default=1, help='Number of hidden block 1 layers.')
+    parser.add_argument('-b1s', '--b1_score', type=int, default=0, help='Insert a B1 layer when reaching this score.')
     parser.add_argument('-b2n', '--b2_nodes', type=int, default=0, help='Number of nodes in the hidden block 2 layer(s).')
     parser.add_argument('-b2l', '--b2_layers', type=int, default=0, help='Number of hidden block 2 layers.')
+    parser.add_argument('-b2s', '--b2_score', type=int, default=0, help='Insert a B2 layer when reaching this score.')
     parser.add_argument('-b3n', '--b3_nodes', type=int, default=0, help='Number of nodes in the block 3 hidden layer(s).')
     parser.add_argument('-b3l', '--b3_layers', type=int, default=0, help='Number of block 3 hidden layers.')
+    parser.add_argument('-b3s', '--b3_score', type=int, default=0, help='Insert a B3 layer when reaching this score.')
     parser.add_argument('-e', '--epsilon', type=int, help='Epsilon value for exploration.')
     parser.add_argument('-mg', '--max_games', type=int, default=0, help='Exit the simulation after max_games games.')
     parser.add_argument('-ms', '--max_score', type=int, default=0, help='Exit the simulation if a score of max_score is achieved.')
@@ -55,15 +58,21 @@ class AISnakeGameConfig():
     if args.b1_nodes:
       default['b1_nodes'] = str(args.b1_nodes)
     if args.b1_layers:
-      default['b1_layers'] = str(args.b1_layers)
+      default['b1_layers'] = str(args.b1_layers)    
+    if args.b1_score:
+      default['b1_score'] = str(args.b1_score)    
     if args.b2_nodes:
       default['b2_nodes'] = str(args.b2_nodes)
     if args.b2_layers:
       default['b2_layers'] = str(args.b2_layers)
+    if args.b2_score:
+      default['b2_score'] = str(args.b2_score)    
     if args.b3_nodes:
       default['b3_nodes'] = str(args.b3_nodes)
     if args.b3_layers:
       default['b3_layers'] = str(args.b3_layers)
+    if args.b3_score:
+      default['b3_score'] = str(args.b3_score)    
     if args.sim_data_dir:
       default['sim_data_dir'] = args.sim_data_dir
     if args.epsilon:
@@ -102,8 +111,9 @@ class AISnakeGameConfig():
     function with the appropriate key names.
     """
     # Key/value pairs where the value is an integer
-    integer_values = ['ai_version', 'b1_nodes', 'b1_layers', 'b2_nodes', 'b2_layers', 
-                      'b3_nodes', 'b3_layers', 'batch_size', 'board_border', 'board_height', 
+    integer_values = ['ai_version', 'b1_nodes', 'b1_layers', 'b1_score', 'b2_nodes', 
+                      'b2_layers', 'b2_score', 'b3_nodes', 'b3_layers', 'b3_score', 
+                      'batch_size', 'board_border', 'board_height',
                       'board_width', 'epsilon_value', 'game_speed', 'in_features', 
                       'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
                       'max_score_num', 'out_features', 'random_seed', 'score_height', 

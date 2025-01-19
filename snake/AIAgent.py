@@ -30,10 +30,13 @@ class AIAgent:
     self.config = config
     self.ai_version = ai_version
 
+    self.b1_score = ini.get('b1_score')
+    self.b2_score = ini.get('b2_score')
+    self.b3_score = ini.get('b3_score')
+
     self.batch_size = ini.get('batch_size')
     self.gamma = ini.get('discount') # Discount rate, for future rewards
     self.highscore = 0
-
     self.last_dirs = [ 0, 0, 1, 0 ]
     self.learning_rate = ini.get('learning_rate')
     self.max_games = ini.get('max_games')
@@ -43,8 +46,6 @@ class AIAgent:
     self.memory = deque(maxlen=ini.get('max_memory'))
     self.n_games = 0 # Number of games played
     self.n_games_buf = -1
-    self.new_layer_score = ini.get('new_layer_score')
-    self.new_layer_added_flag = False
     self.random_move_count = 0
     self.sim_checkpoint_basename = ini.get('sim_checkpoint_basename')
     self.sim_checkpoint_verbose = ini.get('sim_checkpoint_verbose')
