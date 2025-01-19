@@ -6,6 +6,7 @@ injects random moves at the beginning of the simulation. The amount of moves
 is controlled by the epsilon_value parameter which is in the AISnakeGame.ini and
 can also be passed in when invoking the main asg.py front end.
 """
+import random
 from random import randint
 import os, sys
 
@@ -16,6 +17,8 @@ from AISnakeGameConfig import AISnakeGameConfig
 class EpsilonAlgo():
   def __init__(self):
     ini = AISnakeGameConfig()
+    # Set this random seed so things are repeatable
+    random.seed(ini.get('random_seed')) 
     self.epsilon_value = ini.get('epsilon_value')
     self.epsilon = self.epsilon_value
     self.num_games = 0

@@ -34,10 +34,10 @@ def print_game_summary(ai_version, agent, score, record, game):
     'Score' + '{:>4}'.format(score) + ', ' + \
     'Highscore' + '{:>4}'.format(record) + ', ' + \
     'Time ' + '{:>6}'.format(game.elapsed_time) + 's' + \
-    ', nu score ' + str(agent.nu_algo.get_nu_score()) + \
+    ', NuAlgo: score ' + str(agent.nu_algo.get_nu_score()) + \
     ', pool ' + str(agent.nu_algo.get_nu_value()) + \
-    ', reset count ' + str(agent.nu_algo.get_nu_refill_count()) + \
-    ', bad game count ' + str(agent.nu_algo.get_bad_game_count()) + \
+    ', reset# ' + str(agent.nu_algo.get_nu_refill_count()) + \
+    ', bad game# ' + str(agent.nu_algo.get_bad_game_count()) + \
     ' - ' + game.lose_reason)
 
 def train(ai_version, new_sim_run):
@@ -135,7 +135,11 @@ def train(ai_version, new_sim_run):
     # Remember
     agent.remember(state_old, final_move, reward, state_new, done)
     if done:
-      if agent.new_layer_score > 0 and score > agent.new_layer_score:
+      if agent.new_layer_score > 0 and \
+        score >= agent.new_layer_score and \
+        not agent.new_layer_added_flag:
+        # Add a new B1 layer
+        agent.new_layer_added()
         agent.model.insert_layer()
         
       agent.epsilon_algo.played_game()

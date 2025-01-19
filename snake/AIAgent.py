@@ -44,6 +44,7 @@ class AIAgent:
     self.n_games = 0 # Number of games played
     self.n_games_buf = -1
     self.new_layer_score = ini.get('new_layer_score')
+    self.new_layer_added_flag = False
     self.random_move_count = 0
     self.sim_checkpoint_basename = ini.get('sim_checkpoint_basename')
     self.sim_checkpoint_verbose = ini.get('sim_checkpoint_verbose')
@@ -161,6 +162,10 @@ class AIAgent:
       optimizer = self.trainer.optimizer
       self.model.load_model(optimizer, model_file)
       print(f"Loaded simulation model ({model_file})")
+
+  def new_layer_added(self):
+    # Flag this event so a new layer doesn't get added again
+    self.new_layer_added_flag = True
 
   def remember(self, state, action, reward, next_state, done):
     # Store the state, action, reward, next_state, and done in memory

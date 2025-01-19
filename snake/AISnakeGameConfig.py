@@ -108,7 +108,8 @@ class AISnakeGameConfig():
                       'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
                       'max_score_num', 'out_features', 'random_seed', 'score_height', 
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
-                      'new_layer_score', 'nu_bad_games', 'nu_score', 'nu_value']
+                      'new_layer_score', 'nu_bad_games', 'nu_max_zero_scores', 
+                      'nu_score', 'nu_value']
     # Key/value pairs where the value is a float
     float_values = ['discount', 'learning_rate']
     # Key/value pairs where the value is a boolean

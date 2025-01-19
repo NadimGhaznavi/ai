@@ -25,6 +25,7 @@ and can also be overriden with command line switches when you execute the main
 asg.py front end script.
 """
 import sys, os
+import random
 from random import randint
 
 lib_dir = os.path.dirname(__file__)
@@ -38,34 +39,40 @@ class NuAlgo():
   def __init__(self):
     # Constructor
     ini = AISnakeGameConfig()
+    # Set this random seed so things are repeatable
+    random.seed(ini.get('random_seed')) 
     self.nu_value = ini.get('nu_value') # 60
     self.nu_score = ini.get('nu_score') # 1
     self.nu_bad_games = ini.get('nu_bad_games') # 25
-    self.bad_game_count = 0
+    # Number of games in a row with a score of zero
+    self.max_zero_scores = ini.get('nu_max_zero_scores') 
+    self.bad_game_count = 0 # counter for nu_bad_games
     self.nu = self.nu_value # Size of the random move pool
-    self.rand_moves_in_game = 0
+    self.max_rand_moves = 20 # Maximum number of random moves in a game
+    self.max_rand_moves_count = 0 # Counter for max_rand_moves
     # How many times the nu pool has been refilled without finding a high score
     self.nu_refill_count = 0
-    # The last 10 game scores
-    self.max_zero_scores = 15
+    self.rand_moves_in_game = 0 # Number of random moves injected in a game
     self.game_scores = deque(maxlen=self.max_zero_scores)
     print(f"NuAlgo: New instance with nu value of {self.nu_value}, and a threshold score of {self.nu_score}")
 
   def get_move(self, cur_score):
-    if cur_score < self.nu_score :
+    if cur_score < self.nu_score:
       # Current game score too low to inject random moves
       return False
     
     rand_num = randint(0, self.nu_value)
+
     if rand_num >= self.nu:
       # No random move generated
       return False 
     
-    if randint(0,9) == 7:
+    if self.max_rand_moves_count < self.max_rand_moves:
+      self.max_rand_moves_count += 1
+      self.rand_moves_in_game += 1
       rand_move = [ 0, 0, 0 ]
       rand_idx = randint(0, 2)
       rand_move[rand_idx] = 1
-      self.rand_moves_in_game += 1
       # Reduce the size of the nu pool
       self.nu -= 1
       return rand_move
@@ -79,8 +86,15 @@ class NuAlgo():
     print(f"NuAlgo: New high score, increasing nu_score to {score} and refilling pool to {self.nu}")
 
   def played_game(self, cur_score):
+    self.max_rand_moves_count = 0
     self.cur_score = cur_score
     self.game_scores.append(cur_score)
+    if cur_score > self.nu_score:
+      self.nu_score = cur_score
+      self.nu = self.nu_value
+      self.nu_refill_count = 0
+      self.bad_game_count = 0
+      print(f"NuAlgo: Setting nu_score to current score {self.nu_score}, refilling the pool {self.nu}")
     if self.rand_moves_in_game > 0:
       print(f"NuAlgo: Injected {self.rand_moves_in_game} random moves, pool size {self.nu}, nu_score is {self.nu_score}")
       self.rand_moves_in_game = 0
@@ -90,30 +104,27 @@ class NuAlgo():
 
     if self.bad_game_count == self.nu_bad_games and self.nu_refill_count == 0:
       # nu_bad_games has been exceeded without finding a new high score
-      print(f"NuAlgo: Played {self.bad_game_count} games without finding a new high score, refilling the pool")
-      self.nu = self.nu_value
+      print(f"NuAlgo: Played {self.bad_game_count} games without finding a new high score")
       # Increment this counter
       self.nu_refill_count += 1
       self.bad_game_count = 0
 
     elif self.bad_game_count == self.nu_bad_games and self.nu_refill_count == 1:
       total_bad_games = self.nu_bad_games * 2
-      if self.nu_score > 2:
-        # Make sure we don't set nu_score below 1
+      if self.nu_score > 0:
+        # Make sure we don't set nu_score below 0
         self.nu_score -= 1
       print(f"NuAlgo: Played {total_bad_games} games without finding a new highscore, refilling the pool and setting nu_score to {self.nu_score}")
       self.nu = self.nu_value
       self.nu_refill_count += 1
       self.bad_game_count = 0
 
-    elif self.bad_game_count == self.nu_bad_games and self.nu_refill_count == 2:
+    elif self.bad_game_count == self.nu_bad_games and self.nu_refill_count > 1:
       total_bad_games = self.bad_game_count * 3
-      # Do a radical reset of the nu_score, set it to the score of the current game
-      self.nu_score = self.cur_score
-      if self.nu_score == 0:
-        self.nu_score = 1
+      # Start dropping the nu_score by a faster factor: by self.nu_refill_count
+      self.nu_score -= self.nu_refill_count
       self.nu = self.nu_value
-      self.nu_refill_count = 0
+      self.nu_refill_count += 1
       self.bad_game_count = 0     
       print(f"NuAlgo: Played {total_bad_games} games without finding a new highscore, refilling the pool and setting nu_score to {self.nu_score}")
 
@@ -125,7 +136,7 @@ class NuAlgo():
           all_zeros = False
       if all_zeros:
         self.nu = self.nu_value
-        self.nu_score = 1
+        self.nu_score = 0
         self.nu_refill_count = 0
         self.bad_game_count = 0
         self.game_scores = deque(maxlen=self.max_zero_scores)
