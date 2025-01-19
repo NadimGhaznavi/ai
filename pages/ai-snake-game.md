@@ -6,7 +6,7 @@ title: AI Snake Game
 
 This project is based on the classic *Snake Game* where the player uses the arrow keys to control a snake.
 
-![AI Snake Game Screenshot](/images/snake/ai_snake_game.png)
+![AI Snake Game Screenshot](/assets/images/snake/ai_snake_game.png)
 
 
 
