@@ -6,6 +6,15 @@ title: AI Snake Game
 
 * [Introduction and Scope](#introduction-and-scope)
 * [My Motivation](#my-motivation)
+* [Technical Components](#technical-components)
+* [Environment Setup](#environment-setup)
+* [Running the Snake Game](#running-the-snake-game)
+* [Running the AI Snake Game](#running-the-ai-snake-game)
+* [AI Snake Game Keyboard Shortcuts](#ai-snake-game-keyboard-shortcuts)
+* [Codebase Architecture](#codebase-architecture)
+* [Command Line Options](#command-line-options)
+* [Matplotlib Game Score Plot](#matplotlib-game-score-plot)
+* [Credits and Acknowledgements](#credits-and-acknowledgements)
 
 ## Introduction and Scope
 
