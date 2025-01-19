@@ -11,5 +11,5 @@ that I'm working on.
 
 This is my first project:
 
-* [AI Snake Game](ai/index.html)
+* [AI Snake Game](ai/)
 
