@@ -23,7 +23,6 @@ def get_new_model(config):
     int(config['default']['b2n']), int(config['default']['b2l']), 
     int(config['default']['b3n']), int(config['default']['b3l']), 
     int(config['default']['out_features']),
-    bool(config['default']['enable_relu']),
     int(config['default']['ai_version']))
 
 def get_next_ai_version():

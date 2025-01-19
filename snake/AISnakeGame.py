@@ -67,6 +67,9 @@ class AISnakeGame():
     pygame.display.set_caption(GAME_TITLE + ' (v' + str(ai_version) + ')')
     self.clock = pygame.time.Clock()
 
+    # Display periodic status message
+    self.print_stats = ini.get('print_stats')
+    
     # Simulation metrics
     self.elapsed_time = 0
     self.food = None
@@ -88,10 +91,10 @@ class AISnakeGame():
     self.status_iter = ini.get('status_iter')
 
   def game_speed_decrease(self):
-    self.game_speed = self.game_speed - 1
+    self.game_speed = self.game_speed - 10
 
   def game_speed_increase(self):
-    self.game_speed = self.game_speed + 1
+    self.game_speed = self.game_speed + 10
 
   def is_snake_collision(self, pt=None):
     """
@@ -271,16 +274,17 @@ class AISnakeGame():
     """
     Print simulation metrics.
     """
-    print(f"Total simulation time    : {self.total_sim_time}")
-    print(f"Total number of games    : {self.num_games}")
-    print(f"High score               : {self.sim_high_score}")
-    print(f"Total simulation score   : {self.sim_score}")
-    print(f"Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
-    print(f"Wall collision count     : {self.sim_wall_collision_count}")
-    print(f"Snake collision count    : {self.sim_snake_collision_count}")
-    #print(f"Nu algorithm score       : {self.agent.nu_algo.get_nu_score()}")
-    print(f"Average game score       : {self.avg_game_score}")
-    print(f"Average game time        : {self.avg_game_time} sec")
+    if self.print_stats:
+      print(f"Total simulation time    : {self.total_sim_time}")
+      print(f"Total number of games    : {self.num_games}")
+      print(f"High score               : {self.sim_high_score}")
+      print(f"Total simulation score   : {self.sim_score}")
+      print(f"Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
+      print(f"Wall collision count     : {self.sim_wall_collision_count}")
+      print(f"Snake collision count    : {self.sim_snake_collision_count}")
+      #print(f"Nu algorithm score       : {self.agent.nu_algo.get_nu_score()}")
+      print(f"Average game score       : {self.avg_game_score}")
+      print(f"Average game time        : {self.avg_game_time} sec")
 
   def quit_game(self):
     self.sim_score += self.score

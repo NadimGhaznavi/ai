@@ -23,13 +23,8 @@ class EpsilonAlgo():
     self.rand_moves_in_game = 0
     print(f"EpsilonAlgo: New instance with epsilon value of {self.epsilon_value}")
 
-  def get_epsilon(self):
-    return self.epsilon
-
-  def played_game(self):
-    self.num_games += 1
-    self.epsilon = self.epsilon_value - self.num_games
-    self.rand_moves_in_game = 0
+  def get_epsilon_value(self):
+    return self.epsilon_value
 
   def get_move(self):
     rand_num = randint(0, self.epsilon_value)
@@ -40,3 +35,10 @@ class EpsilonAlgo():
       self.rand_moves_in_game += 1
       return rand_move
     return False
+  
+  def played_game(self):
+    self.num_games += 1
+    self.epsilon = self.epsilon_value - self.num_games
+    self.rand_moves_in_game = 0
+
+

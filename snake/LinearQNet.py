@@ -21,7 +21,7 @@ class Linear_QNet(nn.Module):
                b1_nodes, b1_layers, 
                b2_nodes, b2_layers,
                b3_nodes, b3_layers,
-               out_features, enable_relu, ai_version):
+               out_features, ai_version):
     """
     The class accepts the following parameters:
 
@@ -68,94 +68,128 @@ class Linear_QNet(nn.Module):
     the pattern (ReLU followed by Linear) is repeated b3_layers times.
     """  
     super().__init__()
-    print("{:>4} * {:>2} = {:>5}".format(b1_nodes, b1_layers, b1_nodes*b1_layers))
-    print("{:>4} * {:>2} = {:>5}".format(b2_nodes, b2_layers, b2_nodes*b2_layers))
-    print("{:>4} * {:>2} = {:>5}".format(b3_nodes, b3_layers, b3_nodes*b3_layers))
-    print(" Nodes    = {:>5}".format((b1_nodes*b1_layers)+(b2_nodes*b2_layers)+(b3_nodes*b3_layers)))
-    self.ai_version = ai_version
 
-    # The main model
+    self.ai_version = ai_version
+    self.in_features = in_features
+    self.b1_nodes = b1_nodes
+    self.b1_layers = b1_layers
+    self.b2_nodes = b2_nodes
+    self.b2_layers = b2_layers
+    self.b3_nodes = b3_nodes
+    self.b3_layers = b3_layers
+    self.out_features = out_features
+
+    self.ascii_print()
+
+    # The basic main model framework
     main_block = nn.Sequential()
 
+    main_block.append(nn.Sequential()) # input block
+    main_block.append(nn.Sequential()) # B1 block
+    if b2_layers > 0:
+      main_block.append(nn.Sequential()) # B2 block
+    if b3_layers > 0:
+      main_block.append(nn.Sequential()) # B3 block
+    main_block.append(nn.Sequential()) # output block
+
     # Input layer
-    if enable_relu:
-      main_block.append(nn.ReLU())
-    main_block.append(nn.Linear(in_features=in_features, out_features=b1_nodes))
+    main_block[0].append(nn.ReLU())
+    main_block[0].append(nn.Linear(in_features=in_features, out_features=b1_nodes))
 
-
-    ### B1 Block ------------------------------------------------------
-    b1_block = nn.Sequential()
-    b1_layer_count = 1
-    while b1_layer_count != b1_layers:
-      b1_layer_count += 1
-      if b1_layer_count != b1_layers:
-        # There are more B1 layers...
-        if enable_relu:
-          b1_block.append(nn.ReLU())
-        b1_block.append(nn.Linear(in_features=b1_nodes, out_features=b1_nodes))
-    
-    # There are no more B1 to B1 layers
-    
-    # Check if there are any B2 layers
-    if b2_layers != 0:
-      # There are some B2 layers
-      if enable_relu:
-        b1_block.append(nn.ReLU())
-      b1_block.append(nn.Linear(in_features=b1_nodes, out_features=b2_nodes))
-      main_block.append(b1_block)
+    ## B1 Block
+    if b2_layers > 0:
+      # With a B2 block
+      layer_count = 1
+      while layer_count < b1_layers:
+        main_block[1].append(nn.ReLU())
+        main_block[1].append(nn.Linear(in_features=b1_nodes, out_features=b1_nodes))
+        layer_count += 1
+      main_block[1].append(nn.ReLU())
+      main_block[1].append(nn.Linear(in_features=b1_nodes, out_features=b2_nodes))
     else:
-      # There are no B2 layers, so append an output layer. Model is complete.
-      if enable_relu:
-        b1_block.append(nn.ReLU())
-      b1_block.append(nn.Linear(in_features=b1_nodes, out_features=out_features))
-      main_block.append(b1_block)
+      # With no B2 block
+      layer_count = 1
+      while layer_count < b1_layers:
+        main_block[1].append(nn.ReLU())
+        main_block[1].append(nn.Linear(in_features=b1_nodes, out_features=b1_nodes))
+        layer_count += 1      
 
-    ### B2 Block -------------------------------------------------------
-    b2_block = nn.Sequential()
-    b2_layer_count = 0
-    while b2_layer_count != b2_layers:
-      b2_layer_count += 1
-      if b2_layer_count != b2_layers:
-        # There are more B2 layers...
-        b2_block.append(nn.ReLU())
-        b2_block.append(nn.Linear(in_features=b2_nodes, out_features=b2_nodes))
-    
-    # There are no more B2 to B2 layers
-
-    if b2_layers != 0 and b3_layers != 0:
-      # There were some B2 layers and there are some B3 layers
-      b2_block.append(nn.ReLU())
-      b2_block.append(nn.Linear(in_features=b2_nodes, out_features=b3_nodes))
-      main_block.append(b2_block)
-    elif b2_layers != 0 and b3_layers == 0:
-      # There were some B2 layers and there are no B3 layers. Append an output
-      # layer and model is complete.
-      b2_block.append(nn.ReLU())
-      b2_block.append(nn.Linear(in_features=b2_nodes, out_features=out_features))
-      main_block.append(b2_block)
-
-    ### B3 Block -------------------------------------------------------
-    b3_block = nn.Sequential()
-    b3_layer_count = 0
-    while b3_layer_count != b3_layers:
-      b3_layer_count += 1
-      if b3_layer_count != b3_layers:
-        # There are more B3 layers...
-        b3_block.append(nn.ReLU())
-        b3_block.append(nn.Linear(in_features=b3_nodes, out_features=b3_nodes))
+    ## B2 Block
+    if b2_layers > 0:
+      if b3_layers > 0:
+        # With a B3 block
+        layer_count = 1
+        while layer_count < b2_layers:
+          layer_count += 1
+          main_block[2].append(nn.ReLU())
+          main_block[2].append(nn.Linear(in_features=b2_nodes, out_features=b2_nodes))        
+        main_block[2].append(nn.ReLU())
+        main_block[2].append(nn.Linear(in_features=b2_nodes, out_features=b3_nodes))
       else:
-        b3_block.append(nn.ReLU())
-        b3_block.append(nn.Linear(in_features=b3_nodes, out_features=out_features))
-        main_block.append(b3_block)
+        # with no B3 block
+        main_block[2].append(nn.ReLU())
+        main_block[2].append(nn.Linear(in_features=b3_nodes, out_features=out_features))
+        layer_count = 1
+        while layer_count < b2_layers:
+          main_block[2].append(nn.ReLU())
+          main_block[2].append(nn.Linear(in_features=b1_nodes, out_features=b1_nodes))
+          layer_count += 1
+    
+    ## B3 Block
+    if b3_layers > 0:
+      layer_count = 1
+      while layer_count < b2_layers:
+        main_block[3].append(nn.ReLU())
+        main_block[3].append(nn.Linear(in_features=b3_nodes, out_features=b3_nodes))
+        layer_count += 1
+    
+    ## Output block
+    if b2_layers == 0:
+      pass
+      # Only a B1 block
+      main_block[1].append(nn.ReLU())
+      main_block[1].append(nn.Linear(in_features=b1_nodes, out_features=out_features))
+    elif b3_layers == 0:
+      # B1 and B2 layers, no B3 layer
+      main_block[2].append(nn.ReLU())
+      main_block[2].append(nn.Linear(in_features=b2_nodes, out_features=out_features))
+    else:
+      # B1, B2 and B3 layers
+      main_block[3].append(nn.ReLU())
+      main_block[3].append(nn.Linear(in_features=b3_nodes, out_features=out_features))
       
-    self.layer_stack = main_block
+    self.main_block = main_block
+
+  def ascii_print(self):
+    ###  An ASCII depiction of the neural network
+    print("Blocks       Nodes   Layers  Total  Nodes")
+    print("------------------------------------------------------")
+    print("Input block  {:>5} {:>8} {:>13}".format(self.in_features, 1, self.in_features))
+    print("B1 block     {:>5} {:>8} {:>13}".format(self.b1_nodes, self.b1_layers, self.b1_nodes*self.b1_layers))
+    print("B2 block     {:>5} {:>8} {:>13}".format(self.b2_nodes, self.b2_layers, self.b2_nodes*self.b2_layers))
+    print("B3 block     {:>5} {:>8} {:>13}".format(self.b3_nodes, self.b3_layers, self.b3_nodes*self.b3_layers))
+    print("Output block {:>5} {:>8} {:>13}".format(self.out_features, 1, self.out_features))
+    print("------------------------------------------------------")
+    print("Totals                   {:>16}".format(self.in_features + (self.b1_nodes*self.b1_layers) + \
+                                                   (self.b2_nodes*self.b2_layers) + \
+                                                    (self.b3_nodes*self.b3_layers) + self.out_features))
 
   def forward(self, x):
     """
     Default nn.Module behaviour. 
     """
-    return self.layer_stack(x)
+    return self.main_block(x)
   
+  def insert_layer(self):
+    print("LinearQNet: Inserting new layer")
+    print("----- Before -------------------------------------------------")
+    self.ascii_print()
+    self.main_block[0].append(nn.ReLU())
+    self.main_block[0].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
+    self.b1_layers += 1
+    print("----- After --------------------------------------------------")
+    self.ascii_print()
+    
   def load_checkpoint(self, optimizer, load_path):
     """
     Loads the model including the weights, epoch from the 

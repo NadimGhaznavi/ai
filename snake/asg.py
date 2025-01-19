@@ -34,9 +34,10 @@ def print_game_summary(ai_version, agent, score, record, game):
     'Score' + '{:>4}'.format(score) + ', ' + \
     'Highscore' + '{:>4}'.format(record) + ', ' + \
     'Time ' + '{:>6}'.format(game.elapsed_time) + 's' + \
-    #', nu_score ' + str(agent.nu_algo.get_nu_score()) + \
-    #', nu_value ' + str(agent.nu_algo.get_nu_value()) + \
-    #', nu_pool_reset_count ' + str(agent.nu_algo.get_pool_reset_count()) + \
+    ', nu score ' + str(agent.nu_algo.get_nu_score()) + \
+    ', pool ' + str(agent.nu_algo.get_nu_value()) + \
+    ', reset count ' + str(agent.nu_algo.get_nu_refill_count()) + \
+    ', bad game count ' + str(agent.nu_algo.get_bad_game_count()) + \
     ' - ' + game.lose_reason)
 
 def train(ai_version, new_sim_run):
@@ -70,7 +71,6 @@ def train(ai_version, new_sim_run):
       'b3n': ini.get('b3_nodes'),
       'b3l': ini.get('b3_layers'),
       'out_features': out_features,
-      'enable_relu': ini.get('enable_relu'),
       'epsilon_value': ini.get('epsilon_value'),
       'initial_epsilon_value': ini.get('epsilon_value'),
       'initial_nu_score': ini.get('nu_score'),
@@ -85,7 +85,7 @@ def train(ai_version, new_sim_run):
     game.reset()
     agent.save_model()
     agent.save_sim_desc()
-
+    
   else:
     # A version was passed into this script
     old_ai_version = ai_version
@@ -108,8 +108,10 @@ def train(ai_version, new_sim_run):
     desc_file = str(old_ai_version) + desc_basename
     desc_file = os.path.join(data_dir, desc_file)
     desc.read(desc_file)
-    agent.nu_score = int(desc['default']['nu_score'])
-    agent.nu_value = int(desc['default']['nu_value'])
+    desc_default = desc['default']
+    agent.nu_algo.set_nu_score(int(desc_default['nu_score']))
+    agent.nu_algo.set_nu_value(int(desc_default['nu_value']))
+    agent.nu_algo.set_nu_bad_games(int(desc_default['bad_games']))
     
   total_score = 0 # Score for the current game
   record = 0 # Best score
@@ -133,8 +135,11 @@ def train(ai_version, new_sim_run):
     # Remember
     agent.remember(state_old, final_move, reward, state_new, done)
     if done:
+      if agent.new_layer_score > 0 and score > agent.new_layer_score:
+        agent.model.insert_layer()
+        
       agent.epsilon_algo.played_game()
-      agent.nu_algo.played_game()
+      agent.nu_algo.played_game(score)
       # Train long memory
       game.reset()
       # Number of games the agent has played
@@ -151,9 +156,9 @@ def train(ai_version, new_sim_run):
 
       agent.train_long_memory()
       if score > record:
-        agent.nu_algo.new_highscore(score)
-        
+        # New highscore!!! YAY!
         record = score
+        agent.nu_algo.new_highscore(record)
         agent.save_checkpoint()
         game.sim_high_score = record
         agent.save_highscore(record)

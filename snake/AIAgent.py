@@ -10,7 +10,7 @@ from collections import namedtuple
 import numpy as np
 import random
 import torch
-import configparser
+from random import randint
 
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
@@ -42,12 +42,16 @@ class AIAgent:
     self.max_score_num_count = 0
     self.memory = deque(maxlen=ini.get('max_memory'))
     self.n_games = 0 # Number of games played
+    self.n_games_buf = -1
+    self.new_layer_score = ini.get('new_layer_score')
     self.random_move_count = 0
     self.sim_checkpoint_basename = ini.get('sim_checkpoint_basename')
+    self.sim_checkpoint_verbose = ini.get('sim_checkpoint_verbose')
     self.sim_data_dir = ini.get('sim_data_dir')
+    self.sim_desc_basename = ini.get('sim_desc_basename')
+    self.sim_desc_verbose = ini.get('sim_desc_verbose')
     self.sim_highscore_basename = ini.get('sim_highscore_basename')
     self.sim_model_basename = ini.get('sim_model_basename')
-    self.sim_desc_basename = ini.get('sim_desc_basename')
     self.trainer = QTrainer(self.model)
 
     # Nu Algorithm for exploration/exploitation
@@ -171,7 +175,8 @@ class AIAgent:
     if not os.path.exists(self.sim_data_dir):
       os.makedirs(self.sim_data_dir)
     self.model.save_checkpoint(self.trainer.optimizer, checkpoint_file, self.game.num_games)
-    print(f"Saved simulation checkpoint ({checkpoint_file})")
+    if self.sim_checkpoint_verbose:
+      print(f"Saved simulation checkpoint ({checkpoint_file})")
     self.save_sim_desc()
   
   def save_highscore(self, highscore):
@@ -206,14 +211,16 @@ class AIAgent:
     if not os.path.exists(self.sim_data_dir):
       os.makedirs(self.sim_data_dir)
     # Update the epsilon value
-    self.set_config('epsilon_value', str(self.epsilon_algo.get_epsilon()))
+    self.set_config('epsilon_value', str(self.epsilon_algo.get_epsilon_value()))
     self.set_config('nu_score', str(self.nu_algo.get_nu_score()))
     self.set_config('nu_value', str(self.nu_algo.get_nu_value()))
+    self.set_config('nu_bad_games', str(self.nu_algo.get_nu_bad_games()))
     self.set_config('num_games', str(self.n_games))
     self.set_config('highscore', str(self.highscore))
     with open(sim_desc_file, 'w') as config_file:
       self.config.write(config_file)
-    print(f"Saved simulation description ({sim_desc_file})")
+    if self.sim_desc_verbose:
+      print(f"Saved simulation description ({sim_desc_file})")
 
   def set_config(self, key, value):
     self.config['default'][key] = value
@@ -233,14 +240,17 @@ class AIAgent:
     self.trainer.train_step(state, action, reward, next_state, done)
 
   def get_action(self, state):
+
     # Epsilon exploration
     random_move = self.epsilon_algo.get_move()
     if random_move:
+      self.n_games_buf = self.n_games
       return random_move
     
     # Nu exploration
     random_move = self.nu_algo.get_move(self.game.score)
     if random_move:
+      self.n_games_buf = self.n_games
       return random_move
     
     final_move = [0, 0, 0]

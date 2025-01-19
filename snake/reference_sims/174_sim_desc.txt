@@ -1,0 +1,29 @@
+[default]
+in_features = 40
+b1n = 60
+b1l = 1
+b2n = 200
+b2l = 0
+b3n = 300
+b3l = 0
+out_features = 3
+enable_relu = True
+epsilon_value = 130
+initial_epsilon_value = 130
+initial_nu_score = 1
+initial_nu_value = 60
+ai_version = 174
+total_sim_score = 2091
+total_sim_time = 7 min 35.31 sec
+avg_game_score = 6.36
+avg_game_time = 1.38
+nu_score = 47
+nu_value = 60
+nu_bad_games = 25
+num_games = 329
+highscore = 45
+lose_reason = Hit the snake
+wall_collision_count = 179
+snake_collision_count = 67
+exceeded_max_moves_count = 83
+

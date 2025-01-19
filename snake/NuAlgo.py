@@ -30,100 +30,120 @@ from random import randint
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
+from collections import deque
+
+DEBUG = True
 
 class NuAlgo():
   def __init__(self):
     # Constructor
     ini = AISnakeGameConfig()
-    self.nu_bad_games = ini.get('nu_bad_games') # Number of games without a new high score
-    self.nu_score = ini.get('nu_score') # Game score where algorithm is triggered
-    self.nu_value = ini.get('nu_value') # Number of random moves in the nu pool
-    self.cur_nu_value = self.nu_value # Current random pool size
-    self.rand_moves_in_game = 0 # Number of random moves injected in last game
-    self.pool_reset_count = 0  # How many times the pool was refilled without a highscore
-    self.no_highscore = 0 # How many games were played with no highscore
-    self.no_highscore_reset = 0 # How many times the "no_highscore so refill the pool" event happened
-    print(f"NuAlgo: New instance created with threshold score of {self.nu_score}, a pool size of {self.nu_value} and a bad game threshold of {self.nu_bad_games}")
+    self.nu_value = ini.get('nu_value') # 60
+    self.nu_score = ini.get('nu_score') # 1
+    self.nu_bad_games = ini.get('nu_bad_games') # 25
+    self.bad_game_count = 0
+    self.nu = self.nu_value # Size of the random move pool
+    self.rand_moves_in_game = 0
+    # How many times the nu pool has been refilled without finding a high score
+    self.nu_refill_count = 0
+    # The last 10 game scores
+    self.max_zero_scores = 15
+    self.game_scores = deque(maxlen=self.max_zero_scores)
+    print(f"NuAlgo: New instance with nu value of {self.nu_value}, and a threshold score of {self.nu_score}")
+
+  def get_move(self, cur_score):
+    if cur_score < self.nu_score :
+      # Current game score too low to inject random moves
+      return False
+    
+    rand_num = randint(0, self.nu_value)
+    if rand_num >= self.nu:
+      # No random move generated
+      return False 
+    
+    if randint(0,9) == 7:
+      rand_move = [ 0, 0, 0 ]
+      rand_idx = randint(0, 2)
+      rand_move[rand_idx] = 1
+      self.rand_moves_in_game += 1
+      # Reduce the size of the nu pool
+      self.nu -= 1
+      return rand_move
+
+  def new_highscore(self, score):
+    # There is a new high score
+    self.nu_score = score
+    self.bad_game_count = 0
+    self.nu_refill_count = 0
+    self.nu = self.nu_value
+    print(f"NuAlgo: New high score, increasing nu_score to {score} and refilling pool to {self.nu}")
+
+  def played_game(self, cur_score):
+    self.cur_score = cur_score
+    self.game_scores.append(cur_score)
+    if self.rand_moves_in_game > 0:
+      print(f"NuAlgo: Injected {self.rand_moves_in_game} random moves, pool size {self.nu}, nu_score is {self.nu_score}")
+      self.rand_moves_in_game = 0
+
+    # Increment every game (resets with a new highscore)
+    self.bad_game_count += 1
+
+    if self.bad_game_count == self.nu_bad_games and self.nu_refill_count == 0:
+      # nu_bad_games has been exceeded without finding a new high score
+      print(f"NuAlgo: Played {self.bad_game_count} games without finding a new high score, refilling the pool")
+      self.nu = self.nu_value
+      # Increment this counter
+      self.nu_refill_count += 1
+      self.bad_game_count = 0
+
+    elif self.bad_game_count == self.nu_bad_games and self.nu_refill_count == 1:
+      total_bad_games = self.nu_bad_games * 2
+      if self.nu_score > 2:
+        # Make sure we don't set nu_score below 1
+        self.nu_score -= 1
+      print(f"NuAlgo: Played {total_bad_games} games without finding a new highscore, refilling the pool and setting nu_score to {self.nu_score}")
+      self.nu = self.nu_value
+      self.nu_refill_count += 1
+      self.bad_game_count = 0
+
+    elif self.bad_game_count == self.nu_bad_games and self.nu_refill_count == 2:
+      total_bad_games = self.bad_game_count * 3
+      # Do a radical reset of the nu_score, set it to the score of the current game
+      self.nu_score = self.cur_score
+      if self.nu_score == 0:
+        self.nu_score = 1
+      self.nu = self.nu_value
+      self.nu_refill_count = 0
+      self.bad_game_count = 0     
+      print(f"NuAlgo: Played {total_bad_games} games without finding a new highscore, refilling the pool and setting nu_score to {self.nu_score}")
+
+
+    elif len(self.game_scores) == self.max_zero_scores:
+      all_zeros = True
+      for score in self.game_scores:
+        if score != 0:
+          all_zeros = False
+      if all_zeros:
+        self.nu = self.nu_value
+        self.nu_score = 1
+        self.nu_refill_count = 0
+        self.bad_game_count = 0
+        self.game_scores = deque(maxlen=self.max_zero_scores)
+        print(f"NuAlgo: Played {self.max_zero_scores} games with a score of zero, refilling the pool and setting nu_score to {self.nu_score}")
+
+
+  def get_nu_bad_games(self):
+    return self.nu_bad_games
+
+  def get_bad_game_count(self):
+    return self.bad_game_count
+
+  def get_nu_refill_count(self):
+    return self.nu_refill_count
+
+  def get_nu_value(self):
+    return self.nu
 
   def get_nu_score(self):
     return self.nu_score
-  
-  def get_nu_value(self):
-    return self.cur_nu_value
-  
-  def get_pool_reset_count(self):
-    return self.pool_reset_count
 
-  def played_game(self):
-    # Increment this counter
-    self.no_highscore += 1
-    # Check if the random move pool has been depleted
-    if self.rand_moves_in_game:
-      #pass
-      print(f"NuAlgo: Injected {self.rand_moves_in_game} random moves into the last game, pool size is now {self.cur_nu_value}")
-    self.rand_moves_in_game = 0
-    if self.cur_nu_value <= 0:
-      # Fill the random move pool back up
-      print(f"NuAlgo: Random pool depleted, filling pool back up to {self.nu_value}")
-      self.cur_nu_value = self.nu_value
-      self.pool_reset_count += 1
-      if self.pool_reset_count > 0:
-        print(f"NuAlgo: Pool reset count is {self.pool_reset_count}")
-      if self.pool_reset_count == 3:
-        # Pool depleted, lower the threshold for injecting
-        # random moves.
-        self.nu_score -= 1
-        print(f"NuAlog: Random pool depleted 3 times, decreasing threshold score to {self.nu_score}")
-        self.pool_reset_count = 0
-
-    if self.no_highscore == self.nu_bad_games:
-      self.no_highscore_reset += 1
-      bad_games = self.nu_bad_games * self.no_highscore_reset
-      print(f"NuAlgo: AI played {bad_games} games without improvement, refilling the pool with {self.nu_value} random moves")
-      self.cur_nu_value = self.nu_value
-      if self.no_highscore_reset > 1:
-        bad_games = self.no_highscore_reset * self.nu_bad_games
-        print(f"NuAlgo: AI played {bad_games} games without improvement, decreasing the nu_score by {self.no_highscore_reset}")
-        self.nu_score -= self.no_highscore_reset
-        if self.nu_score < 1:
-          # Make sure nu_score is *at least* 1. If this is triggered, you need to change other hyper parameters, because your
-          # other settings are terrible. :)
-          self.nu_score = 1
-
-  def get_move(self, game_score):
-    if game_score < self.nu_score:
-      # NuAlgo is only triggered when the game score is
-      # greater than or equal to the nu_score.
-      return False
-    
-    # Random chance of making a new move
-    rand_num = randint(0, self.nu_value)
-    if rand_num >= self.cur_nu_value:
-      # Nope, just return False and let the AI agent
-      # make a move based on it's calculations
-      return False
-
-    # Track the number of random moves returned
-    self.rand_moves_in_game += 1
-    # Reduce the size of the nu random move pool since
-    # we're about to return a random move
-    self.cur_nu_value -= 1
-    # Generate the random move
-    rand_move = [ 0, 0, 0 ]
-    rand_idx = randint(0, 2)
-    rand_move[rand_idx] = 1
-    # Return the random move
-    return rand_move
-  
-  def new_highscore(self, high_score):
-    # Set a new threshold 
-    self.nu_score = high_score + 1
-    # Fill up the nu random move pool
-    self.cur_nu_value = self.nu_value
-    self.pool_reset_count = 0
-    # Reset these counters
-    self.no_highscore = 0
-    self.no_highscore_reset = 0
-    print(f"NuAlgo: Threshold score increased to {self.nu_score}, random move pool reset to {self.nu_value}")
-
-    
