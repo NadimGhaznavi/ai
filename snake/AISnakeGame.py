@@ -169,11 +169,6 @@ class AISnakeGame():
       for event in pygame.event.get():
         if event.type == pygame.QUIT:
           self.quit_game()
-        if event.type == pygame.KEYDOWN:
-          if event.unicode == '+':
-            self.game_speed_increase
-          if event.unicode == '-':
-            self.game_speed_decrease
       keys = pygame.key.get_pressed()
       if keys[pygame.K_SPACE]:
         is_paused = False
@@ -183,9 +178,9 @@ class AISnakeGame():
         self.print_status()
       if keys[pygame.K_m]:
         self.print_model()   
-      if keys[pygame.K_PLUS]:
+      if keys[pygame.K_a]:
         self.game_speed_increase()
-      if keys[pygame.K_MINUS]:
+      if keys[pygame.K_z]:
         self.game_speed_decrease()
 
 
@@ -204,12 +199,6 @@ class AISnakeGame():
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
         self.quit_game()
-      if event.type == pygame.KEYDOWN:
-        if event.unicode == '+':
-          self.game_speed_increase
-        if event.unicode == '-':
-          self.game_speed_decrease
-
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_p]:
@@ -220,9 +209,9 @@ class AISnakeGame():
       self.print_status()
     if keys[pygame.K_m]:
       self.print_model()
-    if keys[pygame.K_PLUS]:
+    if keys[pygame.K_a]:
       self.game_speed_increase()
-    if keys[pygame.K_MINUS]:
+    if keys[pygame.K_z]:
       self.game_speed_decrease()
 
     # 2. move

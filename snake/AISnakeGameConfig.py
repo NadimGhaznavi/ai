@@ -37,6 +37,7 @@ class AISnakeGameConfig():
     parser.add_argument('-msn', '--max_score_num', type=int, default=0, help='Exit the simulation if a score of max_score is achieved max_num times.')
     parser.add_argument('-nls', '--new_layer_score', type=int, default=0, help='Drop in a new layer at this score')
     parser.add_argument('-nbg', '--nu_bad_games', type=int, default=0, help='The number of games with no new high score.')
+    parser.add_argument('-nmm', '--nu_max_moves', type=int, default=0, help="Maximum number of random moves injected by NuAlgo.")
     parser.add_argument('-ns', '--nu_score', type=int, default=0, help='The nu algorithm is triggered when the score exceeds nu_score.')
     parser.add_argument('-nv', '--nu_value', type=int, default=0, help='The initial amount of randomness the nu algorithm injects.')
     parser.add_argument('-nvm', '--nu_value_max', type=int, default=0, help='Number of random moves to add to the nu pool if nu_num_games_same_score_count_max is exceeded')
@@ -87,6 +88,8 @@ class AISnakeGameConfig():
       default['new_layer_score'] = str(args.new_layer_score)
     if args.nu_bad_games:
       default['nu_bad_games'] = str(args.nu_bad_games)
+    if args.nu_max_moves:
+      default['nu_max_moves'] = str(args.nu_max_moves)
     if args.nu_score:
       default['nu_score'] = str(args.nu_score)
     if args.nu_value:
@@ -119,11 +122,12 @@ class AISnakeGameConfig():
                       'max_score_num', 'out_features', 'random_seed', 'score_height', 
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
                       'new_layer_score', 'nu_bad_games', 'nu_max_zero_scores', 
-                      'nu_score', 'nu_value']
+                      'nu_max_moves', 'nu_score', 'nu_value']
     # Key/value pairs where the value is a float
     float_values = ['discount', 'learning_rate']
     # Key/value pairs where the value is a boolean
-    boolean_values = ['print_stats', 'sim_checkpoint_verbose', 'sim_desc_verbose']
+    boolean_values = ['print_stats', 'print_nu_stats', 'sim_checkpoint_verbose', 
+                      'sim_desc_verbose']
     # For all other key/value pairs, the value is a string.
     value = self.config['default'][key]
 
