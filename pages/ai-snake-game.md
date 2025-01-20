@@ -14,6 +14,7 @@ title: AI Snake Game
 * [Codebase Architecture](#codebase-architecture)
 * [Command Line Options](#command-line-options)
 * [Matplotlib Game Score Plot](#matplotlib-game-score-plot)
+* [Limitations](#limitations)
 * [Credits and Acknowledgements](#credits-and-acknowledgements)
 
 ## Introduction and Scope
@@ -289,6 +290,22 @@ options:
 The `asg.py` front end launches a matplatlib window that graphs out game score and average game score as the simulation runs.
 
 ![Screenshot of the Matplotlib Game Score Graph](/assets/images/snake/ai_metrics.png)
+
+## Limitations
+
+So what are the limits that this implementations is hitting? Well, the AI reaches what I call *level 1* where the length of the snake is over twice the width or height of the board. This is due to the strategy that the AI develops:
+
+The strategy that the AI develops is to circle around the endge of the board. Once it is lined up with the food it moves through the center, eats the food and continues until it reaches the other side of the board. Then it circles again. This algorithm fails when the snake gets too long and it hits itself.
+
+I found a paper, [Playing Atari with Deep Reinforcement Learning](#https://arxiv.org/pdf/1312.5602) which seems to identify and address this problem. Here's the first paragraph from the introduction:
+
+*"Learning to control agents directly from high-dimensional sensory inputs like vision and speech is one of the long-standing challenges of reinforcement learning (RL). Most successful RL applications that operate on these domains have relied on hand-crafted features combined with linear value functions or policy representations. Clearly, the performance of such systems heavily relies on the quality of the feature representation."*
+
+This describes the situation exactly. Here is what they developed:
+
+*"We present the first deep learning model to successfully learn control policies directly from high-dimensional sensory input using reinforcement learning. The model is a convolutional neural network, trained with a variant of Q-learning, whose input is raw pixels and whose output is a value function estimating future rewards."*
+
+Food for thought!!! :)
 
 ## Credits and Acknowledgements
 
