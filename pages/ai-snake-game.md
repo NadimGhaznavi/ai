@@ -28,6 +28,8 @@ As the snake moves, the goal of the game is to maneuver the snake so that it *ea
 The AI Snake Game has an AI controlling the snake. At the beginning of the game the AI is pretty terrible, but after about twenty-five games it has a length of eight and after a couple hundred or more games it can achieve
 scores of forty or more!
 
+Please note that I am still actively tinkering with this project, so the command line switches may be slightly different (usually more of them) than documented on this page.
+
 # My Motivation
 It is clear to me that the *next new thing* is Artificial Intelligence. It's amazing how quickly it is pervading society! AI assistants, AI generated content writing, images and film. Self driving cars, movie recomendations and market analysis.
 
