@@ -15,6 +15,7 @@ title: AI Snake Game
 * [Command Line Options](#command-line-options)
 * [Matplotlib Game Score Plot](#matplotlib-game-score-plot)
 * [Limitations](#limitations)
+* [Links](#Links)
 * [Credits and Acknowledgements](#credits-and-acknowledgements)
 
 ## Introduction and Scope
@@ -306,6 +307,13 @@ This describes the situation exactly. Here is what they developed:
 *"We present the first deep learning model to successfully learn control policies directly from high-dimensional sensory input using reinforcement learning. The model is a convolutional neural network, trained with a variant of Q-learning, whose input is raw pixels and whose output is a value function estimating future rewards."*
 
 Food for thought!!! :)
+
+## Links
+
+* [This page](https://ai.osoyalce.com/pages/ai-snake-game.html)
+* [My code on GitHub](https://github.com/NadimGhaznavi/ai)
+* [AI Snake Game Tutorial on YouTube](https://ai.osoyalce.com/pages/ai-snake-game.html#limitations)
+* [Patrick Loeber's code on GitHub](https://github.com/patrickloeber/snake-ai-pytorch)
 
 ## Credits and Acknowledgements
 
