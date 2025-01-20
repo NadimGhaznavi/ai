@@ -17,11 +17,12 @@ ini = AISnakeGameConfig()
 torch.manual_seed(ini.get('random_seed'))
 
 class Linear_QNet(nn.Module):
-  def __init__(self, in_features, 
-               b1_nodes, b1_layers, 
-               b2_nodes, b2_layers,
-               b3_nodes, b3_layers,
-               out_features, ai_version):
+  #def __init__(self, in_features, 
+  #             b1_nodes, b1_layers, 
+  #             b2_nodes, b2_layers,
+  #             b3_nodes, b3_layers,
+  #             out_features, ai_version):
+  def __init__(self, config):
     """
     The class accepts the following parameters:
 
@@ -69,15 +70,15 @@ class Linear_QNet(nn.Module):
     """  
     super().__init__()
 
-    self.ai_version = ai_version
-    self.in_features = in_features
-    self.b1_nodes = b1_nodes
-    self.b1_layers = b1_layers
-    self.b2_nodes = b2_nodes
-    self.b2_layers = b2_layers
-    self.b3_nodes = b3_nodes
-    self.b3_layers = b3_layers
-    self.out_features = out_features
+    self.ai_version = config.get('ai_version')
+    self.in_features = config.get('in_features')
+    self.b1_nodes = config.get('b1_nodes')
+    self.b1_layers = config.get('b1_layers')
+    self.b2_nodes = config.get('b2_nodes')
+    self.b2_layers = config.get('b2_layers')
+    self.b3_nodes = config.get('b3_nodes')
+    self.b3_layers = config.get('b3_layers')
+    self.out_features = config.get('out_features')
 
     self.ascii_print()
 
@@ -86,77 +87,77 @@ class Linear_QNet(nn.Module):
 
     main_block.append(nn.Sequential()) # input block
     main_block.append(nn.Sequential()) # B1 block
-    if b2_layers > 0:
+    if self.b2_layers > 0:
       main_block.append(nn.Sequential()) # B2 block
-    if b3_layers > 0:
+    if self.b3_layers > 0:
       main_block.append(nn.Sequential()) # B3 block
     main_block.append(nn.Sequential()) # output block
 
     # Input layer
     main_block[0].append(nn.ReLU())
-    main_block[0].append(nn.Linear(in_features=in_features, out_features=b1_nodes))
+    main_block[0].append(nn.Linear(in_features=self.in_features, out_features=self.b1_nodes))
 
     ## B1 Block
-    if b2_layers > 0:
+    if self.b2_layers > 0:
       # With a B2 block
       layer_count = 1
-      while layer_count < b1_layers:
+      while layer_count < self.b1_layers:
         main_block[1].append(nn.ReLU())
-        main_block[1].append(nn.Linear(in_features=b1_nodes, out_features=b1_nodes))
+        main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
         layer_count += 1
       main_block[1].append(nn.ReLU())
-      main_block[1].append(nn.Linear(in_features=b1_nodes, out_features=b2_nodes))
+      main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b2_nodes))
     else:
       # With no B2 block
       layer_count = 1
-      while layer_count < b1_layers:
+      while layer_count < self.b1_layers:
         main_block[1].append(nn.ReLU())
-        main_block[1].append(nn.Linear(in_features=b1_nodes, out_features=b1_nodes))
+        main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
         layer_count += 1      
 
     ## B2 Block
-    if b2_layers > 0:
-      if b3_layers > 0:
+    if self.b2_layers > 0:
+      if self.b3_layers > 0:
         # With a B3 block
         layer_count = 1
-        while layer_count < b2_layers:
+        while layer_count < self.b2_layers:
           layer_count += 1
           main_block[2].append(nn.ReLU())
-          main_block[2].append(nn.Linear(in_features=b2_nodes, out_features=b2_nodes))        
+          main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b2_nodes))        
         main_block[2].append(nn.ReLU())
-        main_block[2].append(nn.Linear(in_features=b2_nodes, out_features=b3_nodes))
+        main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b3_nodes))
       else:
         # with no B3 block
         main_block[2].append(nn.ReLU())
-        main_block[2].append(nn.Linear(in_features=b3_nodes, out_features=out_features))
+        main_block[2].append(nn.Linear(in_features=self.b3_nodes, out_features=self.out_features))
         layer_count = 1
-        while layer_count < b2_layers:
+        while layer_count < self.b2_layers:
           main_block[2].append(nn.ReLU())
-          main_block[2].append(nn.Linear(in_features=b1_nodes, out_features=b1_nodes))
+          main_block[2].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
           layer_count += 1
     
     ## B3 Block
-    if b3_layers > 0:
+    if self.b3_layers > 0:
       layer_count = 1
-      while layer_count < b2_layers:
+      while layer_count < self.b2_layers:
         main_block[3].append(nn.ReLU())
-        main_block[3].append(nn.Linear(in_features=b3_nodes, out_features=b3_nodes))
+        main_block[3].append(nn.Linear(in_features=self.b3_nodes, out_features=self.b3_nodes))
         layer_count += 1
     
     ## Output block
-    if b2_layers == 0:
+    if self.b2_layers == 0:
       pass
       # Only a B1 block
       main_block[1].append(nn.ReLU())
-      main_block[1].append(nn.Linear(in_features=b1_nodes, out_features=out_features))
-    elif b3_layers == 0:
+      main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.out_features))
+    elif self.b3_layers == 0:
       # B1 and B2 layers, no B3 layer
       main_block[2].append(nn.ReLU())
-      main_block[2].append(nn.Linear(in_features=b2_nodes, out_features=out_features))
+      main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.out_features))
     else:
       # B1, B2 and B3 layers
       main_block[3].append(nn.ReLU())
-      main_block[3].append(nn.Linear(in_features=b3_nodes, out_features=out_features))
+      main_block[3].append(nn.Linear(in_features=self.b3_nodes, out_features=self.out_features))
       
     self.main_block = main_block
 

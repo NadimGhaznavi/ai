@@ -48,6 +48,7 @@ class AIAgent:
     self.n_games_buf = -1
     self.random_move_count = 0
     self.sim_checkpoint_basename = ini.get('sim_checkpoint_basename')
+    self.sim_checkpoint_enable = ini.get('sim_checkpoint_enable')
     self.sim_checkpoint_verbose = ini.get('sim_checkpoint_verbose')
     self.sim_data_dir = ini.get('sim_data_dir')
     self.sim_desc_basename = ini.get('sim_desc_basename')
@@ -125,9 +126,9 @@ class AIAgent:
       (dir_r and game.is_snake_collision(point_d)),
 
       # Danger left
-      (dir_d and game.is_snake_collision(point_r)) or
-      (dir_u and game.is_snake_collision(point_l)) or
-      (dir_r and game.is_snake_collision(point_u)) or
+      (dir_d and game.is_snake_collision(point_r)),
+      (dir_u and game.is_snake_collision(point_l)),
+      (dir_r and game.is_snake_collision(point_u)),
       (dir_l and game.is_snake_collision(point_d)),
 
       # Move direction
@@ -176,14 +177,18 @@ class AIAgent:
 
   def save_checkpoint(self):
     # Save the simulation state
-    checkpoint_file = str(self.ai_version) + self.sim_checkpoint_basename
-    checkpoint_file = os.path.join(self.sim_data_dir, checkpoint_file)
-    if not os.path.exists(self.sim_data_dir):
-      os.makedirs(self.sim_data_dir)
-    self.model.save_checkpoint(self.trainer.optimizer, checkpoint_file, self.game.num_games)
-    if self.sim_checkpoint_verbose:
-      print(f"Saved simulation checkpoint ({checkpoint_file})")
-    self.save_sim_desc()
+    if self.sim_checkpoint_enable:
+      checkpoint_file = str(self.ai_version) + self.sim_checkpoint_basename
+      checkpoint_file = os.path.join(self.sim_data_dir, checkpoint_file)
+      if not os.path.exists(self.sim_data_dir):
+        os.makedirs(self.sim_data_dir)
+      self.model.save_checkpoint(self.trainer.optimizer, checkpoint_file, self.game.num_games)
+      if self.sim_checkpoint_verbose:
+        print(f"Saved simulation checkpoint ({checkpoint_file})")
+      self.save_sim_desc()
+      return True # Not used
+    else:
+      return False # Not used either
   
   def save_highscore(self, highscore):
     # Track when a new highscore is achieved
@@ -229,7 +234,7 @@ class AIAgent:
       print(f"Saved simulation description ({sim_desc_file})")
 
   def set_config(self, key, value):
-    self.config['default'][key] = value
+    self.config.set_value(key, value)
 
   def train_long_memory(self):
     if len(self.memory) > self.batch_size:

@@ -38,9 +38,11 @@ class AISnakeGameConfig():
     parser.add_argument('-nls', '--new_layer_score', type=int, default=0, help='Drop in a new layer at this score')
     parser.add_argument('-nbg', '--nu_bad_games', type=int, default=0, help='The number of games with no new high score.')
     parser.add_argument('-nmm', '--nu_max_moves', type=int, default=0, help="Maximum number of random moves injected by NuAlgo.")
+    parser.add_argument('-nps', '--nu_print_stats', type=bool, default=0, help="Print NuAlgo status information in the console.")
     parser.add_argument('-ns', '--nu_score', type=int, default=0, help='The nu algorithm is triggered when the score exceeds nu_score.')
     parser.add_argument('-nv', '--nu_value', type=int, default=0, help='The initial amount of randomness the nu algorithm injects.')
     parser.add_argument('-nvm', '--nu_value_max', type=int, default=0, help='Number of random moves to add to the nu pool if nu_num_games_same_score_count_max is exceeded')
+    parser.add_argument('-r', '--random_seed', type=int, default=0, help='Random seed used by random and torch.')
     parser.add_argument('-s', '--speed', type=int, default=0, help='Set the game speed.')
     parser.add_argument('-sd', '--sim_data_dir', type=str, default=None, help='Set a custom directory to store simulation results.')
     parser.add_argument('-v', '--ai_version', type=int, default=None, help='Load a previous simulation with version ai_version.')
@@ -92,10 +94,14 @@ class AISnakeGameConfig():
       default['nu_max_moves'] = str(args.nu_max_moves)
     if args.nu_score:
       default['nu_score'] = str(args.nu_score)
+    if args.nu_print_stats:
+      default['nu_print_stats'] = str(args.nu_print_stats)
     if args.nu_value:
       default['nu_value'] = str(args.nu_value)
     if args.nu_value_max:
       default['nu_value_max'] = str(args.nu_value_max)
+    if args.random_seed:
+      default['random_seed'] = str(args.random_seed)
     if args.speed:
       default['game_speed'] = str(args.speed)
     if args.ai_version:
@@ -126,7 +132,8 @@ class AISnakeGameConfig():
     # Key/value pairs where the value is a float
     float_values = ['discount', 'learning_rate']
     # Key/value pairs where the value is a boolean
-    boolean_values = ['print_stats', 'print_nu_stats', 'sim_checkpoint_verbose', 
+    boolean_values = ['nu_print_stats', 'nu_verbose', 'print_stats', 'print_nu_stats', 
+                      'sim_checkpoint_enable', 'sim_checkpoint_verbose', 
                       'sim_desc_verbose']
     # For all other key/value pairs, the value is a string.
     value = self.config['default'][key]
@@ -142,4 +149,28 @@ class AISnakeGameConfig():
         return True
     else:
       return value # Return a string
+  
+  def load_config(self, ai_version):
+    sim_desc_basename = self.get('sim_desc_basename')
+    sim_data_dir = self.get('sim_data_dir')
+    sim_desc_file = str(ai_version) + sim_desc_basename
+    sim_desc_file = os.path.join(sim_data_dir, sim_desc_file)
+    if not os.path.isfile(sim_desc_file):
+      print(f"ERROR: Unable to find simulation description file ({sim_desc_file}), exiting")
+      sys.exit(1)
+    self.config.read(sim_desc_file)
+    return self
+  
+
+  def set_value(self, key, value):
+    """
+    Set method.
+    """
+    self.config['default'][key] = value
+
+  def write(self, ini_file):
+    """
+    Create an INI file with the ConfigParser values.
+    """
+    self.config.write(ini_file)
   

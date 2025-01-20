@@ -29,16 +29,20 @@ from SnakeGamePlots import plot
 from AISnakeGameUtils import get_new_model, get_sim_desc, get_next_ai_version
 
 def print_game_summary(ai_version, agent, score, record, game):
-  print('Snake AI (v' + str(ai_version) + ') ' + \
+  summary = 'Snake AI (v' + str(ai_version) + ') ' + \
     'Game' + '{:>5}'.format(agent.n_games) + ', ' + \
     'Score' + '{:>4}'.format(score) + ', ' + \
     'Highscore' + '{:>4}'.format(record) + ', ' + \
-    'Time ' + '{:>6}'.format(game.elapsed_time) + 's' + \
-    ', NuAlgo: score ' + str(agent.nu_algo.get_nu_score()) + \
-    ', pool ' + str(agent.nu_algo.get_nu_value()) + \
+    'Time ' + '{:>6}'.format(game.elapsed_time) + 's'
+  if agent.nu_algo.print_stats:
+    nu_algo_injected = agent.nu_algo.get_injected()
+    summary = summary + ', NuAlgo: score ' + str(agent.nu_algo.get_nu_score()) + \
+    ', pool ' + '{:>2}'.format(agent.nu_algo.get_nu_value()) + \
     ', reset# ' + str(agent.nu_algo.get_nu_refill_count()) + \
-    ', bad game# ' + str(agent.nu_algo.get_bad_game_count()) + \
-    ' - ' + game.lose_reason)
+    ', bad game# ' + '{:>2}'.format(agent.nu_algo.get_bad_game_count()+1) + \
+    ', injected# ' + str(nu_algo_injected)
+  summary = summary + ' - ' + game.lose_reason
+  print(summary)
 
 def train(ai_version, new_sim_run):
   """
@@ -48,10 +52,6 @@ def train(ai_version, new_sim_run):
 
   # Get a mew instance of the AI Snake Game
   game = AISnakeGame(ai_version)
-  # The number of elements in the state map
-  in_features = ini.get('in_features')
-  # The number of valid snake moves i.e. straight, left or right
-  out_features = ini.get('out_features')
 
   # Initialize the simulation metrics
   plot_scores = [] # Scores for each game
@@ -61,26 +61,9 @@ def train(ai_version, new_sim_run):
 
   if new_sim_run:
     # This is a new simulation
-    config = configparser.ConfigParser()
-    config['default'] = {
-      'in_features': in_features,
-      'b1n': ini.get('b1_nodes'),
-      'b1l': ini.get('b1_layers'),
-      'b2n': ini.get('b2_nodes'),
-      'b2l': ini.get('b2_layers'),
-      'b3n': ini.get('b3_nodes'),
-      'b3l': ini.get('b3_layers'),
-      'out_features': out_features,
-      'epsilon_value': ini.get('epsilon_value'),
-      'initial_epsilon_value': ini.get('epsilon_value'),
-      'initial_nu_score': ini.get('nu_score'),
-      'initial_nu_value': ini.get('nu_value'),
-      'ai_version': ai_version
-    }
-    # Get a new model
-    model = get_new_model(config)
-    # Get a new instance of the AI Agent
-    agent = AIAgent(game, model, config, ai_version)
+    config = AISnakeGameConfig() # Get the settings from the AISnakeGame.ini
+    model = Linear_QNet(config) # Get a new model
+    agent = AIAgent(game, model, config, ai_version) # Get a new instance of the AI Agent
     game.set_agent(agent)
     game.reset()
     agent.save_model()
@@ -89,8 +72,9 @@ def train(ai_version, new_sim_run):
   else:
     # A version was passed into this script
     old_ai_version = ai_version
-    config = get_sim_desc(old_ai_version)
-    model = get_new_model(config)
+    config = AISnakeGameConfig()
+    config = config.load_config(old_ai_version)
+    model = Linear_QNet(config)
     ai_version = get_next_ai_version()
     game = AISnakeGame(ai_version)
     agent = AIAgent(game, model, config, ai_version)
@@ -99,19 +83,9 @@ def train(ai_version, new_sim_run):
     agent.ai_version = old_ai_version
     agent.load_checkpoint()
     agent.ai_version = ai_version
-    agent.epsilon_value = int(config['default']['epsilon_value'])
-    if agent.epsilon_value < 0:
-      agent.epsilon_value = 0
-    desc = configparser.ConfigParser()
-    desc_basename = ini.get('sim_desc_basename')
-    data_dir = ini.get('sim_data_dir')
-    desc_file = str(old_ai_version) + desc_basename
-    desc_file = os.path.join(data_dir, desc_file)
-    desc.read(desc_file)
-    desc_default = desc['default']
-    agent.nu_algo.set_nu_score(int(desc_default['nu_score']))
-    agent.nu_algo.set_nu_value(int(desc_default['nu_value']))
-    agent.nu_algo.set_nu_bad_games(int(desc_default['bad_games']))
+    agent.nu_algo.nu_score = config.get('nu_score')
+    agent.nu_algo.nu_value = config.get('nu_value')
+    agent.nu_algo.nu_bad_games = config.get('nu_bad_games')
     
   total_score = 0 # Score for the current game
   record = 0 # Best score
@@ -137,7 +111,7 @@ def train(ai_version, new_sim_run):
     if done:
       # Add a new layer when a specific score is reached
       if agent.b1_score > 0 and score >= agent.b1_score:
-        agent.b1_score = 0
+        agent.b1_score = 0 # Make sure we don't add another layer
         agent.model.insert_layer(1)
       if agent.b2_score > 0 and score >= agent.b2_score:
         agent.b2_score = 0
@@ -166,10 +140,10 @@ def train(ai_version, new_sim_run):
       if score > record:
         # New highscore!!! YAY!
         record = score
-        agent.nu_algo.new_highscore(record)
-        agent.save_checkpoint()
+        agent.nu_algo.new_highscore(record) # Pass the new highscore to NuAlgo
+        agent.save_checkpoint() # Save the simulation state
         game.sim_high_score = record
-        agent.save_highscore(record)
+        agent.save_highscore(record) # Update the highscore file
         agent.highscore = record
         if agent.max_score != 0 and score >= agent.max_score:
           agent.max_score_num_count += 1

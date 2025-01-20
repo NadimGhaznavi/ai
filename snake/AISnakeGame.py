@@ -282,7 +282,8 @@ class AISnakeGame():
       print(f"Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
       print(f"Wall collision count     : {self.sim_wall_collision_count}")
       print(f"Snake collision count    : {self.sim_snake_collision_count}")
-      #print(f"Nu algorithm score       : {self.agent.nu_algo.get_nu_score()}")
+      if self.agent.nu_algo.print_stats:
+        print(f"Nu algorithm score       : {self.agent.nu_algo.get_nu_score()}")
       print(f"Average game score       : {self.avg_game_score}")
       print(f"Average game time        : {self.avg_game_time} sec")
 
@@ -369,8 +370,7 @@ class AISnakeGame():
     # Render the score, number of moves and the game time
     score_string = "Score: " + str(self.score)
     self.elapsed_time = round(float((time.time() - self.start_time)), 2)
-    text = FONT.render(score_string + ', Moves ' + str(self.game_moves) + \
-                         ', Time ' + str(self.elapsed_time) + 's', True, WHITE)
+    text = FONT.render(score_string + ', Time ' + str(self.elapsed_time) + 's', True, WHITE)
     self.display.blit(text, [0, 0])    
     pygame.display.flip()        
     
