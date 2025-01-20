@@ -2,10 +2,10 @@
 title: AI Snake Game
 ---
 
-## Table of Contents
-
+# Table of Contents
 * [Introduction and Scope](#introduction-and-scope)
 * [My Motivation](#my-motivation)
+* [Goals](#goals)
 * [Technical Components](#technical-components)
 * [Environment Setup](#environment-setup)
 * [Running the Snake Game](#running-the-snake-game)
@@ -14,36 +14,43 @@ title: AI Snake Game
 * [Codebase Architecture](#codebase-architecture)
 * [Command Line Options](#command-line-options)
 * [Matplotlib Game Score Plot](#matplotlib-game-score-plot)
-* [Limitations](#limitations)
+* [Limitations and Lessons Learned](#limitations-and-lessons-learned)
 * [Links](#Links)
 * [Credits and Acknowledgements](#credits-and-acknowledgements)
 
-## Introduction and Scope
-
+# Introduction and Scope
 This project is based on the classic *Snake Game* where the player uses the arrow keys to control a snake.
 
 ![AI Snake Game Screenshot](/assets/images/snake/ai_snake_game.png)
 
-As the snake moves, the goal of the game is to maneuver the snake so that it *eats* the food. Every time
-the snake eats a block of food it grows one segment. The game ends when the snake hits the edge of the 
-screen or the food. The score corresponds to the number of food chunks the snake has eaten.
+As the snake moves, the goal of the game is to maneuver the snake so that it *eats* the food. Every time the snake eats a block of food it grows one segment. The game ends when the snake hits the edge of the screen or the food. The score corresponds to the number of food chunks the snake has eaten.
 
-The AI Snake Game has an AI controlling the snake. At the beginning of the game the AI is pretty terrible, 
-but after about twenty-five games it has a length of eight and after a couple hundred or more games it can achieve
+The AI Snake Game has an AI controlling the snake. At the beginning of the game the AI is pretty terrible, but after about twenty-five games it has a length of eight and after a couple hundred or more games it can achieve
 scores of forty or more!
 
-## My Motivation
+# My Motivation
+It is clear to me that the *next new thing* is Artificial Intelligence. It's amazing how quickly it is pervading society! AI assistants, AI generated content writing, images and film. Self driving cars, movie recomendations and market analysis.
 
-It is clear to me that the *next new thing* is Artificial Intelligence. It's amazing how quickly it is
-pervading society! AI assistants, AI generated content writing, images and film. Self driving cars,
-movie recomendations and market analysis.
+As a techie I wanted to learn how to create an AI and this project is my first foray into that arena. I did this project as an educational exercise to teach myself some of the technology that is under the hood.
 
-As a techie I wanted to learn how to create an AI and this project is my first foray into that arena.
-I did this project as an educational exercise to teach myself some of the technology that is under the
-hood.
+# Goals
+I'm always trying to improve my coding skills. I know that parts of the code are pretty messy and could use a serious cleanup and re-write, but my goals do **not** include writing perfect code.
 
-## Technical Components
+* Learn more Python
+* Learn about PyTorch and ML
+* Learn more about GitHub pages 
+* See how different neural network shapes affect the AI agent's learning process
+* See how different hyper-parameters affect the AI agent's learning process
+* See how adding layers *on-the-fly* affects the performance of the AI
 
+If you look at the [command line options](#command-line-options) section you will see that I have implemented switches to do the following:
+
+* Set the number of nodes in the neural network
+* Set the number of layers in the neural network
+* Set three different layer sizes in the neural network
+* Dynamically add a layer when the AI reaches a specific score
+
+# Technical Components
 This project is written in Python. It uses the following components:
 
 * [Python](https://python.org) - The Python programming language
@@ -53,15 +60,10 @@ This project is written in Python. It uses the following components:
 * [Matplotlib](https://matplotlib.org/) - Visualization library
 * [IPython](https://ipython.org/) - Used to connect PyGame and Matplotlib
 
-## Environment Setup
+# Environment Setup
+I strongly recommend setting up a *virtual environment* to run and modify the *AI Snake Game*. You will need Python installed in order to do this. By using a virtual environment you won't be altering the overall state of your Python installation. This will avoid screwing up programs and components on your system that use Python.
 
-I strongly recommend setting up a *virtual environment* to run and modify the *AI Snake Game*. You will need
-Python installed in order to do this. By using a virtual environment you won't be altering the overall state
-of your Python installation. This will avoid screwing up programs and components on your system that use
-Python.
-
-While you can easily run this on Windows, the instructions I have provided are for Linux as that's the system
-I run.
+While you can easily run this on Windows, the instructions I have provided are for Linux as that is my preferred operating system. If you are running on Windows, you might want to follow the links in [technical components](#technical-components) section of this page and use information from those sites on setting up your environment. In particular, the [Pyorch](#https://pytorch.org/get-started/locally/) component.
 
 The command below creates a virtual environment called *ai_dev* in your current working directory.
 
@@ -76,9 +78,7 @@ git clone https://github.com/nadimghaznavi/ai.git
 
 This will download my *ai* git repository onto your system in a directory called *ai*.
 
-You will need to install the Python libraries that the code uses. Again, you'll want
-to do so in your virtual development environment. The first step is to activate the
-environment:
+You will need to install the Python libraries that the code uses. Again, you'll want to do so in your virtual development environment. The first step is to activate the environment:
 ```
 . ai_dev/bin/activate
 ```
@@ -88,8 +88,7 @@ Your prompt will change, indicating that you're now in the virtual environment:
 nadim@mypc:~$ . ai_dev/bin/activate
 (ai_dev) nadim@mypc:~$
 ```
-Once you have activated the virtual environment you will need to install some Python
-libraries. You can use *pip* to do so.
+Once you have activated the virtual environment you will need to install some Python libraries. You can use *pip* to do so.
 ```
 (ai_dev) nadim@mypc:~$ pip install matplotlib
 (ai_dev) nadim@mypc:~$ pip install torch --index-url https://download.pytorch.org/whl/cpu
@@ -97,10 +96,8 @@ libraries. You can use *pip* to do so.
 (ai_dev) nadim@mypc:~$ pip install IPython
 ```
 
-## Running the Snake Game
-
-To run the original snake game, first activate your virtual environment, then launch
-the game:
+# Running the Snake Game
+To run the original snake game, first activate your virtual environment, then launch the game:
 ```
 nadim@mypc:~$ . ai_dev/bin/activate
 (ai_dev) nadim@mypc:~$ cd ai/snake
@@ -108,8 +105,7 @@ nadim@mypc:~$ . ai_dev/bin/activate
 ```
 Then use the arrow keys to control the snake and go for the *food*. Have fun!!!!
 
-## Running the AI Snake Game
-
+# Running the AI Snake Game
 To watch the AI play and learn the snake game just activate your virtual
 environment, navigate to the snake directory and launch the *asg.py* front end:
 ```
@@ -118,8 +114,7 @@ nadim@mypc:~$ . ai_dev/bin/activate
 (ai_dev) nadim@mypc:~/ai/snake$ python asg.py
 ```
 
-## AI Snake Game Keyboard Shortcuts
-
+# AI Snake Game Keyboard Shortcuts
 I've coded in some additional keyboard shortcuts into the AI Snake game:
 
 Key       | Description
@@ -131,94 +126,77 @@ Key       | Description
  spacebar | Resume the game
  q        | Quit the game
 
-## Codebase Architecture
+# Codebase Architecture
+The `asg.py` is the main front end to the AI Snake Game. It's the code that you need to execute in order to run a simulation. 
 
-I have refactored and extended the code a *LOT* from the original version that I started with.
-Here's a breakdown of the files and directories and what they are.
+I have implemented a neural network architecture with three blocks; B1, B2, B3. By using the `--b1_nodes`, `--b1_layers`, `--b2_nodes` and so on, you can configure the number of nodes and layers in each block when you start the simulation.  I also implemented `--b1_score`, `--b2_score` and `--b3_score` switches to insert a B1, B2 or B3 layer *on-the-fly* when a particular score is reached.
 
-### AIAgent.py
+I have refactored and extended the code a *LOT* from the original version that I started with. Here's a breakdown of the files and directories and what they are.
+
+## AIAgent.py
 This file houses the *AI Agent* or the AI player.
 
-### AISnakeGameConfig.py
+## AISnakeGameConfig.py
 This file handles reading the AI Snake Game configuration settings from the *AISnakeGame.ini* file.
 
-### AISnakeGame.ini
+## AISnakeGame.ini
 This file controls a lot of the settings for the AI simulation.
 
-### AISnakeGame.py
+## AISnakeGame.py
 This a modified version of the SnakeGame.py. It's been changed so that the AIAgent acts as the player instead of a human being.
 
-### AISnakeGameUtils.py
-This file has a few functions where I couldn't find a good place for them. It includes:
+## AISnakeGameUtils.py
+This file has a few functions where I couldn't find a good place for them. 
 
-* get_new_model() - Used to get a model if you load a simulation from file.
-* get_next_ai_version() - Every time you run the simulation a model, checkpoint, highscore and description file is created. The files are preceeded by a version number. This function returns the next available version number.
-* get_sim_desc() - Returns a configuration object that contains information taken from an existing simulation description file.
-
-### arial.ttf
-
+## arial.ttf
 The actual snake game and AI snake game uses this file to render the scores, moves and times shown at the top of the game screen.
 
-### asg.py
-
+## asg.py
 This is the front end to the AI Snake game. It's the file you need to run to launch the AI Snake Game.
 
-### batch_scripts
-
+## batch_scripts
 This directory has a couple of batch scripts I wrote to run the AI Snake Game in batch mode while changing one or more parameters. You can use this to run a bunch of simulations overnight and then look at the highscore files to see how different settings affect the performance of the AI.
 
 I included these as examples. I encourage you to author your own and experiement!
 
-### EpsilonAlgo.py
-
+## EpsilonAlgo.py
 The epsilon algorithm is a standard algorithm used to inject a decreasing amount of randomness into the initial stages of the game. It implements the *exploration* part of *exploration/exploitation* in machine learning.
 
-### LinearQNet.py
-
+## LinearQNet.py
 The LinearQNet class houses the PyTorch neural network model. that the AI Snake Game uses. I have extended this class pretty significantly. For example, I've added functions to add in new layers on-the-fly with differing numbers of nodes and load and save functions to take snapshots of the running simulations.
 
-### next_ai_version.txt
-
+## next_ai_version.txt
 This file holds a number that the code uses for the version of the simulation. It is incremented every time you run the `asg.py` front end.
 
-### NuAlgo.py
-
+## NuAlgo.py
 This is a class I wrote to try and optimize the learning behaviour of the AI Agent. By tweaking this code and the settings in the AISnakeGame.ini I have managed to train the AI to reach a high score of 80!!
 
-### QTrainer.py
-
+## QTrainer.py
 This is part of the reinforcement learning that is used in this code to train the AI. It houses the *optimizer* that tweaks the neural network settings as the game runs.
 
-### README.md
-
+## README.md
 A standard GitHub README file. It points at this page.
 
-### reference_sims
-
+## reference_sims
 A few simulation files I saved, because they performed well. You can copy them into the *sim_data* directory and load them with the `-v` switch to run them.
 
-### sim_data
-
+## sim_data
 This directory is automatically created when you run the asg.py script. Here are three example files that were created during a simulation run:
 
 * 409_sim_checkpoint.ptc - A Simulation checkpoint file
 * 409_sim_desc.txt - A file that contains some of the simulation settings
 * 409_sim_highscore.csv - A CSV file with highscores from the simulation run
 
-### SnakeGameElement.py
-
+## SnakeGameElement.py
 This contains some helper classes used by the AISnakeGame.
 
-### SnakeGamePlots.py
-
+## SnakeGamePlots.py
 This has the `plot()` function that launches the *matplotlib* pop-up window that graphs out the game scores in realtime as you run the simulation.
 
-### SnakeGame.py
-
+## SnakeGame.py
 The original Snake Game that you can play.
 
-## Command Line Options
-
+# Command Line Options
 I've implemented a lot of options to the `asg.py` front end:
 
 ```
@@ -286,14 +264,12 @@ options:
                         Load a previous simulation with version ai_version.
 ```
 
-## Matplotlib Game Score Plot
-
+# Matplotlib Game Score Plot
 The `asg.py` front end launches a matplatlib window that graphs out game score and average game score as the simulation runs.
 
 ![Screenshot of the Matplotlib Game Score Graph](/assets/images/snake/ai_metrics.png)
 
-## Limitations
-
+# Limitations and Lessons Learned
 So what are the limits that this implementations is hitting? Well, the AI reaches what I call *level 1* where the length of the snake is over twice the width or height of the board. This is due to the strategy that the AI develops:
 
 The strategy that the AI develops is to circle around the endge of the board. Once it is lined up with the food it moves through the center, eats the food and continues until it reaches the other side of the board. Then it circles again. This algorithm fails when the snake gets too long and it hits itself.
@@ -306,16 +282,17 @@ This describes the situation exactly. Here is what they developed:
 
 *"We present the first deep learning model to successfully learn control policies directly from high-dimensional sensory input using reinforcement learning. The model is a convolutional neural network, trained with a variant of Q-learning, whose input is raw pixels and whose output is a value function estimating future rewards."*
 
+I was quite surprised to discover that the AI Agent learns quickly and effectively with a very small and simple neural network. When I started I was using 512, 1024 and 2048 for the number of nodes and I was using multiple layers. What I found was that a single layer with only 80 nodes outperformed the simulations with large numbers of nodes and layers. It's truly impressive how effective even simple neural networks are at solving problems.
+
 Food for thought!!! :)
 
-## Links
-
+# Links
 * [This page](https://ai.osoyalce.com/pages/ai-snake-game.html)
 * [My code on GitHub](https://github.com/NadimGhaznavi/ai)
 * [AI Snake Game Tutorial on YouTube](https://ai.osoyalce.com/pages/ai-snake-game.html#limitations)
 * [Patrick Loeber's code on GitHub](https://github.com/patrickloeber/snake-ai-pytorch)
 
-## Credits and Acknowledgements
+# Credits and Acknowledgements
 
 This code is based on a YouTube tutorial [Python + PyTorch + Pygame Reinforcement Learning – Train an AI to Play Snake](https://www.youtube.com/watch?v=L8ypSXwyBds&t=1042s&ab_channel=freeCodeCamp.org) by Patrick Loeber. You can access his original code [here](https://github.com/patrickloeber/snake-ai-pytorch) on GitHub.
 
