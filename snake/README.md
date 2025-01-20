@@ -6,4 +6,5 @@ the snake *eats* the food. Each time the snake eats food it grows one segment.
 The game ends when the snake either hits the edge of the game screen or hits 
 itself.
 
-See [this page](https://ai.osoyalce.com/) for more information.
+See [this page](https://ai.osoyalce.com/pages/ai-snake-game.html) for comprehensive
+information about this project.
