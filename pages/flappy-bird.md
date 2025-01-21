@@ -64,11 +64,13 @@ These five elements are stored in a Python *dequeu*, which is a fixed length arr
 # Q-Learning Formula
 This is the *Q-Learning Formula* which is used to move the policy network to the target network.
 
-$$ q[state, action] = q[state, action] + learningRate * (reward * discount * max(q[state_new,:]) -q[state,action]) $$
+$$ q[state, action] = q[state, action] + learningRate * (reward * discount * max(q[state_n,:]) -q[state,action]) $$
+Where: 
+$$ state_n - New State $$
 
 So the change is represented by:
 
-$$ reward * discount * max(q[newstate,:]) -q[state,action] $$
+$$ reward * discount * max(q[state_n,:]) -q[state,action] $$
 
 The effect of the change is tempered by the *learning rate* and is typically very small, e.g. 0.01 or 0.001.
 
@@ -80,14 +82,14 @@ $$ q[state, action] = reward $$
 
 Otherwise:
 
-$$ reward + discount * max(q[state_new,:]) $$
+$$ reward + discount * max(q[state_n,:]) $$
 
 # Calculating Loss
 We are using the *Mean Square Error* (MSE) function to calculate loss:
 
 $$ loss = mse(current_q, target_q) $$
 
--where MSE is:
+-and the *mean square error* function is simply:
 
 $$ \frac{( C - T )^2} { 2 } $$
 
