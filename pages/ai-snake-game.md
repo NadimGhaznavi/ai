@@ -8,11 +8,15 @@ title: AI Snake Game
 * [Goals](#goals)
 * [Technical Components](#technical-components)
 * [Environment Setup](#environment-setup)
+* [Configuration File Management](#configuration-file-management)
 * [Running the Snake Game](#running-the-snake-game)
 * [Running the AI Snake Game](#running-the-ai-snake-game)
 * [AI Snake Game Keyboard Shortcuts](#ai-snake-game-keyboard-shortcuts)
 * [Codebase Architecture](#codebase-architecture)
 * [Command Line Options](#command-line-options)
+  * [Specifying Numbers of Nodes and Layers](#specifying-numbers-of-nodes-and-layers)
+  * [Adding Layers On The Fly](#adding-layers-on-the-fly)
+  * [Changing P Values of Dropout Layers On the Fly](#changing-p-values-of-dropout-layers-on-the-fly)
 * [Matplotlib Game Score Plot](#matplotlib-game-score-plot)
 * [Limitations and Lessons Learned](#limitations-and-lessons-learned)
 * [Links](#Links)
@@ -28,7 +32,7 @@ As the snake moves, the goal of the game is to maneuver the snake so that it *ea
 The AI Snake Game has an AI controlling the snake. At the beginning of the game the AI is pretty terrible, but after about twenty-five games it has a length of eight and after a couple hundred or more games it can achieve
 scores of forty or more!
 
-Please note that I am still actively tinkering with this project, so the command line switches may be slightly different (usually more of them) than documented on this page.
+Please note that I am still actively tinkering with this project, so the command line switches may be slightly different (usually more of them) than documented on this page. 
 
 # My Motivation
 It is clear to me that the *next new thing* is Artificial Intelligence. It's amazing how quickly it is pervading society! AI assistants, AI generated content writing, images and film. Self driving cars, movie recomendations and market analysis.
@@ -61,6 +65,10 @@ This project is written in Python. It uses the following components:
 * [PyTorch](https://pytorch.org/get-started/locally/) - Backend library for AI development
 * [Matplotlib](https://matplotlib.org/) - Visualization library
 * [IPython](https://ipython.org/) - Used to connect PyGame and Matplotlib
+
+# Configuration File Management
+
+**IMPORTANT NOTE:** If you decide to download, run and tinker with this project I want to share a hard-learned lesson: **Neural networks are EXTREMELY sensitive to hyperparameters and the neural network architecture.** For this reason it's critical that you manage the INI file with extreme care. A small change in configuration can make your AI go from a super star to a dismal failure. Do not modify the AISnakeGame.ini file, make a copy and then use the `--ini_file` switch to point the `asg.py` front-end at your custom configuration.
 
 # Environment Setup
 I strongly recommend setting up a *virtual environment* to run and modify the *AI Snake Game*. You will need Python installed in order to do this. By using a virtual environment you won't be altering the overall state of your Python installation. This will avoid screwing up programs and components on your system that use Python.
@@ -265,6 +273,31 @@ options:
   -v AI_VERSION, --ai_version AI_VERSION
                         Load a previous simulation with version ai_version.
 ```
+## Specifying Numbers of Nodes and Layers
+
+I have implemented switches to select the number of layers and the number of nodes in each layer when starting the simulation. I've coded in three blocks where the number of nodes in each block can be different. The code takes care of making sure the layer shapes line up so that the resulting neural network is valid. These options are controllec by the following switches:
+
+* Block 1 configuration: `--b1_nodes` and `--b2_layers`
+* Block 2 configuration: `--b2_nodes` and `--b2_layers`
+* Block 3 configuration: `--b3_nodes` and `--b3_layers`
+
+These features allow easy experimentation with different neural network architectures.
+
+## Adding Layers On The Fly
+
+I was curious about the effect of adding layers on the fly. You may want to experiment with this option using the `--b1_score`, `--b2_score` and `--b3_score` which are features that drop in a B1, B2 or B3 layer when the AI reaches a particular score. What I learned was that adding layers on-the-fly disrupts the performance of the AI (no big surprise). When adding a B1 layer i.e. one that matches the shape of the existing B1 layer is much less disruptive: The AI recovers relatively quickly and carries on. Adding a new B2 layer i.e. when you didn't have any B2 layers and the shape is different than the B1 layer is **extremely** disruptive to the perfomance of the neural network.
+
+## Changing P Values of Dropout Layers On the Fly
+
+I have implemented the following switches to experiment with the effect of dropout layers on the performance of the neural network and how it can help the AI to overcome local minimums:
+
+* `--dropout_p` - The `P` value of the dropout layer
+* `--dropout_min` - The Snake Game score where the P value is set 
+* `--dropout_max` - The Snake Game score where the P value is unset 
+
+The way I have configured the code is that these three switches must all be used together. Initially, the code sets the P value of the dropout layer to zero. When the AI agent achieves a Snake Game score specified by the `--dropout_min` value the P value of the drop out layer(s) are activated. Once the score specified by the `--dropout_max` score is reached the P value is set back to zero.
+
+The dropout layers are inserted before each ReLU layer of the model, except for the output and input layers. 
 
 # Matplotlib Game Score Plot
 The `asg.py` front end launches a matplatlib window that graphs out game score and average game score as the simulation runs.
