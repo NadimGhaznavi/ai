@@ -88,8 +88,10 @@ We are using the *Mean Square Error* (MSE) function to calculate loss.
 $$loss = mse(current_q, target_q)$$
 
 -where MSE is:
-
-$$\frac{( C - T )^2} { 2 }$$
+```
+$$ \frac{( C - T )^2} { 2 } $$
+```
+$$ \frac{( C - T )^2} { 2 } $$
 
 
 # Links
