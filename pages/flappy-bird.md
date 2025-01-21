@@ -85,9 +85,9 @@ loss = mse(current_q, target_q)
 ```
 -where MSE is:
 
-$$ \frac{( C - T )^2} { 2 } $$
+$$\frac{( C - T )^2} { 2 }$$
 
 
 # Links
-* [Implement Deep Q-Learning with PyTorch and Train Flappy Bird! | DQN PyTorch](https://www.youtube.com/watch?v=arR7KzlYs4w&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi&index=1&ab_channel=JohnnyCode)
+* [Implement Deep Q-Learning with PyTorch and Train Flappy Bird! DQN PyTorch](https://www.youtube.com/watch?v=arR7KzlYs4w&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi&index=1&ab_channel=JohnnyCode)
 * [Flappy Bird Gymnasium on GitHub](https://github.com/markub3327/flappy-bird-gymnasium)
