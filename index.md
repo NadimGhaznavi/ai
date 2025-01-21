@@ -9,7 +9,6 @@ that I'm working on.
 
 ## Current Projects
 
-This is my first project:
-
 * [AI Snake Game](/pages/ai-snake-game.html)
+* [AI Flappy Bird](/pages/flappy-bird.html)
 
