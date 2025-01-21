@@ -53,17 +53,28 @@ class NuAlgo():
     self.max_moves_count = 0 # Counter for max_moves
     # How many times the nu pool has been refilled without finding a high score
     self.nu_refill_count = 0
+    self.enabled = ini.get('nu_enable') # Whether this algorithm is enabled
     self.print_stats = ini.get('nu_print_stats')
     self.injected = 0 # Number of random moves injected in a game
     self.game_scores = deque(maxlen=self.max_zero_scores)
     self.verbose = ini.get('nu_verbose')
     self.highscore_countdown = 0
     self.highscore_countdown_enable = False
-    self.highscore_no_rand = 5
-    if self.print_stats:
-      print(f"NuAlgo: New instance with pool size ({self.nu_value}), score ({self.nu_score}) and bad games ({self.nu_bad_games})")
+    self.highscore_no_rand = 0
+
+    if self.enabled == False:
+      print("NuAlgo: NuAlgo is disabled")
+      self.print_stats = False
+      self.verbose = False
+    else:
+      if self.print_stats:
+        print(f"NuAlgo: New instance with pool size ({self.nu_value}), score ({self.nu_score}) and bad games ({self.nu_bad_games})")
 
   def get_move(self, cur_score):
+    if self.enabled == False:
+      # NuAlgo is disabled
+      return False
+    
     if cur_score < self.nu_score:
       # Current game score too low to inject random moves
       return False

@@ -65,7 +65,30 @@ class AIAgent:
     
     self.load_checkpoint() # Load the simulation state from file if it exists
     self.save_highscore(0) # Save the "game #, highscore" metrics
+
+  def get_action(self, state):
+
+    # Epsilon exploration
+    random_move = self.epsilon_algo.get_move()
+    if random_move:
+      self.n_games_buf = self.n_games
+      return random_move
     
+    # Nu exploration
+    random_move = self.nu_algo.get_move(self.game.score)
+    if random_move:
+      self.n_games_buf = self.n_games
+      return random_move
+
+    # AI based action
+    final_move = [0, 0, 0]
+    state0 = torch.tensor(state, dtype=torch.float)
+    prediction = self.model(state0)
+    move = torch.argmax(prediction).item()
+    final_move[move] = 1 
+      
+    return final_move
+
   def get_snake_length_in_binary(self):
     bin_str = format(len(self.game.snake), 'b')
     out_list = []
@@ -249,25 +272,3 @@ class AIAgent:
 
   def train_short_memory(self, state, action, reward, next_state, done):
     self.trainer.train_step(state, action, reward, next_state, done)
-
-  def get_action(self, state):
-
-    # Epsilon exploration
-    random_move = self.epsilon_algo.get_move()
-    if random_move:
-      self.n_games_buf = self.n_games
-      return random_move
-    
-    # Nu exploration
-    random_move = self.nu_algo.get_move(self.game.score)
-    if random_move:
-      self.n_games_buf = self.n_games
-      return random_move
-    
-    final_move = [0, 0, 0]
-    state0 = torch.tensor(state, dtype=torch.float)
-    prediction = self.model(state0)
-    move = torch.argmax(prediction).item()
-    final_move[move] = 1 
-      
-    return final_move

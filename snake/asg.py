@@ -41,6 +41,9 @@ def print_game_summary(ai_version, agent, score, record, game):
     ', reset# ' + str(agent.nu_algo.get_nu_refill_count()) + \
     ', bad game# ' + '{:>2}'.format(agent.nu_algo.get_bad_game_count()+1) + \
     ', injected# ' + str(nu_algo_injected)
+  if agent.epsilon_algo.get_print_stats():
+    summary = summary + ', EpsilonAlgo: injected# {:>3}'.format(agent.epsilon_algo.get_injected()) + \
+      ', epsilon {:>3}'.format(agent.epsilon_algo.get_epsilon())
   summary = summary + ' - ' + game.lose_reason
   print(summary)
 
@@ -48,8 +51,6 @@ def train(ai_version, new_sim_run):
   """
   This is the AI Snake Game main training loop.
   """
-  ini = AISnakeGameConfig()
-
   # Get a mew instance of the AI Snake Game
   game = AISnakeGame(ai_version)
 
@@ -63,6 +64,10 @@ def train(ai_version, new_sim_run):
     # This is a new simulation
     config = AISnakeGameConfig() # Get the settings from the AISnakeGame.ini
     model = Linear_QNet(config) # Get a new model
+    if model.dropout != 0:
+      # If the model has dropout, turn it off. We'll turn it back on if/when the AI
+      # agent reaches a high enough score (--dropout_score <score>)
+      model.update_dropout(0.0)
     agent = AIAgent(game, model, config, ai_version) # Get a new instance of the AI Agent
     game.set_agent(agent)
     game.reset()
@@ -140,6 +145,14 @@ def train(ai_version, new_sim_run):
       if score > record:
         # New highscore!!! YAY!
         record = score
+        if agent.model.dropout != 0:
+          # The model has dropout layers
+          if agent.model.dropout_score != 0 and score >= agent.model.dropout_score:
+            # Turn dropout on
+            agent.model.update_dropout(agent.model.dropout_score)
+          if agent.model.dropout_score != 0 and score < agent.model.dropout_score:
+            # Turn dropout off
+            agent.model.update_dropout(0.0)
         agent.nu_algo.new_highscore(record) # Pass the new highscore to NuAlgo
         agent.save_checkpoint() # Save the simulation state
         game.sim_high_score = record

@@ -79,6 +79,8 @@ class Linear_QNet(nn.Module):
     self.b3_nodes = config.get('b3_nodes')
     self.b3_layers = config.get('b3_layers')
     self.out_features = config.get('out_features')
+    self.dropout = config.get('dropout')
+    self.dropout_score = config.get('dropout_score')
 
     self.ascii_print()
 
@@ -96,6 +98,8 @@ class Linear_QNet(nn.Module):
     # Input layer
     main_block[0].append(nn.ReLU())
     main_block[0].append(nn.Linear(in_features=self.in_features, out_features=self.b1_nodes))
+    if self.dropout:
+      main_block[0].append(nn.Dropout(p=self.dropout))
 
     ## B1 Block
     if self.b2_layers > 0:
@@ -104,6 +108,8 @@ class Linear_QNet(nn.Module):
       while layer_count < self.b1_layers:
         main_block[1].append(nn.ReLU())
         main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
+        if self.dropout:
+          main_block[1].append(nn.Dropout(p=self.dropout))
         layer_count += 1
       main_block[1].append(nn.ReLU())
       main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b2_nodes))
@@ -121,9 +127,13 @@ class Linear_QNet(nn.Module):
         # With a B3 block
         layer_count = 1
         while layer_count < self.b2_layers:
-          layer_count += 1
           main_block[2].append(nn.ReLU())
           main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b2_nodes))        
+          if self.dropout:
+            main_block[2].append(nn.Dropout(p=self.dropout))
+          layer_count += 1
+        if self.dropout:
+          main_block[2].append(nn.Dropout(p=self.dropout))
         main_block[2].append(nn.ReLU())
         main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b3_nodes))
       else:
@@ -139,10 +149,12 @@ class Linear_QNet(nn.Module):
     ## B3 Block
     if self.b3_layers > 0:
       layer_count = 1
-      while layer_count < self.b2_layers:
+      while layer_count < self.b3_layers:
         main_block[3].append(nn.ReLU())
         main_block[3].append(nn.Linear(in_features=self.b3_nodes, out_features=self.b3_nodes))
         layer_count += 1
+        if self.dropout and layer_count != self.b3_layers:
+          main_block[3].append(nn.Dropout(p=self.dropout))
     
     ## Output block
     if self.b2_layers == 0:
@@ -161,6 +173,12 @@ class Linear_QNet(nn.Module):
       
     self.main_block = main_block
 
+  def update_dropout(self, p_value):
+    for layer in self.main_block:
+      for block in layer:
+        if isinstance(block, nn.Dropout):
+          print(f"LinearQNet: Updating dropout to {p_value}")
+          block.p = p_value
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
     print("============ Neural Network Architecture =============")

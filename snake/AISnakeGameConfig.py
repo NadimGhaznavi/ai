@@ -31,7 +31,12 @@ class AISnakeGameConfig():
     parser.add_argument('-b3n', '--b3_nodes', type=int, default=0, help='Number of nodes in the block 3 hidden layer(s).')
     parser.add_argument('-b3l', '--b3_layers', type=int, default=0, help='Number of block 3 hidden layers.')
     parser.add_argument('-b3s', '--b3_score', type=int, default=0, help='Insert a B3 layer when reaching this score.')
-    parser.add_argument('-e', '--epsilon', type=int, help='Epsilon value for exploration.')
+    parser.add_argument('-d', '--discount', type=float, default=0, help='The Linear Q discount factor.')
+    parser.add_argument('-do', '--dropout', type=float, default=0, help='Insert a Droput layer with this p value, used with the --dropout_score switch.')
+    parser.add_argument('-ds', '--dropout_score', type=int, default=0, help='Active the p value of the Droput layer when reaching this score.')
+    parser.add_argument('-e', '--epsilon', type=int, default=0, help='Epsilon value for exploration.')
+    parser.add_argument('-i', '--ini_file', type=str, default='AISnakeGame.ini', help='The path to the configuration file.')
+    parser.add_argument('-l', '--learning_rate', type=float, default=0, help='Optimizer learning rate.')
     parser.add_argument('-mg', '--max_games', type=int, default=0, help='Exit the simulation after max_games games.')
     parser.add_argument('-ms', '--max_score', type=int, default=0, help='Exit the simulation if a score of max_score is achieved.')
     parser.add_argument('-msn', '--max_score_num', type=int, default=0, help='Exit the simulation if a score of max_score is achieved max_num times.')
@@ -52,9 +57,10 @@ class AISnakeGameConfig():
 
     # Access the INI file 
     self.config = configparser.ConfigParser()
-    if not os.path.isfile(ini_file):
-      print(f"ERROR: Cannot find INI file ({ini_file}), exiting")
-    self.config.read(ini_file)
+    self.config['default'] = { 'ini_file': args.ini_file }
+    if not os.path.isfile(args.ini_file):
+      print(f"ERROR: Cannot find INI file ({args.ini_file}), exiting")
+    self.config.read(args.ini_file)
     
     # Override INI file settings if values were passed in via command line switches
     default = self.config['default']
@@ -76,10 +82,16 @@ class AISnakeGameConfig():
       default['b3_layers'] = str(args.b3_layers)
     if args.b3_score:
       default['b3_score'] = str(args.b3_score)    
-    if args.sim_data_dir:
-      default['sim_data_dir'] = args.sim_data_dir
+    if args.discount:
+      default['discount'] = str(args.discount)
+    if args.dropout:
+      default['dropout'] = str(args.dropout)
+    if args.dropout_score:
+      default['dropout_score'] = str(args.dropout_score)
     if args.epsilon:
       default['epsilon_value'] = str(args.epsilon)
+    if args.learning_rate:
+      default['learning_rate'] = str(args.learning_rate)
     if args.max_games:
       default['max_games'] = str(args.max_games)
     if args.max_score:
@@ -102,10 +114,37 @@ class AISnakeGameConfig():
       default['nu_value_max'] = str(args.nu_value_max)
     if args.random_seed:
       default['random_seed'] = str(args.random_seed)
+    if args.sim_data_dir:
+      default['sim_data_dir'] = args.sim_data_dir
     if args.speed:
       default['game_speed'] = str(args.speed)
     if args.ai_version:
       default['ai_version'] = str(args.ai_version)
+
+    if args.b1_nodes == 0:
+      print(f"ERROR: You must set the --b1_nodes switch to a non-zero value")
+      sys.exit(1)
+
+    if args.b1_layers == 0:
+      print(f"ERROR: You must set the --b1_layers switch to a non-zero value")
+      sys.exit(1)
+
+    if args.b2_layers > 0 and args.b2_nodes == 0:
+      print(f"ERROR: You must set the --b2_nodes switch to a non-zero value when using the --b2_layers switch")
+      sys.exit(1)
+
+    if args.b3_layers > 0 and args.b3_nodes == 0:
+      print(f"ERROR: You must set the --b3_nodes switch to a non-zero value when using the --b3_layers switch")
+      sys.exit(1)
+
+    if args.dropout > 0 and args.dropout_score == 0:
+      print(f"ERROR: You must set the --dropout_score switch when using the --dropout switch")
+      sys.exit(1)
+
+    if args.dropout and args.b2_layers == 0:
+      print(f"ERROR: You must set the --b2_layers switch to a non-zero value when using the --dropout switch")
+      sys.exit(1)
+
 
   def get(self, key):
     """
@@ -122,18 +161,18 @@ class AISnakeGameConfig():
     # Key/value pairs where the value is an integer
     integer_values = ['ai_version', 'b1_nodes', 'b1_layers', 'b1_score', 'b2_nodes', 
                       'b2_layers', 'b2_score', 'b3_nodes', 'b3_layers', 'b3_score', 
-                      'batch_size', 'board_border', 'board_height',
-                      'board_width', 'epsilon_value', 'game_speed', 'in_features', 
+                      'batch_size', 'board_border', 'board_height', 'board_width', 
+                      'dropout_score', 'epsilon_value', 'game_speed', 'in_features', 
                       'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
                       'max_score_num', 'out_features', 'random_seed', 'score_height', 
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
                       'new_layer_score', 'nu_bad_games', 'nu_max_zero_scores', 
                       'nu_max_moves', 'nu_score', 'nu_value']
     # Key/value pairs where the value is a float
-    float_values = ['discount', 'learning_rate']
+    float_values = ['discount', 'dropout', 'learning_rate']
     # Key/value pairs where the value is a boolean
-    boolean_values = ['nu_print_stats', 'nu_verbose', 'print_stats', 'print_nu_stats', 
-                      'sim_checkpoint_enable', 'sim_checkpoint_verbose', 
+    boolean_values = ['epsilon_print_stats', 'nu_enable','nu_print_stats', 'nu_verbose', 'print_stats', 
+                      'print_nu_stats', 'sim_checkpoint_enable', 'sim_checkpoint_verbose', 
                       'sim_desc_verbose']
     # For all other key/value pairs, the value is a string.
     value = self.config['default'][key]
