@@ -131,4 +131,5 @@ I am exploring strategies to have the AI develop a new, better strategies, but s
 * [Flappy Bird Gymnasium on GitHub](https://github.com/markub3327/flappy-bird-gymnasium)
 * [Tutorial Code on GitHub](https://github.com/johnnycode8/dqn_pytorch/blob/main/agent.py)
 * [AI Snake Game](https://ai.osoyalce.com/ai/ai-snake-game.html)
+* [The Flappy Bird code in my GitHub repository](#https://github.com/NadimGhaznavi/ai/tree/main/flappy_bird)
 
