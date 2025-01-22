@@ -73,7 +73,9 @@ This is the *Q-Learning Formula* which is used to move the policy network to the
 
 Where: 
 
-> $$ state_n is the new state$$
+> $$ state_n $$
+
+-is the new state.
 
 So the change is represented by:
 
@@ -81,7 +83,7 @@ So the change is represented by:
 
 The effect of the change is tempered by the *learning rate* and is typically very small, e.g. 0.01 or 0.001.
 
-the *DQN Target Formula* is defined as follows. 
+The *DQN Target Formula* is defined as follows. 
 
 If new state is terminal i.e. the game is over:
 
