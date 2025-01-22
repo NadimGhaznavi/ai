@@ -7,6 +7,7 @@ title: Flappy Bird
 * [Experience Replay](#experience-replay)
 * [Q-Learning Formula](#q-learning-formula)
 * [Calculating Loss](#calculating-loss)
+* [The Epsilon Greedy Function](#the-epsilon-greedy-function)
 
 # Overview of Flappy Bird Gymnasium
 
@@ -65,8 +66,10 @@ These five elements are stored in a Python *dequeu*, which is a fixed length arr
 This is the *Q-Learning Formula* which is used to move the policy network to the target network.
 
 $$ q[state, action] = q[state, action] + learningRate * (reward * discount * max(q[state_n,:]) -q[state,action]) $$
+
 Where: 
-$$ state_n - New State $$
+
+$$ state_n is the new state$$
 
 So the change is represented by:
 
@@ -74,7 +77,7 @@ $$ reward * discount * max(q[state_n,:]) -q[state,action] $$
 
 The effect of the change is tempered by the *learning rate* and is typically very small, e.g. 0.01 or 0.001.
 
-*DQN Target Formula* is defined as follows. 
+the *DQN Target Formula* is defined as follows. 
 
 If new state is terminal i.e. the game is over:
 
@@ -93,7 +96,33 @@ $$ loss = mse(current_q, target_q) $$
 
 $$ \frac{( C - T )^2} { 2 } $$
 
+# The Epsilon Greedy Function
+The *epsilon greedy function* can be described as follows:
+```
+if rand() < epsilon:
+  choose random action
+else:
+  choose best calculated action
+
+decrease epsilon
+```
+The *choose best calculated action* is the best Q value.
+```
+
+# Conclusion and Lessons Learned
+
+The *Flappy Bird* tutorial helped me gain a better, more theoretical, understandin of Linear Q Networks. I also learned about using yaml
+for configuration managment. Yaml is a bit better than using the Python ConfigParser which I used in the my [AI Snake Game](https://ai.osoyalce.com/pages/ai-snake-game.html). It provides support for booleans and nested configuration elements including lists.
+
+I have also learned how to include *Latex* into my GitHub pages website as show cased on this page.
+
+However, the *AI Snake Game* remains my favorite sandbox for ongoing AI Development. It has three input features corresponding to *go straight*, *turn left* and *turn right*, versus two input features that the *Flappy Bird* simulation uses (flap or don't flap). The AI Snake Gamee also has a more varied game state. Specifically, when the snake reaches a length that is more than twice the width of the board (I'm using a 20x20 board), then there is an added challenge. With my current setup, the AI can achieve scores of up to around 50, but not really any higher. At that point in the game, the AI has settled into a strategy of moving the snake around the edge of the screen and then cutting through the middle to get the food. It continues to the other edge and then circles again. While this strategy is good for scores up to 40, it fails to reach scores in the 60s because it ends up hitting itself.
+
+I am exploring strategies to have the AI develop a new, better strategies, but so far nothing has worked. It remains stuck in a *local minimum*.
 
 # Links
 * [Implement Deep Q-Learning with PyTorch and Train Flappy Bird! DQN PyTorch](https://www.youtube.com/watch?v=arR7KzlYs4w&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi&index=1&ab_channel=JohnnyCode)
 * [Flappy Bird Gymnasium on GitHub](https://github.com/markub3327/flappy-bird-gymnasium)
+* [Tutorial Code on GitHub](https://github.com/johnnycode8/dqn_pytorch/blob/main/agent.py)
+* [AI Snake Game](https://ai.osoyalce.com/ai/ai-snake-game.html)
+

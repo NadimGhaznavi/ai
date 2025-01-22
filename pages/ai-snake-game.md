@@ -11,6 +11,7 @@ title: AI Snake Game
 * [Configuration File Management](#configuration-file-management)
 * [Running the Snake Game](#running-the-snake-game)
 * [Running the AI Snake Game](#running-the-ai-snake-game)
+  * [Understanding the Reward System](#understanding-the-reward-system]
 * [AI Snake Game Keyboard Shortcuts](#ai-snake-game-keyboard-shortcuts)
 * [Codebase Architecture](#codebase-architecture)
 * [Command Line Options](#command-line-options)
@@ -18,6 +19,7 @@ title: AI Snake Game
   * [Adding Layers On The Fly](#adding-layers-on-the-fly)
   * [Changing P Values of Dropout Layers On the Fly](#changing-p-values-of-dropout-layers-on-the-fly)
 * [Matplotlib Game Score Plot](#matplotlib-game-score-plot)
+* [Using Batch Scripts to Fine Tune Hyperparameters](#using-batch-scripts-to-fine-tune-hyperparameters)
 * [Limitations and Lessons Learned](#limitations-and-lessons-learned)
 * [Links](#Links)
 * [Credits and Acknowledgements](#credits-and-acknowledgements)
@@ -135,6 +137,17 @@ Key       | Description
  p        | Pause the game
  spacebar | Resume the game
  q        | Quit the game
+
+# Understanding the Reward System
+
+There are three *rewards* in the AI Snake Game:
+
+Reward Value | Reward Description
+-------------|---------------------
+ -10         | Game over
+ +10         | Snake got a piece of food
+
+At the end of each move, the AI Snake Game simulation calls the AI Agent's `train_short_memory()` function. The **only** thing this function does is call the *QTrainer's* `train_step()` function, where the weights and bias' are rebalanced.
 
 # Codebase Architecture
 The `asg.py` is the main front end to the AI Snake Game. It's the code that you need to execute in order to run a simulation. 
@@ -287,6 +300,14 @@ These features allow easy experimentation with different neural network architec
 
 I was curious about the effect of adding layers on the fly. You may want to experiment with this option using the `--b1_score`, `--b2_score` and `--b3_score` which are features that drop in a B1, B2 or B3 layer when the AI reaches a particular score. What I learned was that adding layers on-the-fly disrupts the performance of the AI (no big surprise). When adding a B1 layer i.e. one that matches the shape of the existing B1 layer is much less disruptive: The AI recovers relatively quickly and carries on. Adding a new B2 layer i.e. when you didn't have any B2 layers and the shape is different than the B1 layer is **extremely** disruptive to the perfomance of the neural network.
 
+## Adding Dropout Layers
+
+I have implemented a `--dropout-static` switch that instructs the `asg.py` to create PyTorch `nn.Dropout` layers with a *P Value* that is passed in with an argument to the `--dropout-static` switch. The code takes care of inserting these *dropout layers* are in between the hidden B1, B2 and B3 hidden layers.
+
+I implemented this feature to see if adding additional noise to the simulation would stop the AI from getting stuck in sub-optimal game strategy. It's stuck now: When the snake reaches a length that is more than twice the width of the board (I'm using a 20x20 board), then there is an added challenge. With my current setup, the AI can achieve scores of up to around 50, but not really any higher. At that point in the game, the AI has settled into a strategy of moving the snake around the edge of the screen and then cutting through the middle to get the food. It continues to the other edge and then circles again. While this strategy is good for scores up to 40, it fails to reach scores in the 60s because it ends up hitting itself.
+
+I currently have a [batch script](#using-batch-scripts-to-fine-tune-hyperparameters) that is running simulations with varying learning rates to see if tweaking that value will help it get past this challenge.
+
 ## Changing P Values of Dropout Layers On the Fly
 
 I have implemented the following switches to experiment with the effect of dropout layers on the performance of the neural network and how it can help the AI to overcome local minimums:
@@ -298,6 +319,69 @@ I have implemented the following switches to experiment with the effect of dropo
 The way I have configured the code is that these three switches must all be used together. Initially, the code sets the P value of the dropout layer to zero. When the AI agent achieves a Snake Game score specified by the `--dropout_min` value the P value of the drop out layer(s) are activated. Once the score specified by the `--dropout_max` score is reached the P value is set back to zero.
 
 The dropout layers are inserted before each ReLU layer of the model, except for the output and input layers. 
+
+# Using Batch Scripts to Fine Tune Hyperparameters
+
+Fine tuning the hyperparameters and neural network architecture are key elements in finding successful neural network configurations. Scripting these *explorations* is a systematic and efficient way to execute this process. Here is an example of batch script I am using that does 10 simulation runs that vary the *learning rate* of the configuration from 0.0005 to 0.0015:
+```
+#!/bin/bash
+#
+CONFIG=configs/B1_100_nodes-B2_200_nodes-B3_400_nodes-dropout_0.2.ini
+
+MAX_GAMES=800
+
+# Learnign rate, testing from 0.0005 to 0.0015 and skipping 0.001,
+# because I already have that simulation result.
+COUNT=5
+
+while [ $COUNT != 10 ]; do
+	LR=0.000${COUNT}
+	python asg.py \
+		-i $CONFIG \
+		--max_games $MAX_GAMES \
+		-l $LR 
+	COUNT=$((COUNT+1))
+done
+COUNT=1
+while [ $COUNT != 6 ]; do
+	LR=0.001${COUNT}
+	python asg.py \
+		-i $CONFIG \
+		--max_games $MAX_GAMES \
+		-l $LR 
+	COUNT=$((COUNT+1))
+done
+```
+
+The simulation runs produce a CSV high scores file which allows me to easily analyse the results of the batch runs:
+```
+$ echo; for x in $(ls *high*); do echo $x; cat $x; echo; done
+
+800_sim_highscore.csv
+Game Number,High Score
+0,0
+9,1
+120,2
+265,5
+
+801_sim_highscore.csv
+Game Number,High Score
+0,0
+15,1
+171,2
+247,3
+268,4
+292,5
+
+802_sim_highscore.csv
+Game Number,High Score
+0,0
+11,1
+90,2
+  .
+  .
+  .
+```
 
 # Matplotlib Game Score Plot
 The `asg.py` front end launches a matplatlib window that graphs out game score and average game score as the simulation runs.
