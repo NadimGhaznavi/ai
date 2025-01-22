@@ -120,7 +120,7 @@ The *choose best calculated action* is the best Q value.
 The *Flappy Bird* tutorial helped me gain a better, more theoretical, understandin of Linear Q Networks. I also learned about using yaml
 for configuration managment. Yaml is a bit better than using the Python ConfigParser which I used in the my [AI Snake Game](https://ai.osoyalce.com/pages/ai-snake-game.html). It provides support for booleans and nested configuration elements including lists.
 
-I have also learned how to include *Latex* into my GitHub pages website as showcased on this page.
+I have also learned how to include *Latex* into my GitHub pages website as showcased on this page as well as some tricks for using Visual Studio Code, which is my preferred *Integrated Development Environment* (IDE).
 
 However, the *AI Snake Game* remains my favorite sandbox for ongoing AI Development. It has three input features corresponding to *go straight*, *turn left* and *turn right*, versus two input features that the *Flappy Bird* simulation uses (flap or don't flap). The AI Snake Gamee also has a more varied game state. Specifically, when the snake reaches a length that is more than twice the width of the board (I'm using a 20x20 board), then there is an added challenge. With my current setup, the AI can achieve scores of up to around 50, but not really any higher. At that point in the game, the AI has settled into a strategy of moving the snake around the edge of the screen and then cutting through the middle to get the food. It continues to the other edge and then circles again. While this strategy is good for scores up to 40, it fails to reach scores in the 60s because it ends up hitting itself.
 
