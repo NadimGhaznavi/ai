@@ -129,7 +129,7 @@ I am exploring strategies to have the AI develop a new, better strategies, but s
 # Links
 * [Implement Deep Q-Learning with PyTorch and Train Flappy Bird! DQN PyTorch](https://www.youtube.com/watch?v=arR7KzlYs4w&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi&index=1&ab_channel=JohnnyCode)
 * [Flappy Bird Gymnasium on GitHub](https://github.com/markub3327/flappy-bird-gymnasium)
-* [Tutorial Code on GitHub](https://github.com/johnnycode8/dqn_pytorch/blob/main/agent.py)
+* [Tutorial Code on GitHub](https://github.com/johnnycode8/dqn_pytorch/blob/main/)
 * [AI Snake Game](https://ai.osoyalce.com/ai/ai-snake-game.html)
 * [The Flappy Bird code in my GitHub repository](#https://github.com/NadimGhaznavi/ai/tree/main/flappy_bird)
 
