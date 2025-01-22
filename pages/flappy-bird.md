@@ -69,16 +69,15 @@ These five elements are stored in a Python *dequeu*, which is a fixed length arr
 # Q-Learning Formula
 This is the *Q-Learning Formula* which is used to move the policy network to the target network.
 
-> [!IMPORTANT]
 > $$ q[state, action] = q[state, action] + learningRate * (reward * discount * max(q[state_n,:]) -q[state,action]) $$
 
 Where: 
 
-$$ state_n is the new state$$
+> $$ state_n is the new state$$
 
 So the change is represented by:
 
-$$ reward * discount * max(q[state_n,:]) -q[state,action] $$
+> $$ reward * discount * max(q[state_n,:]) -q[state,action] $$
 
 The effect of the change is tempered by the *learning rate* and is typically very small, e.g. 0.01 or 0.001.
 
@@ -86,20 +85,20 @@ the *DQN Target Formula* is defined as follows.
 
 If new state is terminal i.e. the game is over:
 
-$$ q[state, action] = reward $$
+> $$ q[state, action] = reward $$
 
 Otherwise:
 
-$$ reward + discount * max(q[state_n,:]) $$
+> $$ reward + discount * max(q[state_n,:]) $$
 
 # Calculating Loss
 We are using the *Mean Square Error* (MSE) function to calculate loss:
 
-$$ loss = mse(current_q, target_q) $$
+> $$ loss = mse(current_q, target_q) $$
 
 -and the *mean square error* function is simply:
 
-$$ \frac{( C - T )^2} { 2 } $$
+> $$ \frac{( C - T )^2} { 2 } $$
 
 # The Epsilon Greedy Function
 The *epsilon greedy function* can be described as follows:
@@ -119,7 +118,7 @@ The *choose best calculated action* is the best Q value.
 The *Flappy Bird* tutorial helped me gain a better, more theoretical, understandin of Linear Q Networks. I also learned about using yaml
 for configuration managment. Yaml is a bit better than using the Python ConfigParser which I used in the my [AI Snake Game](https://ai.osoyalce.com/pages/ai-snake-game.html). It provides support for booleans and nested configuration elements including lists.
 
-I have also learned how to include *Latex* into my GitHub pages website as show cased on this page.
+I have also learned how to include *Latex* into my GitHub pages website as showcased on this page.
 
 However, the *AI Snake Game* remains my favorite sandbox for ongoing AI Development. It has three input features corresponding to *go straight*, *turn left* and *turn right*, versus two input features that the *Flappy Bird* simulation uses (flap or don't flap). The AI Snake Gamee also has a more varied game state. Specifically, when the snake reaches a length that is more than twice the width of the board (I'm using a 20x20 board), then there is an added challenge. With my current setup, the AI can achieve scores of up to around 50, but not really any higher. At that point in the game, the AI has settled into a strategy of moving the snake around the edge of the screen and then cutting through the middle to get the food. It continues to the other edge and then circles again. While this strategy is good for scores up to 40, it fails to reach scores in the 60s because it ends up hitting itself.
 
