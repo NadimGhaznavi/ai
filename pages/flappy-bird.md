@@ -28,15 +28,19 @@ title: Flappy Bird
 
 The actions, or *action space* is defined as having the following two state:
 
-* 0 - do nothing
-* 1 - flap
+State | State Description
+------|-------------------
+ 0    | Do nothing
+ 1    | Flap
 
 There are four *rewards* that are assigned, based on the actions of the bird:
 
-* +0.1 - every frame it stays alive
-* +1.0 - successfully passing a pipe
-* -1.0 - dying
-* −0.5 - touch the top of the screen
+Rewards | Description
+--------|-----------------------------
+ +0.1   | For every frame Flappy Bird stays alive
+ +1.0   | Each time Flappy Bird successfully passes a pipe
+ -1.0   | When Flappy Bird loses the game
+ −0.5   | When Flappy bird loses the game by touching the top of the screen
 
 # Environment Setup
 
@@ -65,7 +69,8 @@ These five elements are stored in a Python *dequeu*, which is a fixed length arr
 # Q-Learning Formula
 This is the *Q-Learning Formula* which is used to move the policy network to the target network.
 
-$$ q[state, action] = q[state, action] + learningRate * (reward * discount * max(q[state_n,:]) -q[state,action]) $$
+> [!IMPORTANT]
+> $$ q[state, action] = q[state, action] + learningRate * (reward * discount * max(q[state_n,:]) -q[state,action]) $$
 
 Where: 
 
