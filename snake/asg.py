@@ -25,7 +25,7 @@ from AISnakeGameConfig import AISnakeGameConfig
 from AISnakeGame import AISnakeGame
 from LinearQNet import Linear_QNet
 from AIAgent import AIAgent
-from SnakeGamePlots import plot
+from SnakeGamePlots import MyPlot
 from AISnakeGameUtils import get_new_model, get_sim_desc, get_next_ai_version
 
 def print_game_summary(ai_version, agent, score, record, game):
@@ -47,7 +47,7 @@ def print_game_summary(ai_version, agent, score, record, game):
   summary = summary + ' - ' + game.lose_reason
   print(summary)
 
-def train(ai_version, new_sim_run):
+def train(ai_version, new_sim_run, my_plot):
   """
   This is the AI Snake Game main training loop.
   """
@@ -129,12 +129,14 @@ def train(ai_version, new_sim_run):
       agent.n_games += 1
       # Implement the max_games feature where the simulation ends when the number 
       # of games reaches the max_games threashold
+      
       if agent.max_games != 0 and agent.n_games == agent.max_games:
         lose_reason = "Executed max_games value of " + str(agent.max_games)
         game.lose_reason = lose_reason
         agent.set_config('lose_reason', lose_reason)
         agent.save_sim_desc()
         print_game_summary(ai_version, agent, score, record, game)
+        my_plot.save()
         game.quit_game()
 
       agent.train_long_memory()
@@ -167,6 +169,7 @@ def train(ai_version, new_sim_run):
           agent.set_config('lose_reason', lose_reason)
           agent.save_sim_desc()
           print_game_summary(ai_version, agent, score, record, game)
+          my_plot.save()
           game.quit_game()
         #" a total of " + str(agent.max_score_num_count) + " times"
 
@@ -180,9 +183,8 @@ def train(ai_version, new_sim_run):
       mean_time = round(game.sim_time / agent.n_games, 1)
       plot_mean_times.append(mean_time)
 
-      plot(plot_scores, plot_mean_scores, 
-           plot_times, plot_mean_times, 
-           ai_version)
+      
+      my_plot.plot(plot_scores, plot_mean_scores, plot_times, plot_mean_times, ai_version)
 
 if __name__ == '__main__':
   ini = AISnakeGameConfig()
@@ -202,7 +204,10 @@ if __name__ == '__main__':
       # Get a new AI version for this simulation
       ai_version = get_next_ai_version()
   
-  train(ai_version, new_sim_run)
+  my_plot = MyPlot(ai_version)
+  train(ai_version, new_sim_run, my_plot)
+  
+
 
 
 
