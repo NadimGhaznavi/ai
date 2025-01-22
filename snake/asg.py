@@ -64,10 +64,6 @@ def train(ai_version, new_sim_run):
     # This is a new simulation
     config = AISnakeGameConfig() # Get the settings from the AISnakeGame.ini
     model = Linear_QNet(config) # Get a new model
-    if model.dropout != 0:
-      # If the model has dropout, turn it off. We'll turn it back on if/when the AI
-      # agent reaches a high enough score (--dropout_score <score>)
-      model.update_dropout(0.0)
     agent = AIAgent(game, model, config, ai_version) # Get a new instance of the AI Agent
     game.set_agent(agent)
     game.reset()
@@ -145,14 +141,17 @@ def train(ai_version, new_sim_run):
       if score > record:
         # New highscore!!! YAY!
         record = score
-        if agent.model.dropout != 0:
-          # The model has dropout layers
-          if agent.model.dropout_score != 0 and score >= agent.model.dropout_score:
-            # Turn dropout on
-            agent.model.update_dropout(agent.model.dropout_score)
-          if agent.model.dropout_score != 0 and score < agent.model.dropout_score:
-            # Turn dropout off
-            agent.model.update_dropout(0.0)
+
+        # Check if the model has dynamic dropout layers
+        if agent.model.has_dynamic_dropout():
+          if agent.model.dropout_min != 0:
+            if score >= agent.model.dropout_min:
+              # Turn dropout on
+              agent.model.set_p_value(agent.model.dropout_p)
+            elif score <= agent.model.dropout_max:
+              # Turn dropout off
+              agent.model.set_p_value(0.0)
+            
         agent.nu_algo.new_highscore(record) # Pass the new highscore to NuAlgo
         agent.save_checkpoint() # Save the simulation state
         game.sim_high_score = record

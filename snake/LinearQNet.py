@@ -79,8 +79,27 @@ class Linear_QNet(nn.Module):
     self.b3_nodes = config.get('b3_nodes')
     self.b3_layers = config.get('b3_layers')
     self.out_features = config.get('out_features')
-    self.dropout = config.get('dropout')
-    self.dropout_score = config.get('dropout_score')
+    self.dropout_p = config.get('dropout_p')
+    self.dropout_min = config.get('dropout_min')
+    self.dropout_max = config.get('dropout_max')
+    self.dropout_static = config.get('dropout_static')
+    self.p_value = 0
+
+    # Enable dropout layers in the model if the user has specified a dynamic
+    # ( --dropout_p, --dropout_min and --dropout_max) or static ( --dropout_staic)
+    # configuration
+    if self.dropout_min > 0 or self.dropout_static > 0:
+      self.dropout = True
+      if self.dropout_min:
+        # Dynamic dropout configuration
+        self.p_value = self.dropout_p
+      else:
+        # Static droptout confifiguration
+        self.p_value = self.dropout_static
+
+    else:
+      self.dropout = False
+
 
     self.ascii_print()
 
@@ -99,7 +118,7 @@ class Linear_QNet(nn.Module):
     main_block[0].append(nn.ReLU())
     main_block[0].append(nn.Linear(in_features=self.in_features, out_features=self.b1_nodes))
     if self.dropout:
-      main_block[0].append(nn.Dropout(p=self.dropout))
+      main_block[0].append(nn.Dropout(p=self.dropout_p))
 
     ## B1 Block
     if self.b2_layers > 0:
@@ -108,8 +127,8 @@ class Linear_QNet(nn.Module):
       while layer_count < self.b1_layers:
         main_block[1].append(nn.ReLU())
         main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
-        if self.dropout:
-          main_block[1].append(nn.Dropout(p=self.dropout))
+        if self.p_value:
+          main_block[1].append(nn.Dropout(p=self.p_value))
         layer_count += 1
       main_block[1].append(nn.ReLU())
       main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b2_nodes))
@@ -129,11 +148,11 @@ class Linear_QNet(nn.Module):
         while layer_count < self.b2_layers:
           main_block[2].append(nn.ReLU())
           main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b2_nodes))        
-          if self.dropout:
-            main_block[2].append(nn.Dropout(p=self.dropout))
+          if self.p_value:
+            main_block[2].append(nn.Dropout(p=self.p_value))
           layer_count += 1
-        if self.dropout:
-          main_block[2].append(nn.Dropout(p=self.dropout))
+        if self.p_value:
+          main_block[2].append(nn.Dropout(p=self.p_value))
         main_block[2].append(nn.ReLU())
         main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b3_nodes))
       else:
@@ -173,12 +192,6 @@ class Linear_QNet(nn.Module):
       
     self.main_block = main_block
 
-  def update_dropout(self, p_value):
-    for layer in self.main_block:
-      for block in layer:
-        if isinstance(block, nn.Dropout):
-          print(f"LinearQNet: Updating dropout to {p_value}")
-          block.p = p_value
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
     print("============ Neural Network Architecture =============")
@@ -200,6 +213,13 @@ class Linear_QNet(nn.Module):
     """
     return self.main_block(x)
   
+  def has_dynamic_dropout(self):
+    """
+    Returns True if the network has dynamic dropout layers.
+    """
+    if self.dropout_min:
+      return True
+    return False
   def insert_layer(self, block_num):
     # Insert the new layer
     print(f"LinearQNet: Inserting new B{block_num} layer")
@@ -276,4 +296,14 @@ class Linear_QNet(nn.Module):
         'weights_only': True,
         'num_games': 0
     }, save_path)
+
+  def set_p_value(self, p_value):
+    if p_value == self.p_value:
+      # The P value for the dropout layers is already set to this value
+      return
+    for layer in self.main_block:
+      for block in layer:
+        if isinstance(block, nn.Dropout):
+          print(f"LinearQNet: Setting P value for dropout layer(s) to {p_value}")
+          block.p = p_value
 
