@@ -118,7 +118,7 @@ class Linear_QNet(nn.Module):
     main_block[0].append(nn.ReLU())
     main_block[0].append(nn.Linear(in_features=self.in_features, out_features=self.b1_nodes))
     if self.dropout:
-      main_block[0].append(nn.Dropout(p=self.dropout_p))
+      main_block[0].append(nn.Dropout(p=self.p_value))
 
     ## B1 Block
     if self.b2_layers > 0:
@@ -127,7 +127,7 @@ class Linear_QNet(nn.Module):
       while layer_count < self.b1_layers:
         main_block[1].append(nn.ReLU())
         main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
-        if self.p_value:
+        if self.dropout:
           main_block[1].append(nn.Dropout(p=self.p_value))
         layer_count += 1
       main_block[1].append(nn.ReLU())
@@ -148,7 +148,7 @@ class Linear_QNet(nn.Module):
         while layer_count < self.b2_layers:
           main_block[2].append(nn.ReLU())
           main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b2_nodes))        
-          if self.p_value:
+          if self.dropout:
             main_block[2].append(nn.Dropout(p=self.p_value))
           layer_count += 1
         if self.p_value:
