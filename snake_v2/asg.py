@@ -52,7 +52,7 @@ def train(ai_version, new_sim_run, my_plot):
   This is the AI Snake Game main training loop.
   """
   # Get a mew instance of the AI Snake Game
-  game = AISnakeGame(ai_version)
+  game = AISnakeGame(ai_version, my_plot)
 
   # Initialize the simulation metrics
   plot_scores = [] # Scores for each game
@@ -77,7 +77,7 @@ def train(ai_version, new_sim_run, my_plot):
     config = config.load_config(old_ai_version)
     model = Linear_QNet(config)
     ai_version = get_next_ai_version()
-    game = AISnakeGame(ai_version)
+    game = AISnakeGame(ai_version, my_plot)
     agent = AIAgent(game, model, config, ai_version)
     game.set_agent(agent)
     game.reset()
