@@ -14,35 +14,34 @@ from random import randint
 
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
-from AISnakeGameConfig import AISnakeGameConfig
 from QTrainer import QTrainer
+from LinearQNet import LinearQNet
 from SnakeGameElement import Direction
 from SnakeGameElement import Point
 from EpsilonAlgo import EpsilonAlgo
 from NuAlgo import NuAlgo
 
 class AIAgent:
-  def __init__(self, game, l1_model, l2_model, ai_version):
-    self.ai_version = ai_version
+  def __init__(self, ini, game):
     self.game = game
-    self.highscore = 0
-    
-    self.ini = AISnakeGameConfig(ai_version)
+    self.ini = ini
 
-    self.batch_size = self.ini.get('batch_size')
+    # Level 1 instances
+    self.l1_epsilon_algo = EpsilonAlgo(ini, 1) # Epsilon Algorithm for exploration/exploitation
+    self.l1_memory = deque(maxlen=ini.get('max_memory'))
+    self.l1_model = LinearQNet(ini, 1)
+    self.l1_trainer = QTrainer(ini, self.l1_model)
+
+    self.l2_epsilon_algo = EpsilonAlgo(ini, 2)
+    self.l2_memory = deque(maxlen=self.ini.get('max_memory'))
+    self.l2_model = LinearQNet(ini, 2)
+    self.l2_trainer = QTrainer(ini, self.l2_model)
+
 
     # Used in the state map, this initializes it to some random direction
     self.last_dirs = [ 0, 0, 1, 0 ]
-
-    self.l1_epsilon_algo = EpsilonAlgo(1, self.ai_version) # Epsilon Algorithm for exploration/exploitation
-    self.l1_memory = deque(maxlen=self.ini.get('max_memory'))
-    self.l1_model = l1_model
-    self.l1_trainer = QTrainer(l1_model, self.ai_version)
-
-    self.l2_epsilon_algo = EpsilonAlgo(2, self.ai_version)
-    self.l2_memory = deque(maxlen=self.ini.get('max_memory'))
-    self.l2_model = l2_model
-    self.l2_trainer = QTrainer(self.l2_model, self.ai_version)
+    self.highscore = 0 # Current highscore
+    self.batch_size = self.ini.get('batch_size')
 
     self.n_games = 0 # Number of games played
     self.n_games_buf = -1    
@@ -56,24 +55,32 @@ class AIAgent:
   def get_action(self, state):
 
     l2_score = self.ini.get('l2_score')
+    game_score = self.game.get_score()
     
-    # Random action (epsilon exploration)
-    if self.game.score <= l2_score:
+    # Random epsilon based action (exploration)
+    if game_score <= l2_score:
+      # Use the Level 1 epsilon algorithm, with its own epsilon value
       random_move = self.l1_epsilon_algo.get_move()
     else:
+      # Use the Level 2 epsilon algorithm, with its own epsilon value
       random_move = self.l2_epsilon_algo.get_move()
     
     if random_move:
+      # Epsilon algorithm returned a move (not False)
       self.n_games_buf = self.n_games
       return random_move
     
     # AI agent based action
     final_move = [0, 0, 0]
     state0 = torch.tensor(state, dtype=torch.float)
-    if self.game.score <= l2_score:
+
+    if game_score <= l2_score:
+      # Use the Level 1 model
       prediction = self.l1_model(state0)
     else:
+      # Use the Level 2 model
       prediction = self.l2_model(state0)
+
     move = torch.argmax(prediction).item()
     final_move[move] = 1 
       
@@ -81,7 +88,7 @@ class AIAgent:
 
   def get_checkpoint_filenames(self):
     # Get the checkpoint filename componenets
-    ai_version = self.ai_version
+    ai_version = self.ini.get('ai_version')
     checkpoint_basename = self.ini.get('sim_checkpoint_basename')
     checkpoint_basename_l2 = self.ini.get('l2_sim_checkpoint_basename')
     sim_data_dir = self.ini.get('sim_data_dir')
@@ -93,7 +100,7 @@ class AIAgent:
   
   def get_model_filenames(self):
     # Get the model filename componenets
-    ai_version = self.ai_version
+    ai_version = self.ini.get('ai_version')
     model_basename = self.ini.get('sim_model_basename')
     model_basename_l2 = self.ini.get('l2_sim_model_basename')
     sim_data_dir = self.ini.get('sim_data_dir')
@@ -182,7 +189,8 @@ class AIAgent:
       # Snake length in binary using 7 bits
       slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6],
     ]
-    # Include the previous direction of the snake
+
+    # Include the previous direction of the snake in the state
     for aDir in self.last_dirs:
       state.append(aDir)
     self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
@@ -193,36 +201,33 @@ class AIAgent:
     checkpoint_file, checkpoint_file_l2 = self.get_checkpoint_filenames()
     # Load the level 1 model checkpoint
     if os.path.isfile(checkpoint_file):
-      optimizer = self.l1_trainer.optimizer
-      self.l1_model.load_checkpoint(optimizer, checkpoint_file)
+      self.l1_model.load_checkpoint(self.l1_trainer.optimizer, checkpoint_file)
       print(f"Loaded simulation checkpoint ({checkpoint_file})")
     # Repeat for the level 2 model checkpoint
     if os.path.isfile(checkpoint_file_l2):
-      optimizer = self.l2_trainer.optimizer
-      self.l2_model.load_checkpoint(optimizer, checkpoint_file_l2)
+      self.l2_model.load_checkpoint(self.l2_trainer.optimizer, checkpoint_file_l2)
       print(f"Loaded simulation checkpoint ({checkpoint_file_l2})")
 
   def load_model(self):
     model_file, model_file_l2 = self.get_model_filenames()
     # Load the level 1 model
     if os.path.isfile(model_file):
-      optimizer = self.l1_trainer.optimizer
-      self.l1_model.load_model(optimizer, model_file)
+      self.l1_model.load_model(self.l1_trainer.optimizer, model_file)
       print(f"Loaded simulation model ({model_file})")
     # Repeat for the level 2 model
     if os.path.isfile(model_file_l2):
-      optimizer = self.l2_trainer.optimizer
-      self.l2_model.load_model(optimizer, model_file_l2)
+      self.l2_model.load_model(self.l2_trainer.optimizer, model_file_l2)
       print(f"Loaded simulation model ({model_file_l2})")
 
   def remember(self, state, action, reward, next_state, done):
     # Store the state, action, reward, next_state, and done in memory
     # Recall that memory is a deque, so it will automatically remove the oldest memory 
     # if the memory exceeds MAX_MEMORY
-    l2_score = self.ini.get('l2_score')
-    if self.game.score <= l2_score:
+    if self.game.get_score() <= self.ini.get('l2_score'):
+      # Use the level 1 memory
       self.l1_memory.append((state, action, reward, next_state, done))
     else:
+      # User the level 2 memory
       self.l2_memory.append((state, action, reward, next_state, done))
 
   def save_checkpoint(self):
@@ -238,12 +243,11 @@ class AIAgent:
   
   def save_highscore(self, highscore):
     # Get the highscore filename components
-    ai_version = self.ai_version
     sim_highscore_basename = self.ini.get('sim_highscore_basename')
     sim_data_dir = self.ini.get('sim_data_dir')
     # Construct the file name
-    highscore_file = os.path.join(sim_data_dir, str(ai_version) + sim_highscore_basename)
-    # Track when a new highscore is achieved
+    highscore_file = os.path.join(
+      sim_data_dir, str(self.ini.get('ai_version')) + sim_highscore_basename)
     if not os.path.exists(highscore_file):
       # Create a new highscore file
       with open(highscore_file, 'w') as file_handle:
@@ -262,26 +266,31 @@ class AIAgent:
     self.l2_model.save_model(self.l2_trainer.optimizer, model_file_l2)
     print(f"Saved simulation model ({model_file})")
     print(f"Saved simulation model ({model_file_l2})")
+
   def train_long_memory(self):
     l2_score = self.ini.get('l2_score')
-    if self.game.score <= l2_score:
+    game_score = self.game.get_score()
+
+    if game_score <= l2_score:
+      # Use the level 1 memory
       if len(self.l1_memory) > self.batch_size:
         # Sample a random batch of memories
         mini_sample = random.sample(self.l1_memory, self.batch_size)
       else:
         mini_sample = self.l1_memory
+      # Get the states, actions, rewards, next_states, and dones from the mini_sample
+      states, actions, rewards, next_states, dones = zip(*mini_sample)
+      self.l1_trainer.train_step(states, actions, rewards, next_states, dones)
+
     else:
+      # Use the level 2 memory
       if len(self.l2_memory) > self.batch_size:
         # Sample a random batch of memories
         mini_sample = random.sample(self.l2_memory, self.batch_size)
       else:
         mini_sample = self.l2_memory
-
-    # Get the states, actions, rewards, next_states, and dones from the mini_sample
-    states, actions, rewards, next_states, dones = zip(*mini_sample)
-    if self.game.score <= l2_score:
-      self.l1_trainer.train_step(states, actions, rewards, next_states, dones)
-    else:
+      # Get the states, actions, rewards, next_states, and dones from the mini_sample
+      states, actions, rewards, next_states, dones = zip(*mini_sample)
       self.l2_trainer.train_step(states, actions, rewards, next_states, dones)
 
   def train_short_memory(self, state, action, reward, next_state, done):

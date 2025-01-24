@@ -16,14 +16,13 @@ from AISnakeGameConfig import AISnakeGameConfig
 
 
 class QTrainer:
-  def __init__(self, model, ai_version):
+  def __init__(self, ini, model):
     """
     The constructor accepts the following parameters:
         * model - A sub-class of nn.Module
         * lr    - The learning rate
         * gamma - The gamma value
     """
-    ini = AISnakeGameConfig(ai_version)
     torch.manual_seed(ini.get('random_seed'))
     self.lr = ini.get('learning_rate')
     self.gamma = ini.get('discount')
@@ -31,7 +30,21 @@ class QTrainer:
     # Mean Squared Error Loss... 
     self.criterion = nn.MSELoss()
     self.model = model
-    
+    # Keep track of the number of steps executed by this instance
+    self.steps = 0
+  
+  def get_steps(self):
+    """
+    Returns the number of steps the AI agent has taken with this instance.
+    """
+    return self.steps
+  
+  def reset_steps(self):
+    """
+    Resets the number of steps to zero.
+    """
+    self.steps = 0
+                
   def train_step(self, state, action, reward, next_state, game_over):
     """
     The train_step() function accepts the following parameters
@@ -61,6 +74,8 @@ class QTrainer:
     # 2. Q_new = r + y * max(next_predicted Q value) -> only do this if not done
     target = pred.clone()
     for idx in range(len(game_over)):
+      # Track the number of steps executed by this instance
+      self.steps += 1
       Q_new = reward[idx]
       if not game_over[idx]:
         Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))

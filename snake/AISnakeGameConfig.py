@@ -11,19 +11,17 @@ import os, sys
 import argparse
 import configparser
 
-# The directory that this script is in
+# The default INI file
 base_dir = os.path.dirname(__file__)
-
-# Global variables
-ini_file = os.path.join(base_dir, 'AISnakeGame.ini')
+default_ini_file = os.path.join(base_dir, 'AISnakeGame.ini')
 
 class AISnakeGameConfig():
 
-  def __init__(self, ai_version):
-    # Setup the expected script arguments
+  def __init__(self):
+    # Parse command line options
     parser = argparse.ArgumentParser(description='AI Snake Game')
     parser.add_argument('-b1n', '--b1_nodes', type=int, help='Number of nodes in the first block 1 layer.')
-    parser.add_argument('-b1l', '--b1_layers', type=int, default=1, help='Number of hidden block 1 layers.')
+    parser.add_argument('-b1l', '--b1_layers', type=int, default=0, help='Number of hidden block 1 layers.')
     parser.add_argument('-b1s', '--b1_score', type=int, default=0, help='Insert a B1 layer when reaching this score.')
     parser.add_argument('-b2n', '--b2_nodes', type=int, default=0, help='Number of nodes in the hidden block 2 layer(s).')
     parser.add_argument('-b2l', '--b2_layers', type=int, default=0, help='Number of hidden block 2 layers.')
@@ -69,14 +67,25 @@ class AISnakeGameConfig():
     # Parse arguments
     args = parser.parse_args()
 
-    # Access the INI file 
     self.config = configparser.ConfigParser()
-    self.config['default'] = { 'ini_file': args.ini_file }
-    if not os.path.isfile(args.ini_file):
-      print(f"ERROR: Cannot find INI file ({args.ini_file}), exiting")
-      sys.exit(1)
-    self.config.read(args.ini_file)
-    
+
+    if args.ini_file:
+      # User specified an INI file
+      self.config.read(args.ini_file)
+      self.set_value('ini_file', args.ini_file)
+    else:
+      self.config.read(default_ini_file)
+      self.set_value('ini_file', default_ini_file)
+
+    if args.ai_version is not None:
+      # User passed in a version number, we are going to restart an existing simulation
+      self.set_value('ai_version', str(args.ai_version))
+      self.set_value('new_simulation', 'False')
+    else:
+      # User did not pass in a version number, we are going to start a new simulation
+      self.set_value('ai_version', str(self.get_next_ai_version_num()))
+      self.set_value('new_simulation', 'True')
+
     # Override INI file settings if values were passed in via command line switches
     default = self.config['default']
     if args.b1_nodes:
@@ -161,35 +170,22 @@ class AISnakeGameConfig():
       default['sim_data_dir'] = args.sim_data_dir
     if args.speed:
       default['game_speed'] = str(args.speed)
-    if args.ai_version:
-      default['ai_version'] = str(args.ai_version)
-    else:
-      default['ai_version'] = str(ai_version)
 
-    if args.b1_nodes == 0:
-      print(f"ERROR: You must set the --b1_nodes switch to a non-zero value")
+    if self.get('b1_nodes') == 0:
+      print(f"ERROR: You must set b1_nodes to a non-zero value")
       sys.exit(1)
 
-    if args.b1_layers == 0:
-      print(f"ERROR: You must set the --b1_layers switch to a non-zero value")
+    if self.get('b1_layers') == 0:
+      print(f"ERROR: You must set b1_layers to a non-zero value")
       sys.exit(1)
 
-    if args.b2_layers > 0 and args.b2_nodes == 0:
-      print(f"ERROR: You must set the --b2_nodes switch to a non-zero value when using the --b2_layers switch")
+    if self.get('b2_layers') > 0 and self.get('b2_nodes') == 0:
+      print(f"ERROR: You must set b2_nodes to a non-zero value if you set b2_layers")
       sys.exit(1)
 
-    if args.b3_layers > 0 and args.b3_nodes == 0:
-      print(f"ERROR: You must set the --b3_nodes switch to a non-zero value when using the --b3_layers switch")
+    if self.get('b3_layers') > 0 and self.get('b3_nodes') == 0:
+      print(f"ERROR: You must set b3_nodes to a non-zero value if you set b3_layers")
       sys.exit(1)
-
-    if args.dropout_p and self.get('b2_layers') == 0:
-      print(f"ERROR: You must set the --b2_layers switch to a non-zero value when using the --dropout switch")
-      sys.exit(1)
-
-    if args.dropout_p:
-      if self.get('dropout_min') == 0 or self.get('dropout_max') == 0:
-        print(f"ERROR: You must set the --dropout_min and --dropout_max switches when using the --dropout_p switch")
-        sys.exit(1)
 
   def get(self, key):
     """
@@ -222,11 +218,16 @@ class AISnakeGameConfig():
     # Key/value pairs where the value is a float
     float_values = ['discount', 'dropout_p', 'dropout_static', 'l2_dropout_static', 'learning_rate']
     # Key/value pairs where the value is a boolean
-    boolean_values = ['epsilon_print_stats', 'nu_enable','nu_print_stats', 'nu_verbose', 'print_stats', 
-                      'print_nu_stats', 'sim_checkpoint_enable', 'sim_checkpoint_verbose', 
-                      'sim_desc_verbose']
+    boolean_values = ['epsilon_print_stats', 'print_stats', 'new_simulation',
+                      'sim_checkpoint_enable', 'sim_checkpoint_verbose', 'sim_desc_verbose',
+                      'steps_stats', 'steps_verbose',
+                      ]
     # For all other key/value pairs, the value is a string.
-    value = self.config['default'][key]
+    try:
+      value = self.config['default'][key]
+    except:
+      print(f"ERROR: Cannot find setting ({key}) in {self.get('ini_file')}, exiting")
+      sys.exit(1)
 
     if key in integer_values:
       return int(value) # Return an int
@@ -239,6 +240,27 @@ class AISnakeGameConfig():
         return True
     else:
       return value # Return a string
+  
+  def get_next_ai_version_num(self):
+    """
+    Get the next available version number from the ai_version file.
+    If the file doesn't exist, write '2' to the file an return '1'.
+    """    
+    ai_version_file = os.path.join(base_dir, self.get('ai_version_file'))
+    if os.path.isfile(ai_version_file):
+      file_handle = open(ai_version_file, 'r')
+      for line in file_handle:
+        ai_version = int(line.strip())
+      file_handle.close()
+      with open(ai_version_file, 'w') as file_handle:
+        file_handle.write(str(ai_version + 1))
+        file_handle.close()
+    else:
+      ai_version = 1
+      with open(ai_version_file, 'w') as file_handle:
+        file_handle.write('2')
+        file_handle.close()
+    return ai_version
   
   def load_config(self, ai_version):
     sim_desc_basename = self.get('sim_desc_basename')

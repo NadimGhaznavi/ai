@@ -18,7 +18,7 @@ class LinearQNet(nn.Module):
   #             b2_nodes, b2_layers,
   #             b3_nodes, b3_layers,
   #             out_features, ai_version):
-  def __init__(self, config, label, ai_version):
+  def __init__(self, ini, label):
     """
     The class accepts the following parameters:
 
@@ -67,39 +67,44 @@ class LinearQNet(nn.Module):
     super().__init__()
     # This should be "1" or "2" to indicate whether this is a level 1 or level 2 model
     self.label = label 
-    self.ai_version = ai_version
     
-    config = AISnakeGameConfig(ai_version)
-    torch.manual_seed(config.get('random_seed'))
+    # Set this random seed so things are repeatable. Also set this so that we
+    # can change the random seed to make sure the overall results are consistent,
+    # even with a different random seed i.e. not due to random chance. I.e. 
+    # repeat a simulation with a different random seed to get the same results.
+    torch.manual_seed(ini.get('random_seed'))
 
-    self.in_features = config.get('in_features')
+    # A counter to keep track of the number of steps in a game where this model
+    # was used. It will get reset at the beginning of each game.
+    self.steps = 0
+    self.in_features = ini.get('in_features')
     if self.label == 1:
       # Level 1 neural network
-      self.b1_nodes = config.get('b1_nodes')
-      self.b1_layers = config.get('b1_layers')
-      self.b2_nodes = config.get('b2_nodes')
-      self.b2_layers = config.get('b2_layers')
-      self.b3_nodes = config.get('b3_nodes')
-      self.b3_layers = config.get('b3_layers')
-      self.out_features = config.get('out_features')
-      self.dropout_p = config.get('dropout_p')
-      self.dropout_min = config.get('dropout_min')
-      self.dropout_max = config.get('dropout_max')
-      self.dropout_static = config.get('dropout_static')
+      self.b1_nodes = ini.get('b1_nodes')
+      self.b1_layers = ini.get('b1_layers')
+      self.b2_nodes = ini.get('b2_nodes')
+      self.b2_layers = ini.get('b2_layers')
+      self.b3_nodes = ini.get('b3_nodes')
+      self.b3_layers = ini.get('b3_layers')
+      self.out_features = ini.get('out_features')
+      self.dropout_p = ini.get('dropout_p')
+      self.dropout_min = ini.get('dropout_min')
+      self.dropout_max = ini.get('dropout_max')
+      self.dropout_static = ini.get('dropout_static')
       self.p_value = 0
     elif self.label == 2:
       # Level 2 neural network
-      self.b1_nodes = config.get('l2_b1_nodes')
-      self.b1_layers = config.get('l2_b1_layers')
-      self.b2_nodes = config.get('l2_b2_nodes')
-      self.b2_layers = config.get('l2_b2_layers')
-      self.b3_nodes = config.get('l2_b3_nodes')
-      self.b3_layers = config.get('l2_b3_layers')
-      self.out_features = config.get('out_features')
-      self.dropout_p = config.get('l2_dropout_p')
-      self.dropout_min = config.get('l2_dropout_min')
-      self.dropout_max = config.get('l2_dropout_max')
-      self.dropout_static = config.get('l2_dropout_static')
+      self.b1_nodes = ini.get('l2_b1_nodes')
+      self.b1_layers = ini.get('l2_b1_layers')
+      self.b2_nodes = ini.get('l2_b2_nodes')
+      self.b2_layers = ini.get('l2_b2_layers')
+      self.b3_nodes = ini.get('l2_b3_nodes')
+      self.b3_layers = ini.get('l2_b3_layers')
+      self.out_features = ini.get('out_features')
+      self.dropout_p = ini.get('l2_dropout_p')
+      self.dropout_min = ini.get('l2_dropout_min')
+      self.dropout_max = ini.get('l2_dropout_max')
+      self.dropout_static = ini.get('l2_dropout_static')
       self.p_value = 0
 
     # Enable dropout layers in the model if the user has specified a dynamic
@@ -116,7 +121,6 @@ class LinearQNet(nn.Module):
 
     else:
       self.dropout = False
-
 
     self.ascii_print()
 
@@ -231,8 +235,15 @@ class LinearQNet(nn.Module):
     """
     Default nn.Module behaviour. 
     """
+    self.steps += 1
     return self.main_block(x)
   
+  def get_steps(self):
+    """
+    Returns the number of steps the AI agent has taken.
+    """
+    return self.steps
+
   def has_dynamic_dropout(self):
     """
     Returns True if the network has dynamic dropout layers.
@@ -240,6 +251,7 @@ class LinearQNet(nn.Module):
     if self.dropout_min:
       return True
     return False
+  
   def insert_layer(self, block_num):
     # Insert the new layer
     print(f"LinearQNet: Inserting new B{block_num} layer")
@@ -294,6 +306,13 @@ class LinearQNet(nn.Module):
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     state_dict['num_games'] = 0
 
+  def reset_steps(self):
+    """
+    Resets the number of steps to 0. Should be called at the beginning of
+    each game.
+    """
+    self.steps = 0
+    
   def save_checkpoint(self, optimizer, save_path):
     """
     Saves the model including the weights, epoch and model version.

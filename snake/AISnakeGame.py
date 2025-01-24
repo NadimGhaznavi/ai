@@ -46,10 +46,7 @@ class AISnakeGame():
   uses the AIAgent class as the player. It also loads game parameters
   from the AISnakeGame.ini file using the StartConfig class.
   """
-  def __init__(self, ai_version, plot):
-    # Get AISnakeGame.ini file settings
-    ini = AISnakeGameConfig(ai_version)
-    
+  def __init__(self, ini, plot):
     # Get a matplotlib plot object, so we can save the plot when the 
     # game quits
     self.plot = plot
@@ -68,7 +65,7 @@ class AISnakeGame():
     self.screen_width = self.board_width
     self.screen_height = self.board_height
     self.display = pygame.display.set_mode((self.board_width, self.board_height))
-    pygame.display.set_caption(GAME_TITLE + ' (v' + str(ai_version) + ')')
+    pygame.display.set_caption(GAME_TITLE + ' (v' + str(ini.get('ai_version')) + ')')
     self.clock = pygame.time.Clock()
 
     # Display periodic status message
@@ -107,6 +104,12 @@ class AISnakeGame():
         self.game_speed = self.game_speed + 10
         print(f"AiSnakeGame: Increasing game speed to {self.game_speed}")
         self.num_games_cur += 1
+
+  def get_score(self):
+    """
+    Return the current game score.
+    """
+    return self.score
 
   def is_snake_collision(self, pt=None):
     """
@@ -176,6 +179,10 @@ class AISnakeGame():
     Pause the game.
     """
     is_paused = True
+    # The loop is *FAST* make sure that we only print this info message once
+    if self.num_games == self.num_games_cur:
+      print("AISnakeGame: Game paused, press SPACE to continue. Press 'm' to print the models. Press 'q' to quit. Press 'a/z' to speedup/slowdown the game.")
+      self.num_games_cur += 1
     # Create pause loop
     while is_paused:
       for event in pygame.event.get():
