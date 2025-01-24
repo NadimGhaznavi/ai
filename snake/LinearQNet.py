@@ -73,18 +73,34 @@ class LinearQNet(nn.Module):
     torch.manual_seed(config.get('random_seed'))
 
     self.in_features = config.get('in_features')
-    self.b1_nodes = config.get('b1_nodes')
-    self.b1_layers = config.get('b1_layers')
-    self.b2_nodes = config.get('b2_nodes')
-    self.b2_layers = config.get('b2_layers')
-    self.b3_nodes = config.get('b3_nodes')
-    self.b3_layers = config.get('b3_layers')
-    self.out_features = config.get('out_features')
-    self.dropout_p = config.get('dropout_p')
-    self.dropout_min = config.get('dropout_min')
-    self.dropout_max = config.get('dropout_max')
-    self.dropout_static = config.get('dropout_static')
-    self.p_value = 0
+    if self.label == 1:
+      # Level 1 neural network
+      self.b1_nodes = config.get('b1_nodes')
+      self.b1_layers = config.get('b1_layers')
+      self.b2_nodes = config.get('b2_nodes')
+      self.b2_layers = config.get('b2_layers')
+      self.b3_nodes = config.get('b3_nodes')
+      self.b3_layers = config.get('b3_layers')
+      self.out_features = config.get('out_features')
+      self.dropout_p = config.get('dropout_p')
+      self.dropout_min = config.get('dropout_min')
+      self.dropout_max = config.get('dropout_max')
+      self.dropout_static = config.get('dropout_static')
+      self.p_value = 0
+    elif self.label == 2:
+      # Level 2 neural network
+      self.b1_nodes = config.get('l2_b1_nodes')
+      self.b1_layers = config.get('l2_b1_layers')
+      self.b2_nodes = config.get('l2_b2_nodes')
+      self.b2_layers = config.get('l2_b2_layers')
+      self.b3_nodes = config.get('l2_b3_nodes')
+      self.b3_layers = config.get('l2_b3_layers')
+      self.out_features = config.get('out_features')
+      self.dropout_p = config.get('l2_dropout_p')
+      self.dropout_min = config.get('l2_dropout_min')
+      self.dropout_max = config.get('l2_dropout_max')
+      self.dropout_static = config.get('l2_dropout_static')
+      self.p_value = 0
 
     # Enable dropout layers in the model if the user has specified a dynamic
     # ( --dropout_p, --dropout_min and --dropout_max) or static ( --dropout_staic)

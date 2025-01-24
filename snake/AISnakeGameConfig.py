@@ -31,8 +31,8 @@ class AISnakeGameConfig():
     parser.add_argument('-b3n', '--b3_nodes', type=int, default=0, help='Number of nodes in the block 3 hidden layer(s).')
     parser.add_argument('-b3l', '--b3_layers', type=int, default=0, help='Number of block 3 hidden layers.')
     parser.add_argument('-b3s', '--b3_score', type=int, default=0, help='Insert a B3 layer when reaching this score.')
-    parser.add_argument('-l2b1n', '--l2_b1_nodes', type=int, help='Number of nodes in the first level 2, block 1 layer.')
-    parser.add_argument('-l2b1l', '--l2_b1_layers', type=int, default=1, help='Number of hidden level 2, block 1 layers.')
+    parser.add_argument('-l2b1n', '--l2_b1_nodes', type=int, default=0, help='Number of nodes in the first level 2, block 1 layer.')
+    parser.add_argument('-l2b1l', '--l2_b1_layers', type=int, default=0, help='Number of hidden level 2, block 1 layers.')
     parser.add_argument('-l2b1s', '--l2_b1_score', type=int, default=0, help='Insert a level 2, B1 layer when reaching this score.')
     parser.add_argument('-l2b2n', '--l2_b2_nodes', type=int, default=0, help='Number of nodes in the hidden level 2, block 2 layer(s).')
     parser.add_argument('-l2b2l', '--l2_b2_layers', type=int, default=0, help='Number of hidden level 2, block 2 layers.')
@@ -107,6 +107,24 @@ class AISnakeGameConfig():
       default['dropout_static'] = str(args.dropout_static)
     if args.epsilon:
       default['epsilon_value'] = str(args.epsilon)
+    if args.l2_b1_nodes:
+      default['l2_b1_nodes'] = str(args.l2_b1_nodes)
+    if args.l2_b1_layers:
+      default['l2_b1_layers'] = str(args.l2_b1_layers)
+    if args.l2_b1_score:
+      default['l2_b1_score'] = str(args.l2_b1_score)
+    if args.l2_b2_nodes:
+      default['l2_b2_nodes'] = str(args.l2_b2_nodes)
+    if args.l2_b2_layers:
+      default['l2_b2_layers'] = str(args.l2_b2_layers)
+    if args.l2_b2_score:
+      default['l2_b2_score'] = str(args.l2_b2_score)
+    if args.l2_b3_nodes:
+      default['l2_b3_nodes'] = str(args.l2_b3_nodes)
+    if args.l2_b3_layers:
+      default['l2_b3_layers'] = str(args.l2_b3_layers)
+    if args.l2_b3_score:
+      default['l2_b3_score'] = str(args.l2_b3_score)
     if args.l2_epsilon:
       default['l2_epsilon_value'] = str(args.l2_epsilon)
     if args.learning_rate:
@@ -188,7 +206,8 @@ class AISnakeGameConfig():
                       'l2_b1_nodes', 'l2_b1_layers', 'l2_b1_score', 
                       'l2_b2_nodes', 'l2_b2_layers', 'l2_b2_score',
                       'l2_b3_nodes', 'l2_b3_layers', 'l2_b3_score',
-                      'l2_epsilon_value', 'l2_score',
+                      'l2_epsilon_value', 'l2_dropout_p', 'l2_dropout_max', 'l2_dropout_min', 
+                      'l2_dropout_static',
                       'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
                       'max_score_num', 'out_features', 'random_seed', 'score_height', 
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
