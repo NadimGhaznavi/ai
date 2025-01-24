@@ -166,30 +166,21 @@ class AISnakeGameConfig():
     else:
       default['ai_version'] = str(ai_version)
 
-    if args.b1_nodes == 0:
-      print(f"ERROR: You must set the --b1_nodes switch to a non-zero value")
+    if self.get('b1_nodes') == 0:
+      print(f"ERROR: You must set b1_nodes to a non-zero value")
       sys.exit(1)
 
-    if args.b1_layers == 0:
-      print(f"ERROR: You must set the --b1_layers switch to a non-zero value")
+    if self.get('b1_layers') == 0:
+      print(f"ERROR: You must set b1_layers to a non-zero value")
       sys.exit(1)
 
-    if args.b2_layers > 0 and args.b2_nodes == 0:
-      print(f"ERROR: You must set the --b2_nodes switch to a non-zero value when using the --b2_layers switch")
+    if self.get('b2_layers') > 0 and self.get('b2_nodes') == 0:
+      print(f"ERROR: You must set b2_nodes to a non-zero value if you set b2_layers")
       sys.exit(1)
 
-    if args.b3_layers > 0 and args.b3_nodes == 0:
-      print(f"ERROR: You must set the --b3_nodes switch to a non-zero value when using the --b3_layers switch")
+    if self.get('b3_layers') > 0 and self.get('b3_nodes') == 0:
+      print(f"ERROR: You must set b3_nodes to a non-zero value if you set b3_layers")
       sys.exit(1)
-
-    if args.dropout_p and self.get('b2_layers') == 0:
-      print(f"ERROR: You must set the --b2_layers switch to a non-zero value when using the --dropout switch")
-      sys.exit(1)
-
-    if args.dropout_p:
-      if self.get('dropout_min') == 0 or self.get('dropout_max') == 0:
-        print(f"ERROR: You must set the --dropout_min and --dropout_max switches when using the --dropout_p switch")
-        sys.exit(1)
 
   def get(self, key):
     """
