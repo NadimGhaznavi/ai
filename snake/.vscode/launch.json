@@ -13,7 +13,11 @@
             "console": "integratedTerminal",
             "args": [
                 "--max_score", "1",
-                "-l2b1n", "200"
+                "-b1n", "200",
+                "-b1l", "2",
+                "-l2b1n", "400",
+                "-l2b1l", "2",
+                "-l2dss", "0.2"
             ]
         }
     ]

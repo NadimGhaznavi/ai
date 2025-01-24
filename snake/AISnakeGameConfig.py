@@ -40,6 +40,7 @@ class AISnakeGameConfig():
     parser.add_argument('-l2b3n', '--l2_b3_nodes', type=int, default=0, help='Number of nodes in the level 2, block 3 hidden layer(s).')
     parser.add_argument('-l2b3l', '--l2_b3_layers', type=int, default=0, help='Number of level 2, block 3 hidden layers.')
     parser.add_argument('-l2b3s', '--l2_b3_score', type=int, default=0, help='Insert a level 2, B3 layer when reaching this score.')
+    parser.add_argument('-l2dss', '--l2_dropout_static', type=float, default=0, help='Create dropout layers and set the p value to this value.')
     parser.add_argument('-d', '--discount', type=float, default=0, help='The Linear Q discount factor.')
     parser.add_argument('-do', '--dropout_p', type=float, default=0, help='Insert a Droput layer with this p value, used with the --dropout_score switch.')
     parser.add_argument('-dss', '--dropout_static', type=float, default=0, help='Create dropout layers and set the p value to this value.')
@@ -125,6 +126,8 @@ class AISnakeGameConfig():
       default['l2_b3_layers'] = str(args.l2_b3_layers)
     if args.l2_b3_score:
       default['l2_b3_score'] = str(args.l2_b3_score)
+    if args.l2_dropout_static:
+      default['l2_dropout_static'] = str(args.l2_dropout_static)
     if args.l2_epsilon:
       default['l2_epsilon_value'] = str(args.l2_epsilon)
     if args.learning_rate:
@@ -206,15 +209,15 @@ class AISnakeGameConfig():
                       'l2_b1_nodes', 'l2_b1_layers', 'l2_b1_score', 
                       'l2_b2_nodes', 'l2_b2_layers', 'l2_b2_score',
                       'l2_b3_nodes', 'l2_b3_layers', 'l2_b3_score',
-                      'l2_epsilon_value', 'l2_dropout_p', 'l2_dropout_max', 'l2_dropout_min', 
-                      'l2_dropout_static',
+                      'l2_dropout_p', 'l2_dropout_max', 'l2_dropout_min', 
+                      'l2_epsilon_value', 'l2_score',
                       'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
                       'max_score_num', 'out_features', 'random_seed', 'score_height', 
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
                       'new_layer_score', 'nu_bad_games', 'nu_max_zero_scores', 
                       'nu_max_moves', 'nu_score', 'nu_value']
     # Key/value pairs where the value is a float
-    float_values = ['discount', 'dropout_p', 'dropout_static', 'learning_rate']
+    float_values = ['discount', 'dropout_p', 'dropout_static', 'l2_dropout_static', 'learning_rate']
     # Key/value pairs where the value is a boolean
     boolean_values = ['epsilon_print_stats', 'nu_enable','nu_print_stats', 'nu_verbose', 'print_stats', 
                       'print_nu_stats', 'sim_checkpoint_enable', 'sim_checkpoint_verbose', 
