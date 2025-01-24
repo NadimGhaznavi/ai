@@ -34,7 +34,7 @@ GREY = (25,25,25)
 BLOCK_SIZE = 20
 
 # Game Caption / Title
-GAME_TITLE = 'AI Snake Game Simulator'
+GAME_TITLE = 'AI Snake Game '
 
 # The font file used to render the writing on the game screen
 FONT = pygame.font.Font('arial.ttf', 25)
