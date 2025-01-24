@@ -283,7 +283,7 @@ class AISnakeGame():
     if self.num_games == self.num_games_cur:
       print(self.agent.l1_model)    
       print(self.agent.l2_model)    
-      self.num_games_cur += 1   
+      self.num_games_cur += 1
 
   def print_status(self):
     """
@@ -339,6 +339,7 @@ class AISnakeGame():
     self.score = 0
     # Number of games
     self.num_games += 1
+    self.num_games_cur = self.num_games
     # Simulation runtime (clock time, not CPU time)
     self.sim_time += self.elapsed_time
     self.start_time = time.time()
