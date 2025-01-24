@@ -11,14 +11,16 @@ title: AI Snake Game
 * [Configuration File Management](#configuration-file-management)
 * [Running the Snake Game](#running-the-snake-game)
 * [Running the AI Snake Game](#running-the-ai-snake-game)
-  * [Understanding the Reward System](#understanding-the-reward-system)
+* [Understanding the Reward System](#understanding-the-reward-system)
 * [AI Snake Game Keyboard Shortcuts](#ai-snake-game-keyboard-shortcuts)
 * [Codebase Architecture](#codebase-architecture)
+* [Introducing the Concept of Level 2](#introducing-the-concept-of-level-2)
+* [Introducing the Level 2 Neural Network Architecture](#introducing-the-level-2-neural-network-architecture)
 * [Command Line Options](#command-line-options)
-  * [Specifying Numbers of Nodes and Layers](#specifying-numbers-of-nodes-and-layers)
-  * [Adding Layers On The Fly](#adding-layers-on-the-fly)
-  * [Adding Dropout Layers](#adding-dropout-layers)
-  * [Changing P Values of Dropout Layers On the Fly](#changing-p-values-of-dropout-layers-on-the-fly)
+* [Specifying Numbers of Nodes and Layers](#specifying-numbers-of-nodes-and-layers)
+* [Adding Layers On The Fly](#adding-layers-on-the-fly)
+* [Adding Dropout Layers](#adding-dropout-layers)
+* [Changing P Values of Dropout Layers On the Fly](#changing-p-values-of-dropout-layers-on-the-fly)
 * [Matplotlib Game Score Plot](#matplotlib-game-score-plot)
 * [Using Batch Scripts to Fine Tune Hyperparameters](#using-batch-scripts-to-fine-tune-hyperparameters)
 * [Limitations and Lessons Learned](#limitations-and-lessons-learned)
@@ -71,7 +73,7 @@ This project is written in Python. It uses the following components:
 
 # Configuration File Management
 
-**IMPORTANT NOTE:** If you decide to download, run and tinker with this project I want to share a hard-learned lesson: **Neural networks are EXTREMELY sensitive to hyperparameters and the neural network architecture.** For this reason it's critical that you manage the INI file with extreme care. A small change in configuration can make your AI go from a super star to a dismal failure. Do not modify the AISnakeGame.ini file, make a copy and then use the `--ini_file` switch to point the `asg.py` front-end at your custom configuration.
+**IMPORTANT NOTE:** If you decide to download, run and tinker with this project I want to share a hard-learned lesson: **Neural networks are EXTREMELY sensitive to hyperparameters and the neural network architecture.** For this reason it's critical that you manage the INI file with extreme care. A small change in configuration can make your AI go from a super star to a dismal failure. Do not modify the AISnakeGame.ini file, make a copy and then use the `--ini_file` switch to point the `AISim.py` front-end at your custom configuration.
 
 # Environment Setup
 I strongly recommend setting up a *virtual environment* to run and modify the *AI Snake Game*. You will need Python installed in order to do this. By using a virtual environment you won't be altering the overall state of your Python installation. This will avoid screwing up programs and components on your system that use Python.
@@ -120,11 +122,11 @@ Then use the arrow keys to control the snake and go for the *food*. Have fun!!!!
 
 # Running the AI Snake Game
 To watch the AI play and learn the snake game just activate your virtual
-environment, navigate to the snake directory and launch the *asg.py* front end:
+environment, navigate to the snake directory and launch the *AISim.py* front end:
 ```
 nadim@mypc:~$ . ai_dev/bin/activate
 (ai_dev) nadim@mypc:~$ cd ai/snake
-(ai_dev) nadim@mypc:~/ai/snake$ python asg.py
+(ai_dev) nadim@mypc:~/ai/snake$ python AISim.py
 ```
 
 # AI Snake Game Keyboard Shortcuts
@@ -140,7 +142,6 @@ Key       | Description
  q        | Quit the game
 
 # Understanding the Reward System
-
 There are three *rewards* in the AI Snake Game:
 
 Reward Value | Reward Description
@@ -151,7 +152,7 @@ Reward Value | Reward Description
 At the end of each move, the AI Snake Game simulation calls the AI Agent's `train_short_memory()` function. The **only** thing this function does is call the *QTrainer's* `train_step()` function, where the weights and bias' are rebalanced.
 
 # Codebase Architecture
-The `asg.py` is the main front end to the AI Snake Game. It's the code that you need to execute in order to run a simulation. 
+The `AISim.py` is the main front end to the AI Snake Game. It's the code that you need to execute in order to run a simulation. 
 
 I have implemented a neural network architecture with three blocks; B1, B2, B3. By using the `--b1_nodes`, `--b1_layers`, `--b2_nodes` and so on, you can configure the number of nodes and layers in each block when you start the simulation.  I also implemented `--b1_score`, `--b2_score` and `--b3_score` switches to insert a B1, B2 or B3 layer *on-the-fly* when a particular score is reached.
 
@@ -159,6 +160,9 @@ I have refactored and extended the code a *LOT* from the original version that I
 
 ## AIAgent.py
 This file houses the *AI Agent* or the AI player.
+
+## AiSim.py
+This is the front end to the AI Snake game. It's the file you need to run to launch the AI Snake Game.
 
 ## AISnakeGameConfig.py
 This file handles reading the AI Snake Game configuration settings from the *AISnakeGame.ini* file.
@@ -169,14 +173,8 @@ This file controls a lot of the settings for the AI simulation.
 ## AISnakeGame.py
 This a modified version of the SnakeGame.py. It's been changed so that the AIAgent acts as the player instead of a human being.
 
-## AISnakeGameUtils.py
-This file has a few functions where I couldn't find a good place for them. 
-
 ## arial.ttf
 The actual snake game and AI snake game uses this file to render the scores, moves and times shown at the top of the game screen.
-
-## asg.py
-This is the front end to the AI Snake game. It's the file you need to run to launch the AI Snake Game.
 
 ## batch_scripts
 This directory has a couple of batch scripts I wrote to run the AI Snake Game in batch mode while changing one or more parameters. You can use this to run a bunch of simulations overnight and then look at the highscore files to see how different settings affect the performance of the AI.
@@ -190,10 +188,12 @@ The epsilon algorithm is a standard algorithm used to inject a decreasing amount
 The LinearQNet class houses the PyTorch neural network model. that the AI Snake Game uses. I have extended this class pretty significantly. For example, I've added functions to add in new layers on-the-fly with differing numbers of nodes and load and save functions to take snapshots of the running simulations.
 
 ## next_ai_version.txt
-This file holds a number that the code uses for the version of the simulation. It is incremented every time you run the `asg.py` front end.
+This file holds a number that the code uses for the version of the simulation. It is incremented every time you run the `AISim.py` front end.
 
 ## NuAlgo.py
-This is a class I wrote to try and optimize the learning behaviour of the AI Agent. By tweaking this code and the settings in the AISnakeGame.ini I have managed to train the AI to reach a high score of 80!!
+This is a class I wrote to try and optimize the learning behaviour of the AI Agent. By tweaking this code and the settings in the AISnakeGame.ini I have managed to train the AI to reach a high score of 80!! 
+
+However, tuning the code and NuAlgo settings is very, very domain specific, so I have dropped this module and am no longer using the code.
 
 ## QTrainer.py
 This is part of the reinforcement learning that is used in this code to train the AI. It houses the *optimizer* that tweaks the neural network settings as the game runs.
@@ -205,7 +205,7 @@ A standard GitHub README file. It points at this page.
 A few simulation files I saved, because they performed well. You can copy them into the *sim_data* directory and load them with the `-v` switch to run them.
 
 ## sim_data
-This directory is automatically created when you run the asg.py script. Here are three example files that were created during a simulation run:
+This directory is automatically created when you run the AISim.py script. Here are three example files that were created during a simulation run:
 
 * 409_sim_checkpoint.ptc - A Simulation checkpoint file
 * 409_sim_desc.txt - A file that contains some of the simulation settings
@@ -220,19 +220,45 @@ This has the `plot()` function that launches the *matplotlib* pop-up window that
 ## SnakeGame.py
 The original Snake Game that you can play.
 
+# Introducing the Concept of Level 2
+
+The Snake Game becomes significantly more challenging when the Snake's length is more than twice the width of the board. At that point the strategy needed to continue to improve the scores doesn't just rely on finding the food, it also includes the challenge of moving in a manner such that collisions with the Snake itself are avoided. 
+
+I'm defining *level 1* as scores up to this point. E.g. Given a board size of 40x40, with a snake segment and a food segment occupying one square, the level one score would be 40. Scores above 40 are considered *level 2*.
+
+A very basic and simple neural network architecture consisting of one layer with 100 nodes is easily able to achieve *level 1* scores. Reaching *level 2* e.g. consistent scores in the 50 to 60 range on a 20x20 board is much, much harder.
+
+# Introducing the Level 2 Neural Network Architecture
+
+In my quest to improve the AI Agent's ability to play the Snake Game, I have introduced what I call a *Level 2* neural network. This is basically a second, independent neural network that is only fed data when the game score in the level two range ie. scores from 41 on.
+
+This approach has been successful and I am currently experimenting with the exact neural network architecture of the L1 and L2 neural networks to reduce the amount of training required to reach level two scores.
+
+To support these experiements, I have implemented a slew of level two switches to configure the L2 neural network:
+
 # Command Line Options
-I've implemented a lot of options to the `asg.py` front end:
+I've implemented a lot of options to the `AISim.py` front end:
 
 ```
-usage: asg.py [-h] [-b1n B1_NODES] [-b1l B1_LAYERS] [-b1s B1_SCORE] [-b2n B2_NODES]
-              [-b2l B2_LAYERS] [-b2s B2_SCORE] [-b3n B3_NODES] [-b3l B3_LAYERS]
-              [-b3s B3_SCORE] [-e EPSILON] [-mg MAX_GAMES] [-ms MAX_SCORE]
-              [-msn MAX_SCORE_NUM] [-nls NEW_LAYER_SCORE] [-nbg NU_BAD_GAMES]
-              [-nmm NU_MAX_MOVES] [-nps NU_PRINT_STATS] [-ns NU_SCORE] [-nv NU_VALUE]
-              [-nvm NU_VALUE_MAX] [-s SPEED] [-sd SIM_DATA_DIR] [-v AI_VERSION]
+usage: AISim.py [-h] [-b1n B1_NODES] [-b1l B1_LAYERS] [-b1s B1_SCORE]
+                [-b2n B2_NODES] [-b2l B2_LAYERS] [-b2s B2_SCORE]
+                [-b3n B3_NODES] [-b3l B3_LAYERS] [-b3s B3_SCORE]
+                [-l2b1n L2_B1_NODES] [-l2b1l L2_B1_LAYERS]
+                [-l2b1s L2_B1_SCORE] [-l2b2n L2_B2_NODES]
+                [-l2b2l L2_B2_LAYERS] [-l2b2s L2_B2_SCORE]
+                [-l2b3n L2_B3_NODES] [-l2b3l L2_B3_LAYERS]
+                [-l2b3s L2_B3_SCORE] [-d DISCOUNT] [-do DROPOUT_P]
+                [-dss DROPOUT_STATIC] [-dsx DROPOUT_MIN] [-dsy DROPOUT_MAX]
+                [-e EPSILON] [-l2e L2_EPSILON] [-i INI_FILE]
+                [-l LEARNING_RATE] [-mg MAX_GAMES] [-ms MAX_SCORE]
+                [-msn MAX_SCORE_NUM] [-nls NEW_LAYER_SCORE]
+                [-nbg NU_BAD_GAMES] [-nmm NU_MAX_MOVES] [-nps NU_PRINT_STATS]
+                [-ns NU_SCORE] [-nv NU_VALUE] [-nvm NU_VALUE_MAX]
+                [-r RANDOM_SEED] [-s SPEED] [-sd SIM_DATA_DIR] [-v AI_VERSION]
 ```
 
-Here's a more detailed description of the options. You can see these by passing a `-h` to the `asg.py` script:
+Running the `AISim.py` frontend with the `-h` switch provides a more detailed description of these options.
+
 ```
 AI Snake Game
 
@@ -256,15 +282,56 @@ options:
                         Number of block 3 hidden layers.
   -b3s B3_SCORE, --b3_score B3_SCORE
                         Insert a B3 layer when reaching this score.
+  -l2b1n L2_B1_NODES, --l2_b1_nodes L2_B1_NODES
+                        Number of nodes in the first level 2, block 1 layer.
+  -l2b1l L2_B1_LAYERS, --l2_b1_layers L2_B1_LAYERS
+                        Number of hidden level 2, block 1 layers.
+  -l2b1s L2_B1_SCORE, --l2_b1_score L2_B1_SCORE
+                        Insert a level 2, B1 layer when reaching this score.
+  -l2b2n L2_B2_NODES, --l2_b2_nodes L2_B2_NODES
+                        Number of nodes in the hidden level 2, block 2
+                        layer(s).
+  -l2b2l L2_B2_LAYERS, --l2_b2_layers L2_B2_LAYERS
+                        Number of hidden level 2, block 2 layers.
+  -l2b2s L2_B2_SCORE, --l2_b2_score L2_B2_SCORE
+                        Insert a level 2, B2 layer when reaching this score.
+  -l2b3n L2_B3_NODES, --l2_b3_nodes L2_B3_NODES
+                        Number of nodes in the level 2, block 3 hidden
+                        layer(s).
+  -l2b3l L2_B3_LAYERS, --l2_b3_layers L2_B3_LAYERS
+                        Number of level 2, block 3 hidden layers.
+  -l2b3s L2_B3_SCORE, --l2_b3_score L2_B3_SCORE
+                        Insert a level 2, B3 layer when reaching this score.
+  -d DISCOUNT, --discount DISCOUNT
+                        The Linear Q discount factor.
+  -do DROPOUT_P, --dropout_p DROPOUT_P
+                        Insert a Droput layer with this p value, used with the
+                        --dropout_score switch.
+  -dss DROPOUT_STATIC, --dropout_static DROPOUT_STATIC
+                        Create dropout layers and set the p value to this
+                        value.
+  -dsx DROPOUT_MIN, --dropout_min DROPOUT_MIN
+                        Activate the p value of the droput layer when reaching
+                        this score.
+  -dsy DROPOUT_MAX, --dropout_max DROPOUT_MAX
+                        Deactivate the p value of the droput layer when
+                        reaching this score.
   -e EPSILON, --epsilon EPSILON
                         Epsilon value for exploration.
+  -l2e L2_EPSILON, --l2_epsilon L2_EPSILON
+                        Level 2 epsilon value for exploration.
+  -i INI_FILE, --ini_file INI_FILE
+                        The path to the configuration file.
+  -l LEARNING_RATE, --learning_rate LEARNING_RATE
+                        Optimizer learning rate.
   -mg MAX_GAMES, --max_games MAX_GAMES
                         Exit the simulation after max_games games.
   -ms MAX_SCORE, --max_score MAX_SCORE
-                        Exit the simulation if a score of max_score is achieved.
+                        Exit the simulation if a score of max_score is
+                        achieved.
   -msn MAX_SCORE_NUM, --max_score_num MAX_SCORE_NUM
-                        Exit the simulation if a score of max_score is achieved max_num
-                        times.
+                        Exit the simulation if a score of max_score is
+                        achieved max_num times.
   -nls NEW_LAYER_SCORE, --new_layer_score NEW_LAYER_SCORE
                         Drop in a new layer at this score
   -nbg NU_BAD_GAMES, --nu_bad_games NU_BAD_GAMES
@@ -274,12 +341,16 @@ options:
   -nps NU_PRINT_STATS, --nu_print_stats NU_PRINT_STATS
                         Print NuAlgo status information in the console.
   -ns NU_SCORE, --nu_score NU_SCORE
-                        The nu algorithm is triggered when the score exceeds nu_score.
+                        The nu algorithm is triggered when the score exceeds
+                        nu_score.
   -nv NU_VALUE, --nu_value NU_VALUE
-                        The initial amount of randomness the nu algorithm injects.
+                        The initial amount of randomness the nu algorithm
+                        injects.
   -nvm NU_VALUE_MAX, --nu_value_max NU_VALUE_MAX
                         Number of random moves to add to the nu pool if
                         nu_num_games_same_score_count_max is exceeded
+  -r RANDOM_SEED, --random_seed RANDOM_SEED
+                        Random seed used by random and torch.
   -s SPEED, --speed SPEED
                         Set the game speed.
   -sd SIM_DATA_DIR, --sim_data_dir SIM_DATA_DIR
@@ -303,7 +374,7 @@ I was curious about the effect of adding layers on the fly. You may want to expe
 
 ## Adding Dropout Layers
 
-I have implemented a `--dropout-static` switch that instructs the `asg.py` to create PyTorch `nn.Dropout` layers with a *P Value* that is passed in with an argument to the `--dropout-static` switch. The code takes care of inserting these *dropout layers* are in between the hidden B1, B2 and B3 hidden layers.
+I have implemented a `--dropout-static` switch that instructs the `AISim.py` to create PyTorch `nn.Dropout` layers with a *P Value* that is passed in with an argument to the `--dropout-static` switch. The code takes care of inserting these *dropout layers* are in between the hidden B1, B2 and B3 hidden layers.
 
 I implemented this feature to see if adding additional noise to the simulation would stop the AI from getting stuck in sub-optimal game strategy. It's stuck now: When the snake reaches a length that is more than twice the width of the board (I'm using a 20x20 board), then there is an added challenge. With my current setup, the AI can achieve scores of up to around 50, but not really any higher. At that point in the game, the AI has settled into a strategy of moving the snake around the edge of the screen and then cutting through the middle to get the food. It continues to the other edge and then circles again. While this strategy is good for scores up to 40, it fails to reach scores in the 60s because it ends up hitting itself.
 
@@ -337,7 +408,7 @@ COUNT=5
 
 while [ $COUNT != 10 ]; do
 	LR=0.000${COUNT}
-	python asg.py \
+	python AISim.py \
 		-i $CONFIG \
 		--max_games $MAX_GAMES \
 		-l $LR 
@@ -346,7 +417,7 @@ done
 COUNT=1
 while [ $COUNT != 6 ]; do
 	LR=0.001${COUNT}
-	python asg.py \
+	python AISim.py \
 		-i $CONFIG \
 		--max_games $MAX_GAMES \
 		-l $LR 
@@ -385,7 +456,7 @@ Game Number,High Score
 ```
 
 # Matplotlib Game Score Plot
-The `asg.py` front end launches a matplatlib window that graphs out game score and average game score as the simulation runs.
+The `AISim.py` front end launches a matplatlib window that graphs out game score and average game score as the simulation runs.
 
 ![Screenshot of the Matplotlib Game Score Graph](/assets/images/snake/ai_metrics.png)
 
