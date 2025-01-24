@@ -176,6 +176,10 @@ class AISnakeGame():
     Pause the game.
     """
     is_paused = True
+    # The loop is *FAST* make sure that we only print this info message once
+    if self.num_games == self.num_games_cur:
+      print("AISnakeGame: Game paused, press SPACE to continue. Press 'm' to print the models. Press 'q' to quit. Press 'a/z' to speedup/slowdown the game.")
+      self.num_games_cur += 1
     # Create pause loop
     while is_paused:
       for event in pygame.event.get():
