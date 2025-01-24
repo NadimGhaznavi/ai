@@ -23,7 +23,7 @@ class AISnakeGameConfig():
     # Setup the expected script arguments
     parser = argparse.ArgumentParser(description='AI Snake Game')
     parser.add_argument('-b1n', '--b1_nodes', type=int, help='Number of nodes in the first block 1 layer.')
-    parser.add_argument('-b1l', '--b1_layers', type=int, default=1, help='Number of hidden block 1 layers.')
+    parser.add_argument('-b1l', '--b1_layers', type=int, default=0, help='Number of hidden block 1 layers.')
     parser.add_argument('-b1s', '--b1_score', type=int, default=0, help='Insert a B1 layer when reaching this score.')
     parser.add_argument('-b2n', '--b2_nodes', type=int, default=0, help='Number of nodes in the hidden block 2 layer(s).')
     parser.add_argument('-b2l', '--b2_layers', type=int, default=0, help='Number of hidden block 2 layers.')
