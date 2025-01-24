@@ -16,7 +16,7 @@ ini = AISnakeGameConfig()
 
 torch.manual_seed(ini.get('random_seed'))
 
-class Linear_QNet(nn.Module):
+class LinearQNet(nn.Module):
   #def __init__(self, in_features, 
   #             b1_nodes, b1_layers, 
   #             b2_nodes, b2_layers,
@@ -274,15 +274,14 @@ class Linear_QNet(nn.Module):
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     state_dict['num_games'] = 0
 
-  def save_checkpoint(self, optimizer, save_path, num_games):
+  def save_checkpoint(self, optimizer, save_path):
     """
     Saves the model including the weights, epoch and model version.
     """
     torch.save({
         'model_state_dict': self.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
-        'weights_only': False,
-        'num_games': num_games
+        'weights_only': False
     }, save_path)
 
   def save_model(self, optimizer, save_path):

@@ -15,20 +15,23 @@ sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 
 class EpsilonAlgo():
-  def __init__(self):
+  def __init__(self, level):
     ini = AISnakeGameConfig()
     # Set this random seed so things are repeatable
     random.seed(ini.get('random_seed')) 
     self.epsilon_value = ini.get('epsilon_value')
+    if level == 2:
+      self.epsilon_value = ini.get('l2_epsilon_value')
     self.print_stats = ini.get('epsilon_print_stats')
     self.epsilon = self.epsilon_value
     self.num_games = 0
     self.injected = 0
+    self.level = level
     if self.epsilon_value == 0:
-      print("EpsilonAlgo: EpsilonAlgo is disabled")
+      print(f"EpsilonAlgo({level}): EpsilonAlgo is disabled")
       self.print_stats = False
     else:
-      print(f"EpsilonAlgo: New instance with epsilon value of {self.epsilon_value}")
+      print(f"EpsilonAlgo({level}): New instance with epsilon value of {self.epsilon_value}")
 
   def get_epsilon(self):
     if self.epsilon < 0:

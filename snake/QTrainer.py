@@ -29,10 +29,10 @@ class QTrainer:
     ini = AISnakeGameConfig()
     self.lr = ini.get('learning_rate')
     self.gamma = ini.get('discount')
-    self.model = model
     self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
     # Mean Squared Error Loss... 
     self.criterion = nn.MSELoss()
+    self.model = model
     
   def train_step(self, state, action, reward, next_state, game_over):
     """
@@ -42,6 +42,7 @@ class QTrainer:
         * reward,
         * next_state
         * game_over
+        * cur_score
     """
     state = torch.tensor(np.array(state), dtype=torch.float)
     next_state = torch.tensor(np.array(next_state), dtype=torch.float)
@@ -66,7 +67,7 @@ class QTrainer:
       if not game_over[idx]:
         Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
       target[idx][torch.argmax(action).item()] = Q_new
-      
+
     self.optimizer.zero_grad() # Reset the gradients to zero
     loss = self.criterion(target, pred) # Calculate the loss
     loss.backward() # Backpropagate the loss

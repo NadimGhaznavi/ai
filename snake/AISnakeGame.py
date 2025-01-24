@@ -46,10 +46,14 @@ class AISnakeGame():
   uses the AIAgent class as the player. It also loads game parameters
   from the AISnakeGame.ini file using the StartConfig class.
   """
-  def __init__(self, ai_version):
+  def __init__(self, ai_version, plot):
     # Get AISnakeGame.ini file settings
     ini = AISnakeGameConfig()
-        
+    
+    # Get a matplotlib plot object, so we can save the plot when the 
+    # game quits
+    self.plot = plot
+
     # This is so that our simulations are repeatable
     random.seed(ini.get('random_seed'))
 
@@ -78,6 +82,7 @@ class AISnakeGame():
     self.lose_reason = 'N/A'
     self.max_moves = ini.get('max_moves')
     self.num_games = 0
+    self.num_games_cur = self.num_games
     self.score = 0
     self.sim_start_time = time.time()
     self.sim_score = 0
@@ -87,14 +92,21 @@ class AISnakeGame():
     self.sim_snake_collision_count = 0
     self.sim_exceeded_max_moves_count = 0
     self.start_time = 0
-    self.sim_save_checkpoint_freq = ini.get('sim_save_checkpoint_freq')
     self.status_iter = ini.get('status_iter')
 
   def game_speed_decrease(self):
-    self.game_speed = self.game_speed - 10
+    # PyGame input comes in WAAAAY too fast, throttle it so that
+    # this setting doesn't go haywire
+    if self.num_games == self.num_games_cur:
+      self.game_speed = self.game_speed - 10
+      print(f"AiSnakeGame: Decreasing game speed to {self.game_speed}")
+      self.num_games_cur += 1
 
   def game_speed_increase(self):
-    self.game_speed = self.game_speed + 10
+    if self.num_games == self.num_games_cur:
+        self.game_speed = self.game_speed + 10
+        print(f"AiSnakeGame: Increasing game speed to {self.game_speed}")
+        self.num_games_cur += 1
 
   def is_snake_collision(self, pt=None):
     """
@@ -210,9 +222,9 @@ class AISnakeGame():
     if keys[pygame.K_m]:
       self.print_model()
     if keys[pygame.K_a]:
-      self.game_speed_increase()
+      self.game_speed_increase
     if keys[pygame.K_z]:
-      self.game_speed_decrease()
+      self.game_speed_decrease
 
     # 2. move
     self.move(action) # update the head
@@ -268,7 +280,9 @@ class AISnakeGame():
     """
     Print the neural network model.
     """
-    print(self.agent.model)    
+    if self.num_games == self.num_games_cur:
+      print(self.agent.model)    
+      self.num_games_cur += 1   
 
   def print_status(self):
     """
@@ -292,6 +306,7 @@ class AISnakeGame():
     self.sim_time += self.elapsed_time
     self.print_status()
     self.agent.save_checkpoint()
+    self.plot.save()
     pygame.quit()
     quit()
 
@@ -333,10 +348,6 @@ class AISnakeGame():
 
     # The number of game moves
     self.game_moves = 0
-
-    # Save the model and it's state every sim_save_checkpoint_freq games
-    if(self.num_games % self.sim_save_checkpoint_freq) == 0:
-      self.agent.save_checkpoint()
 
     ## (Re)initialize the game state
     # The direction of the snake

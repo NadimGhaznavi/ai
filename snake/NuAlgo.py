@@ -1,6 +1,10 @@
 """
 NuAlgo.py
 
+The motivation for this class was to help the AI break the "level 1" barrier.
+It was not successful. I have removed it from the main codebase, but am 
+leaving it here for historical reasons.
+
 This class implements the nu algorithm. The algorithm injects random moves
 whenever the AI reaches the current high score. This encourages the AI to
 continue exploring as the snake grows in length. The number of random

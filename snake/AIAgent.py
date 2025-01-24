@@ -18,78 +18,93 @@ from AISnakeGameConfig import AISnakeGameConfig
 from QTrainer import QTrainer
 from SnakeGameElement import Direction
 from SnakeGameElement import Point
-from AISnakeGameUtils import get_sim_desc
 from EpsilonAlgo import EpsilonAlgo
 from NuAlgo import NuAlgo
 
 class AIAgent:
-  def __init__(self, game, model, config, ai_version):
-    ini = AISnakeGameConfig()
-    self.game = game
-    self.model = model
-    self.config = config
+  def __init__(self, game, l1_model, l2_model, ai_version):
     self.ai_version = ai_version
-
-    self.b1_score = ini.get('b1_score')
-    self.b2_score = ini.get('b2_score')
-    self.b3_score = ini.get('b3_score')
-
-    self.batch_size = ini.get('batch_size')
-    self.gamma = ini.get('discount') # Discount rate, for future rewards
+    self.game = game
     self.highscore = 0
+    
+    self.ini = AISnakeGameConfig()
+
+    self.batch_size = self.ini.get('batch_size')
+
+    # Used in the state map, this initializes it to some random direction
     self.last_dirs = [ 0, 0, 1, 0 ]
-    self.learning_rate = ini.get('learning_rate')
-    self.max_games = ini.get('max_games')
-    self.max_score = ini.get('max_score')
-    self.max_score_num = ini.get('max_score_num')
-    self.max_score_num_count = 0
-    self.memory = deque(maxlen=ini.get('max_memory'))
+
+    self.l1_epsilon_algo = EpsilonAlgo(1) # Epsilon Algorithm for exploration/exploitation
+    self.l1_memory = deque(maxlen=self.ini.get('max_memory'))
+    self.l1_model = l1_model
+    self.l1_trainer = QTrainer(l1_model)
+
+    self.l2_epsilon_algo = EpsilonAlgo(2)
+    self.l2_memory = deque(maxlen=self.ini.get('max_memory'))
+    self.l2_model = l2_model
+    self.l2_trainer = QTrainer(self.l2_model)
+
     self.n_games = 0 # Number of games played
-    self.n_games_buf = -1
-    self.random_move_count = 0
-    self.sim_checkpoint_basename = ini.get('sim_checkpoint_basename')
-    self.sim_checkpoint_enable = ini.get('sim_checkpoint_enable')
-    self.sim_checkpoint_verbose = ini.get('sim_checkpoint_verbose')
-    self.sim_data_dir = ini.get('sim_data_dir')
-    self.sim_desc_basename = ini.get('sim_desc_basename')
-    self.sim_desc_verbose = ini.get('sim_desc_verbose')
-    self.sim_highscore_basename = ini.get('sim_highscore_basename')
-    self.sim_model_basename = ini.get('sim_model_basename')
-    self.trainer = QTrainer(self.model)
-
-    # Nu Algorithm for exploration/exploitation
-    self.nu_algo = NuAlgo()
-
-    # Epsilon Algorithm for exploration/exploitation
-    self.epsilon_algo = EpsilonAlgo()
+    self.n_games_buf = -1    
     
     self.load_checkpoint() # Load the simulation state from file if it exists
-    self.save_highscore(0) # Save the "game #, highscore" metrics
+    self.save_highscore(0) # Initialize the highscore file
+
+    # Create the simulation data directory if it does not exist
+    os.makedirs(self.ini.get('sim_data_dir'), exist_ok=True)
 
   def get_action(self, state):
 
-    # Epsilon exploration
-    random_move = self.epsilon_algo.get_move()
+    l2_score = self.ini.get('l2_score')
+    
+    # Random action (epsilon exploration)
+    if self.game.score <= l2_score:
+      random_move = self.l1_epsilon_algo.get_move()
+    else:
+      random_move = self.l2_epsilon_algo.get_move()
+    
     if random_move:
       self.n_games_buf = self.n_games
       return random_move
     
-    # Nu exploration
-    random_move = self.nu_algo.get_move(self.game.score)
-    if random_move:
-      self.n_games_buf = self.n_games
-      return random_move
-
-    # AI based action
+    # AI agent based action
     final_move = [0, 0, 0]
     state0 = torch.tensor(state, dtype=torch.float)
-    prediction = self.model(state0)
+    if self.game.score <= l2_score:
+      prediction = self.l1_model(state0)
+    else:
+      prediction = self.l2_model(state0)
     move = torch.argmax(prediction).item()
     final_move[move] = 1 
       
     return final_move
 
+  def get_checkpoint_filenames(self):
+    # Get the checkpoint filename componenets
+    ai_version = self.ai_version
+    checkpoint_basename = self.ini.get('sim_checkpoint_basename')
+    checkpoint_basename_l2 = self.ini.get('l2_sim_checkpoint_basename')
+    sim_data_dir = self.ini.get('sim_data_dir')
+    # Construct the file names
+    checkpoint_file = os.path.join(sim_data_dir, str(ai_version) + checkpoint_basename)
+    checkpoint_file_l2 = os.path.join(sim_data_dir, str(ai_version) + checkpoint_basename_l2)
+    # Return the filenames
+    return checkpoint_file, checkpoint_file_l2
+  
+  def get_model_filenames(self):
+    # Get the model filename componenets
+    ai_version = self.ai_version
+    model_basename = self.ini.get('sim_model_basename')
+    model_basename_l2 = self.ini.get('l2_sim_model_basename')
+    sim_data_dir = self.ini.get('sim_data_dir')
+    # Construct the file names
+    model_file = os.path.join(sim_data_dir, str(ai_version) + model_basename)
+    model_file_l2 = os.path.join(sim_data_dir, str(ai_version) + model_basename_l2)
+    return model_file, model_file_l2
+
   def get_snake_length_in_binary(self):
+    # Get the length of the snake in binary.
+    # This is used in the state map, the get_state() function.
     bin_str = format(len(self.game.snake), 'b')
     out_list = []
     for bit in range(len(bin_str)):
@@ -101,6 +116,7 @@ class AIAgent:
     return out_list
 
   def get_state(self):
+    # Returns the current state of the game.
     game = self.game
     head = game.snake[0]
     point_l = Point(head.x - 20, head.y)
@@ -173,52 +189,61 @@ class AIAgent:
     return np.array(state, dtype=int)
 
   def load_checkpoint(self):
-    checkpoint_file = str(self.ai_version) + self.sim_checkpoint_basename
-    checkpoint_file = os.path.join(self.sim_data_dir, checkpoint_file)
+    # Get the checkpoint filenames
+    checkpoint_file, checkpoint_file_l2 = self.get_checkpoint_filenames()
+    # Load the level 1 model checkpoint
     if os.path.isfile(checkpoint_file):
-      optimizer = self.trainer.optimizer
-      self.model.load_checkpoint(optimizer, checkpoint_file)
+      optimizer = self.l1_trainer.optimizer
+      self.l1_model.load_checkpoint(optimizer, checkpoint_file)
       print(f"Loaded simulation checkpoint ({checkpoint_file})")
+    # Repeat for the level 2 model checkpoint
+    if os.path.isfile(checkpoint_file_l2):
+      optimizer = self.l2_trainer.optimizer
+      self.l2_model.load_checkpoint(optimizer, checkpoint_file_l2)
+      print(f"Loaded simulation checkpoint ({checkpoint_file_l2})")
 
   def load_model(self):
-    model_file = str(self.ai_version) + self.sim_model_basename
-    model_file = os.path.join(self.sim_data_dir, model_file)
+    model_file, model_file_l2 = self.get_model_filenames()
+    # Load the level 1 model
     if os.path.isfile(model_file):
-      optimizer = self.trainer.optimizer
-      self.model.load_model(optimizer, model_file)
+      optimizer = self.l1_trainer.optimizer
+      self.l1_model.load_model(optimizer, model_file)
       print(f"Loaded simulation model ({model_file})")
-
-  def new_layer_added(self):
-    # Flag this event so a new layer doesn't get added again
-    self.new_layer_added_flag = True
+    # Repeat for the level 2 model
+    if os.path.isfile(model_file_l2):
+      optimizer = self.l2_trainer.optimizer
+      self.l2_model.load_model(optimizer, model_file_l2)
+      print(f"Loaded simulation model ({model_file_l2})")
 
   def remember(self, state, action, reward, next_state, done):
     # Store the state, action, reward, next_state, and done in memory
     # Recall that memory is a deque, so it will automatically remove the oldest memory 
     # if the memory exceeds MAX_MEMORY
-    self.memory.append((state, action, reward, next_state, done))
+    l2_score = self.ini.get('l2_score')
+    if self.game.score <= l2_score:
+      self.l1_memory.append((state, action, reward, next_state, done))
+    else:
+      self.l2_memory.append((state, action, reward, next_state, done))
 
   def save_checkpoint(self):
+    # Get the checkpoint filename componenets
+    checkpoint_file, checkpoint_file_l2 = self.get_checkpoint_filenames()
     # Save the simulation state
-    if self.sim_checkpoint_enable:
-      checkpoint_file = str(self.ai_version) + self.sim_checkpoint_basename
-      checkpoint_file = os.path.join(self.sim_data_dir, checkpoint_file)
-      if not os.path.exists(self.sim_data_dir):
-        os.makedirs(self.sim_data_dir)
-      self.model.save_checkpoint(self.trainer.optimizer, checkpoint_file, self.game.num_games)
-      if self.sim_checkpoint_verbose:
+    if self.ini.get('sim_checkpoint_enable'):
+      self.l1_model.save_checkpoint(self.l1_trainer.optimizer, checkpoint_file)
+      self.l2_model.save_checkpoint(self.l2_trainer.optimizer, checkpoint_file_l2)
+      if self.ini.get('sim_checkpoint_verbose'):
         print(f"Saved simulation checkpoint ({checkpoint_file})")
-      self.save_sim_desc()
-      return True # Not used
-    else:
-      return False # Not used either
+        print(f"Saved simulation checkpoint ({checkpoint_file_l2})")
   
   def save_highscore(self, highscore):
+    # Get the highscore filename components
+    ai_version = self.ai_version
+    sim_highscore_basename = self.ini.get('sim_highscore_basename')
+    sim_data_dir = self.ini.get('sim_data_dir')
+    # Construct the file name
+    highscore_file = os.path.join(sim_data_dir, str(ai_version) + sim_highscore_basename)
     # Track when a new highscore is achieved
-    highscore_file = str(self.ai_version) + self.sim_highscore_basename
-    highscore_file = os.path.join(self.sim_data_dir, highscore_file)
-    if not os.path.exists(self.sim_data_dir):
-      os.makedirs(self.sim_data_dir)
     if not os.path.exists(highscore_file):
       # Create a new highscore file
       with open(highscore_file, 'w') as file_handle:
@@ -230,45 +255,52 @@ class AIAgent:
         file_handle.write(str(self.n_games) + ',' + str(highscore) + "\n")
 
   def save_model(self):
-    # Save the simulation model
-    model_file = str(self.ai_version) + self.sim_model_basename
-    model_file = os.path.join(self.sim_data_dir, model_file)
-    if not os.path.exists(self.sim_data_dir):
-      os.makedirs(self.sim_data_dir)
-    self.model.save_model(self.trainer.optimizer, model_file)
+    # Get the model filenames
+    model_file, model_file_l2 = self.get_model_filenames()
+    # Save the simulation models
+    self.l1_model.save_model(self.l1_trainer.optimizer, model_file)
+    self.l2_model.save_model(self.l2_trainer.optimizer, model_file_l2)
     print(f"Saved simulation model ({model_file})")
+    print(f"Saved simulation model ({model_file_l2})")
 
   def save_sim_desc(self):
-    # Save a descrion of the simulation model
-    sim_desc_file = str(self.ai_version) + self.sim_desc_basename
-    sim_desc_file = os.path.join(self.sim_data_dir, sim_desc_file)
-    if not os.path.exists(self.sim_data_dir):
-      os.makedirs(self.sim_data_dir)
+    # Get the filename components
+    ai_version = self.ai_version
+    data_dir = self.ini.get('sim_data_dir')
+    desc_file_basename = self.ini.get('sim_desc_basename')
+    # Construct the filename
+    desc_file = os.path.join(data_dir, str(ai_version) + desc_file_basename)
     # Update the epsilon value
-    self.set_config('epsilon_value', str(self.epsilon_algo.get_epsilon_value()))
-    self.set_config('nu_score', str(self.nu_algo.get_nu_score()))
-    self.set_config('nu_value', str(self.nu_algo.get_nu_value()))
-    self.set_config('nu_bad_games', str(self.nu_algo.get_nu_bad_games()))
-    self.set_config('num_games', str(self.n_games))
-    self.set_config('highscore', str(self.highscore))
-    with open(sim_desc_file, 'w') as config_file:
-      self.config.write(config_file)
-    if self.sim_desc_verbose:
-      print(f"Saved simulation description ({sim_desc_file})")
+    if self.ini.get('sim_desc_verbose'):
+      print(f"Saved simulation description ({desc_file})")
 
   def set_config(self, key, value):
-    self.config.set_value(key, value)
+    self.ini.set_value(key, value)
 
   def train_long_memory(self):
-    if len(self.memory) > self.batch_size:
-      # Sample a random batch of memories
-      mini_sample = random.sample(self.memory, self.batch_size)
+    l2_score = self.ini.get('l2_score')
+    if self.game.score <= l2_score:
+      if len(self.l1_memory) > self.batch_size:
+        # Sample a random batch of memories
+        mini_sample = random.sample(self.l1_memory, self.batch_size)
+      else:
+        mini_sample = self.l1_memory
     else:
-      mini_sample = self.memory
+      if len(self.l2_memory) > self.batch_size:
+        # Sample a random batch of memories
+        mini_sample = random.sample(self.l2_memory, self.batch_size)
+      else:
+        mini_sample = self.l2_memory
 
     # Get the states, actions, rewards, next_states, and dones from the mini_sample
     states, actions, rewards, next_states, dones = zip(*mini_sample)
-    self.trainer.train_step(states, actions, rewards, next_states, dones)
+    if self.game.score <= l2_score:
+      self.l1_trainer.train_step(states, actions, rewards, next_states, dones)
+    else:
+      self.l2_trainer.train_step(states, actions, rewards, next_states, dones)
 
   def train_short_memory(self, state, action, reward, next_state, done):
-    self.trainer.train_step(state, action, reward, next_state, done)
+    if self.game.score <= self.ini.get('l2_score'):
+      self.l1_trainer.train_step(state, action, reward, next_state, done)
+    else:
+      self.l2_trainer.train_step(state, action, reward, next_state, done)

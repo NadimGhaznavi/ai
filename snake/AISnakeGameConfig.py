@@ -31,12 +31,22 @@ class AISnakeGameConfig():
     parser.add_argument('-b3n', '--b3_nodes', type=int, default=0, help='Number of nodes in the block 3 hidden layer(s).')
     parser.add_argument('-b3l', '--b3_layers', type=int, default=0, help='Number of block 3 hidden layers.')
     parser.add_argument('-b3s', '--b3_score', type=int, default=0, help='Insert a B3 layer when reaching this score.')
+    parser.add_argument('-l2b1n', '--l2_b1_nodes', type=int, help='Number of nodes in the first level 2, block 1 layer.')
+    parser.add_argument('-l2b1l', '--l2_b1_layers', type=int, default=1, help='Number of hidden level 2, block 1 layers.')
+    parser.add_argument('-l2b1s', '--l2_b1_score', type=int, default=0, help='Insert a level 2, B1 layer when reaching this score.')
+    parser.add_argument('-l2b2n', '--l2_b2_nodes', type=int, default=0, help='Number of nodes in the hidden level 2, block 2 layer(s).')
+    parser.add_argument('-l2b2l', '--l2_b2_layers', type=int, default=0, help='Number of hidden level 2, block 2 layers.')
+    parser.add_argument('-l2b2s', '--l2_b2_score', type=int, default=0, help='Insert a level 2, B2 layer when reaching this score.')
+    parser.add_argument('-l2b3n', '--l2_b3_nodes', type=int, default=0, help='Number of nodes in the level 2, block 3 hidden layer(s).')
+    parser.add_argument('-l2b3l', '--l2_b3_layers', type=int, default=0, help='Number of level 2, block 3 hidden layers.')
+    parser.add_argument('-l2b3s', '--l2_b3_score', type=int, default=0, help='Insert a level 2, B3 layer when reaching this score.')
     parser.add_argument('-d', '--discount', type=float, default=0, help='The Linear Q discount factor.')
     parser.add_argument('-do', '--dropout_p', type=float, default=0, help='Insert a Droput layer with this p value, used with the --dropout_score switch.')
     parser.add_argument('-dss', '--dropout_static', type=float, default=0, help='Create dropout layers and set the p value to this value.')
     parser.add_argument('-dsx', '--dropout_min', type=int, default=0, help='Activate the p value of the droput layer when reaching this score.')
     parser.add_argument('-dsy', '--dropout_max', type=int, default=0, help='Deactivate the p value of the droput layer when reaching this score.')
     parser.add_argument('-e', '--epsilon', type=int, default=0, help='Epsilon value for exploration.')
+    parser.add_argument('-l2e', '--l2_epsilon', type=int, default=0, help='Level 2 epsilon value for exploration.')
     parser.add_argument('-i', '--ini_file', type=str, default='AISnakeGame.ini', help='The path to the configuration file.')
     parser.add_argument('-l', '--learning_rate', type=float, default=0, help='Optimizer learning rate.')
     parser.add_argument('-mg', '--max_games', type=int, default=0, help='Exit the simulation after max_games games.')
@@ -97,6 +107,8 @@ class AISnakeGameConfig():
       default['dropout_static'] = str(args.dropout_static)
     if args.epsilon:
       default['epsilon_value'] = str(args.epsilon)
+    if args.l2_epsilon:
+      default['l2_epsilon_value'] = str(args.l2_epsilon)
     if args.learning_rate:
       default['learning_rate'] = str(args.learning_rate)
     if args.max_games:
@@ -170,7 +182,12 @@ class AISnakeGameConfig():
                       'b2_layers', 'b2_score', 'b3_nodes', 'b3_layers', 'b3_score', 
                       'batch_size', 'board_border', 'board_height', 'board_width', 
                       'dropout_max','dropout_min', 'epsilon_value', 'game_speed', 
-                      'in_features', 'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
+                      'in_features', 
+                      'l2_b1_nodes', 'l2_b1_layers', 'l2_b1_score', 
+                      'l2_b2_nodes', 'l2_b2_layers', 'l2_b2_score',
+                      'l2_b3_nodes', 'l2_b3_layers', 'l2_b3_score',
+                      'l2_epsilon_value', 'l2_score',
+                      'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
                       'max_score_num', 'out_features', 'random_seed', 'score_height', 
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
                       'new_layer_score', 'nu_bad_games', 'nu_max_zero_scores', 
@@ -218,5 +235,8 @@ class AISnakeGameConfig():
     """
     Create an INI file with the ConfigParser values.
     """
+    print(self.config)
+    print(type(self.config))
+    print(ini_file)
     self.config.write(ini_file)
   
