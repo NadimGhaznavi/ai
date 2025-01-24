@@ -140,7 +140,7 @@ class LinearQNet(nn.Module):
     ## B1 Block
     if self.b2_layers > 0:
       # With a B2 block
-      layer_count = 1
+      layer_count = 0
       while layer_count < self.b1_layers:
         if self.dropout and layer_count > 1:
           main_block[1].append(nn.Dropout(p=self.p_value))
@@ -151,19 +151,19 @@ class LinearQNet(nn.Module):
       main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b2_nodes))
     else:
       # With no B2 block
-      layer_count = 1
+      layer_count = 0
       while layer_count < self.b1_layers:
         main_block[1].append(nn.ReLU())
         main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
         layer_count += 1
-        if self.dropout and layer_count > 1 and layer_count != self.b1_layers:
+        if self.dropout and layer_count < self.b1_layers:
           main_block[1].append(nn.Dropout(p=self.p_value))
 
     ## B2 Block
     if self.b2_layers > 0:
       if self.b3_layers > 0:
         # With a B3 block
-        layer_count = 1
+        layer_count = 0
         while layer_count < self.b2_layers:
           main_block[2].append(nn.ReLU())
           main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b2_nodes))        
@@ -178,7 +178,7 @@ class LinearQNet(nn.Module):
         # with no B3 block
         main_block[2].append(nn.ReLU())
         main_block[2].append(nn.Linear(in_features=self.b3_nodes, out_features=self.out_features))
-        layer_count = 1
+        layer_count = 0
         while layer_count < self.b2_layers and layer_count != self.b2_layers:
           main_block[2].append(nn.ReLU())
           main_block[2].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
@@ -186,7 +186,7 @@ class LinearQNet(nn.Module):
     
     ## B3 Block
     if self.b3_layers > 0:
-      layer_count = 1
+      layer_count = 0
       while layer_count < self.b3_layers:
         main_block[3].append(nn.ReLU())
         main_block[3].append(nn.Linear(in_features=self.b3_nodes, out_features=self.b3_nodes))
@@ -196,7 +196,6 @@ class LinearQNet(nn.Module):
     
     ## Output block
     if self.b2_layers == 0:
-      pass
       # Only a B1 block
       main_block[1].append(nn.ReLU())
       main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.out_features))
@@ -214,19 +213,19 @@ class LinearQNet(nn.Module):
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
     print(f"====== Level {self.label} Neural Network Architecture ==========")
-    print("Blocks         Nodes   Layers  Total  Nodes")
+    print("Blocks           Nodes   Layers  Total  Nodes")
     print("------------------------------------------------------")
-    print("Input block    {:>5} {:>8} {:>13}".format(self.in_features, 1, self.in_features))
-    print("B1 block       {:>5} {:>8} {:>13}".format(self.b1_nodes, self.b1_layers, self.b1_nodes*self.b1_layers))
-    print("B2 block       {:>5} {:>8} {:>13}".format(self.b2_nodes, self.b2_layers, self.b2_nodes*self.b2_layers))
-    print("B3 block       {:>5} {:>8} {:>13}".format(self.b3_nodes, self.b3_layers, self.b3_nodes*self.b3_layers))
-    print("Output block   {:>5} {:>8} {:>13}".format(self.out_features, 1, self.out_features))
+    print("Input block      {:>5} {:>8} {:>13}".format(self.in_features, 1, self.in_features))
+    print("B1 block         {:>5} {:>8} {:>13}".format(self.b1_nodes, self.b1_layers, self.b1_nodes*self.b1_layers))
+    print("B2 block         {:>5} {:>8} {:>13}".format(self.b2_nodes, self.b2_layers, self.b2_nodes*self.b2_layers))
+    print("B3 block         {:>5} {:>8} {:>13}".format(self.b3_nodes, self.b3_layers, self.b3_nodes*self.b3_layers))
+    print("Output block     {:>5} {:>8} {:>13}".format(self.out_features, 1, self.out_features))
     print("------------------------------------------------------")
-    print("Totals                     {:>16}".format(self.in_features + (self.b1_nodes*self.b1_layers) + \
+    print("Totals                       {:>16}".format(self.in_features + (self.b1_nodes*self.b1_layers) + \
                                                    (self.b2_nodes*self.b2_layers) + \
                                                     (self.b3_nodes*self.b3_layers) + self.out_features))
     if self.dropout:
-      print("Dropout layer(s), p-value  {:>16}".format(self.p_value))
+      print("Dropout layers, p-value is {:>16}".format(self.p_value))
 
   def forward(self, x):
     """

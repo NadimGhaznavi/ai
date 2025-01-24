@@ -283,7 +283,7 @@ class AISnakeGame():
     if self.num_games == self.num_games_cur:
       self.agent.l1_model.ascii_print()
       print(self.agent.l1_model)    
-      self.agent.l1_model.ascii_print()
+      self.agent.l2_model.ascii_print()
       print(self.agent.l2_model)    
       self.num_games_cur += 1
 

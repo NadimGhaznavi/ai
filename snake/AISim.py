@@ -38,6 +38,7 @@ def get_next_ai_version():
       file_handle.write('2')
       file_handle.close()
   print(f"AI version is {ai_version}")
+  print(f"The second neural network will be used for scores above {ini.get('l2_score')}")
   return ai_version
 def print_game_summary(ai_version, agent, score, record, game, l2_score):
   summary = 'Snake AI (v' + str(ai_version) + ') ' + \
