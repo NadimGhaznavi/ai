@@ -15,8 +15,8 @@ sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 
 class EpsilonAlgo():
-  def __init__(self, level):
-    ini = AISnakeGameConfig()
+  def __init__(self, level, ai_version):
+    ini = AISnakeGameConfig(ai_version)
     # Set this random seed so things are repeatable
     random.seed(ini.get('random_seed')) 
     self.epsilon_value = ini.get('epsilon_value')

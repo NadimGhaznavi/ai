@@ -27,22 +27,22 @@ class AIAgent:
     self.game = game
     self.highscore = 0
     
-    self.ini = AISnakeGameConfig()
+    self.ini = AISnakeGameConfig(ai_version)
 
     self.batch_size = self.ini.get('batch_size')
 
     # Used in the state map, this initializes it to some random direction
     self.last_dirs = [ 0, 0, 1, 0 ]
 
-    self.l1_epsilon_algo = EpsilonAlgo(1) # Epsilon Algorithm for exploration/exploitation
+    self.l1_epsilon_algo = EpsilonAlgo(1, self.ai_version) # Epsilon Algorithm for exploration/exploitation
     self.l1_memory = deque(maxlen=self.ini.get('max_memory'))
     self.l1_model = l1_model
-    self.l1_trainer = QTrainer(l1_model)
+    self.l1_trainer = QTrainer(l1_model, self.ai_version)
 
-    self.l2_epsilon_algo = EpsilonAlgo(2)
+    self.l2_epsilon_algo = EpsilonAlgo(2, self.ai_version)
     self.l2_memory = deque(maxlen=self.ini.get('max_memory'))
     self.l2_model = l2_model
-    self.l2_trainer = QTrainer(self.l2_model)
+    self.l2_trainer = QTrainer(self.l2_model, self.ai_version)
 
     self.n_games = 0 # Number of games played
     self.n_games_buf = -1    
@@ -262,21 +262,6 @@ class AIAgent:
     self.l2_model.save_model(self.l2_trainer.optimizer, model_file_l2)
     print(f"Saved simulation model ({model_file})")
     print(f"Saved simulation model ({model_file_l2})")
-
-  def save_sim_desc(self):
-    # Get the filename components
-    ai_version = self.ai_version
-    data_dir = self.ini.get('sim_data_dir')
-    desc_file_basename = self.ini.get('sim_desc_basename')
-    # Construct the filename
-    desc_file = os.path.join(data_dir, str(ai_version) + desc_file_basename)
-    # Update the epsilon value
-    if self.ini.get('sim_desc_verbose'):
-      print(f"Saved simulation description ({desc_file})")
-
-  def set_config(self, key, value):
-    self.ini.set_value(key, value)
-
   def train_long_memory(self):
     l2_score = self.ini.get('l2_score')
     if self.game.score <= l2_score:

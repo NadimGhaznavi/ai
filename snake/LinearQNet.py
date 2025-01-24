@@ -12,17 +12,13 @@ lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 
-ini = AISnakeGameConfig()
-
-torch.manual_seed(ini.get('random_seed'))
-
 class LinearQNet(nn.Module):
   #def __init__(self, in_features, 
   #             b1_nodes, b1_layers, 
   #             b2_nodes, b2_layers,
   #             b3_nodes, b3_layers,
   #             out_features, ai_version):
-  def __init__(self, config):
+  def __init__(self, config, label, ai_version):
     """
     The class accepts the following parameters:
 
@@ -69,8 +65,13 @@ class LinearQNet(nn.Module):
     the pattern (ReLU followed by Linear) is repeated b3_layers times.
     """  
     super().__init__()
+    # This should be "1" or "2" to indicate whether this is a level 1 or level 2 model
+    self.label = label 
+    self.ai_version = ai_version
+    
+    config = AISnakeGameConfig(ai_version)
+    torch.manual_seed(config.get('random_seed'))
 
-    self.ai_version = config.get('ai_version')
     self.in_features = config.get('in_features')
     self.b1_nodes = config.get('b1_nodes')
     self.b1_layers = config.get('b1_layers')
@@ -94,7 +95,7 @@ class LinearQNet(nn.Module):
         # Dynamic dropout configuration
         self.p_value = self.dropout_p
       else:
-        # Static droptout confifiguration
+        # Static droptout configuration 
         self.p_value = self.dropout_static
 
     else:
@@ -194,7 +195,7 @@ class LinearQNet(nn.Module):
 
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
-    print("============ Neural Network Architecture =============")
+    print(f"====== Level {self.label} Neural Network Architecture ==========")
     print("Blocks       Nodes   Layers  Total  Nodes")
     print("------------------------------------------------------")
     print("Input block  {:>5} {:>8} {:>13}".format(self.in_features, 1, self.in_features))

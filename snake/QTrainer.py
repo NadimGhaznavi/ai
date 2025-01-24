@@ -14,19 +14,17 @@ lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 
-ini = AISnakeGameConfig()
-
-torch.manual_seed(ini.get('random_seed'))
 
 class QTrainer:
-  def __init__(self, model):
+  def __init__(self, model, ai_version):
     """
     The constructor accepts the following parameters:
         * model - A sub-class of nn.Module
         * lr    - The learning rate
         * gamma - The gamma value
     """
-    ini = AISnakeGameConfig()
+    ini = AISnakeGameConfig(ai_version)
+    torch.manual_seed(ini.get('random_seed'))
     self.lr = ini.get('learning_rate')
     self.gamma = ini.get('discount')
     self.optimizer = optim.Adam(model.parameters(), lr=self.lr)

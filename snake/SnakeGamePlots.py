@@ -11,7 +11,7 @@ from AISnakeGameConfig import AISnakeGameConfig
 
 class MyPlot():
   def __init__(self, ai_version):
-    ini = AISnakeGameConfig()
+    ini = AISnakeGameConfig(ai_version)
     self.sim_plot_basename = ini.get('sim_plot_basename')
     self.sim_data_dir = ini.get('sim_data_dir')
     self.sim_plot_file = str(ai_version) + self.sim_plot_basename

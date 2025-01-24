@@ -1,5 +1,5 @@
 """
-asg.py
+AISim.py
 
 The frontend to the AI Snake Game.
 
@@ -21,7 +21,7 @@ def get_next_ai_version():
   Get the next available version number from the ai_version file.
   If the file doesn't exist, write '2' to the file an return '1'.
   """
-  ini = AISnakeGameConfig()
+  ini = AISnakeGameConfig(0)
   ai_version_file = ini.get('ai_version_file')
   ai_version_file = os.path.join(lib_dir, ai_version_file)
   if os.path.isfile(ai_version_file):
@@ -70,7 +70,7 @@ def train(ai_version, new_sim_run):
   game = AISnakeGame(ai_version, my_plot)
 
   # Get the AI Snake Game configuration
-  ini = AISnakeGameConfig()
+  ini = AISnakeGameConfig(ai_version)
 
   # This is the score when we switch to using the level two network
   l2_score = ini.get('l2_score')
@@ -83,22 +83,21 @@ def train(ai_version, new_sim_run):
 
   if new_sim_run:
     # This is a new simulation
-    config = AISnakeGameConfig() # Get the settings from the AISnakeGame.ini
-    l1_model = LinearQNet(config) # Get a new model for level one score
-    l2_model = LinearQNet(config) # Get a new model for level two score
+    config = AISnakeGameConfig(ai_version) # Get the settings from the AISnakeGame.ini
+    l1_model = LinearQNet(config, 1, ai_version) # Get a new model for level one score
+    l2_model = LinearQNet(config, 2, ai_version) # Get a new model for level two score
     agent = AIAgent(game, l1_model, l2_model, ai_version) # Get a new instance of the AI Agent
     game.set_agent(agent)
     game.reset()
     agent.save_model()
-    agent.save_sim_desc()
+    agent.ini.save_sim_desc()
     
   else:
     # A version was passed into this script
     old_ai_version = ai_version
-    config = AISnakeGameConfig()
-    config = config.load_config(old_ai_version)
-    l1_model = LinearQNet(config)
-    l2_model = LinearQNet(config)
+    old_config = AISnakeGameConfig(old_ai_version)
+    l1_model = LinearQNet(old_config, 1, ai_version)
+    l2_model = LinearQNet(old_config, 2, ai_version)
     ai_version = get_next_ai_version()
     game = AISnakeGame(ai_version, my_plot)
     agent = AIAgent(game, l1_model, l2_model, config, ai_version)
@@ -196,12 +195,12 @@ def train(ai_version, new_sim_run):
         agent.save_highscore(record) # Update the highscore file
         agent.highscore = record
         
-        if config.get('max_score') != 0 and score >= config.get('max_score'):
+        if agent.ini.get('max_score') != 0 and score >= agent.ini.get('max_score'):
           # Exit the simulation if a score of max_score is achieved
-          lose_reason = "Achieved max_score value of " + str(agent.max_score)
+          lose_reason = "Achieved max_score value of " + str(agent.ini.get('max_score'))
           game.lose_reason = lose_reason
-          config.set_value('lose_reason', lose_reason) 
-          agent.save_sim_desc()
+          agent.ini.set_value('lose_reason', lose_reason) 
+          agent.ini.save_sim_desc()
           print_game_summary(ai_version, agent, score, record, game, l2_score)
           my_plot.save()
           game.quit_game()
@@ -219,11 +218,10 @@ def train(ai_version, new_sim_run):
       my_plot.plot(plot_scores, plot_mean_scores, plot_times, plot_mean_times, ai_version)
 
 if __name__ == '__main__':
-  ini = AISnakeGameConfig()
+  ini = AISnakeGameConfig(0)
   # Get the ai_version from a command line switch
-  ai_version = ini.get('ai_version')
   new_sim_run = True
-  if ai_version:
+  if ini.get('ai_version') != 0:
     # Restart a previous simulation
     new_sim_run = False
   else:

@@ -19,7 +19,7 @@ ini_file = os.path.join(base_dir, 'AISnakeGame.ini')
 
 class AISnakeGameConfig():
 
-  def __init__(self):
+  def __init__(self, ai_version):
     # Setup the expected script arguments
     parser = argparse.ArgumentParser(description='AI Snake Game')
     parser.add_argument('-b1n', '--b1_nodes', type=int, help='Number of nodes in the first block 1 layer.')
@@ -139,6 +139,8 @@ class AISnakeGameConfig():
       default['game_speed'] = str(args.speed)
     if args.ai_version:
       default['ai_version'] = str(args.ai_version)
+    else:
+      default['ai_version'] = str(ai_version)
 
     if args.b1_nodes == 0:
       print(f"ERROR: You must set the --b1_nodes switch to a non-zero value")
@@ -224,6 +226,17 @@ class AISnakeGameConfig():
     self.config.read(sim_desc_file)
     return self
   
+  def save_sim_desc(self):
+    # Get the filename components
+    ai_version = self.get('ai_version')
+    data_dir = self.get('sim_data_dir')
+    desc_file_basename = self.get('sim_desc_basename')
+    # Construct the filename
+    desc_file = os.path.join(data_dir, str(ai_version) + desc_file_basename)
+    with open(desc_file, 'w') as file_handle:
+      self.config.write(file_handle)
+    if self.get('sim_desc_verbose'):
+      print(f"Saved simulation description ({desc_file})")
 
   def set_value(self, key, value):
     """
