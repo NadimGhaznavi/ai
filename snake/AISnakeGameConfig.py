@@ -101,7 +101,9 @@ class AISnakeGameConfig():
     if args.b3_layers:
       default['b3_layers'] = str(args.b3_layers)
     if args.b3_score:
-      default['b3_score'] = str(args.b3_score)    
+      default['b3_score'] = str(args.b3_score)
+    if args.custom_data_dir:
+      default['custom_data_dir'] = args.custom_data_dir
     if args.discount:
       default['discount'] = str(args.discount)
     if args.dropout_p:
@@ -187,18 +189,17 @@ class AISnakeGameConfig():
       print(f"ERROR: You must set b3_nodes to a non-zero value if you set b3_layers")
       sys.exit(1)
 
-
-    self.set_value('new_simulation', 'False')
-    self.set_value('new_simulation', 'True')
-
     # Create the base simulation data directory if it does not exist
     os.makedirs(self.get('sim_data_dir'), exist_ok=True)
+
     # Create the custom simulation data directory if it was specified
-    if self.get('custom_data_dir'):
-      os.makedirs(self.get('custom_data_dir'), exist_ok=True)
+    custom_data_dir = self.get('custom_data_dir')
+    if custom_data_dir:
       # Set the simulation data directory to the custom one
-      custom_sim_data_dir = os.path.join(self.get('sim_data_dir'), self.get('custom_data_dir'))
-      self.set_value('sim_data_dir', custom_sim_data_dir)
+      custom_data_dir = os.path.join(self.get('sim_data_dir'), custom_data_dir)
+      self.set_value('sim_data_dir', custom_data_dir)
+      os.makedirs(custom_data_dir, exist_ok=True)
+
 
   def get(self, key):
     """

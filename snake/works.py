@@ -10,6 +10,7 @@ from collections import namedtuple
 import numpy as np
 import random
 import torch
+from random import randint
 
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
@@ -268,6 +269,7 @@ class AIAgent:
     if game_score <= l2_score:
       # Use the level 1 memory
       mini_sample = self.l1_memory.get_memory()
+      print("SIZE of mini_sample: ", len(mini_sample))
     else:
       # Use the level 2 memory
       mini_sample = self.l2_memory.get_memory()
