@@ -60,6 +60,8 @@ class AISnakeGameConfig():
     parser.add_argument('-nv', '--nu_value', type=int, default=0, help='The initial amount of randomness the nu algorithm injects.')
     parser.add_argument('-nvm', '--nu_value_max', type=int, default=0, help='Number of random moves to add to the nu pool if nu_num_games_same_score_count_max is exceeded')
     parser.add_argument('-r', '--random_seed', type=int, default=0, help='Random seed used by random and torch.')
+    parser.add_argument('-rl1', '--restore_l1', type=str, default=None, help='Load a previous L1 model.')
+    parser.add_argument('-rl2', '--restore_l2', type=str, default=None, help='Load a previous L2 model.')
     parser.add_argument('-s', '--speed', type=int, default=0, help='Set the game speed.')
     parser.add_argument('-sd', '--sim_data_dir', type=str, default=None, help='Set a custom directory to store simulation results.')
     parser.add_argument('-v', '--ai_version', type=int, default=None, help='Load a previous simulation with version ai_version.')
@@ -76,15 +78,6 @@ class AISnakeGameConfig():
     else:
       self.config.read(default_ini_file)
       self.set_value('ini_file', default_ini_file)
-
-    if args.ai_version is not None:
-      # User passed in a version number, we are going to restart an existing simulation
-      self.set_value('ai_version', str(args.ai_version))
-      self.set_value('new_simulation', 'False')
-    else:
-      # User did not pass in a version number, we are going to start a new simulation
-      self.set_value('ai_version', str(self.get_next_ai_version_num()))
-      self.set_value('new_simulation', 'True')
 
     # Override INI file settings if values were passed in via command line switches
     default = self.config['default']
@@ -166,8 +159,12 @@ class AISnakeGameConfig():
       default['nu_value_max'] = str(args.nu_value_max)
     if args.random_seed:
       default['random_seed'] = str(args.random_seed)
+    if args.restore_l1:
+      default['restore_l1'] = args.restore_l1
+    if args.restore_l2:
+      default['restore_l2'] = args.restore_l2
     if args.sim_data_dir:
-      default['sim_data_dir'] = args.sim_data_dir
+      default['custom_sim_data_dir'] = args.sim_data_dir
     if args.speed:
       default['game_speed'] = str(args.speed)
 
@@ -187,8 +184,18 @@ class AISnakeGameConfig():
       print(f"ERROR: You must set b3_nodes to a non-zero value if you set b3_layers")
       sys.exit(1)
 
-    # Create the simulation data directory if it does not exist
-    os.makedirs(self.get('sim_data_dir'), exist_ok=True) 
+
+    self.set_value('new_simulation', 'False')
+    self.set_value('new_simulation', 'True')
+
+    # Create the base simulation data directory if it does not exist
+    os.makedirs(self.get('sim_data_dir'), exist_ok=True)
+    # Create the custom simulation data directory if it was specified
+    if self.get('custom_sim_data_dir'):
+      os.makedirs(self.get('custom_sim_data_dir'), exist_ok=True)
+      # Set the simulation data directory to the custom one
+      custom_sim_data_dir = os.path.join(self.get('sim_data_dir'), self.get('custom_sim_data_dir'))
+      self.set_value('sim_data_dir', custom_sim_data_dir)
 
   def get(self, key):
     """
