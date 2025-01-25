@@ -16,6 +16,7 @@ from AISnakeGameConfig import AISnakeGameConfig
 
 class EpsilonAlgo():
   def __init__(self, ini, level):
+    self.ini = ini
     # Set this random seed so things are repeatable
     random.seed(ini.get('random_seed')) 
 

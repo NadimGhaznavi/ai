@@ -30,13 +30,13 @@ def print_game_summary(ini, agent, score, record, game, l2_score):
     if score <= l2_score:
       if agent.l1_epsilon_algo.get_print_stats() and \
         agent.l1_epsilon_algo.get_epsilon() != 0:
-        summary = summary + ', Model (1): inject# {:>3}'.format(agent.l1_epsilon_algo.get_injected()) + \
-          ', pool ({:>3})'.format(agent.l1_epsilon_algo.get_epsilon())
+        summary = summary + ', L1 EpsilonAlgo: inject# {:>3}'.format(agent.l1_epsilon_algo.get_injected()) + \
+          ', units# {:>3}'.format(agent.l1_epsilon_algo.get_epsilon())
     else:
       if agent.l2_epsilon_algo.get_print_stats() and \
         agent.l2_epsilon_algo.get_epsilon() != 0:
-        summary = summary + ', Model(2): inject# {:>3}'.format(agent.l2_epsilon_algo.get_injected()) + \
-          ', pool ({:>3})'.format(agent.l2_epsilon_algo.get_epsilon())
+        summary = summary + ', L2 EpsilonAlgo: inject# {:>3}'.format(agent.l2_epsilon_algo.get_injected()) + \
+          ', units# {:>3}'.format(agent.l2_epsilon_algo.get_epsilon())
 
   # Level 1 and 2 statistics
   if ini.get('steps_stats'):
@@ -44,11 +44,14 @@ def print_game_summary(ini, agent, score, record, game, l2_score):
     l2_model_steps = agent.l2_model.get_steps()
     l1_trainer_steps = agent.l1_trainer.get_steps()
     l2_trainer_steps = agent.l2_trainer.get_steps()
-    summary = summary + \
-      ', L1 steps: model# {:>5}'.format(l1_model_steps) + \
-      ', trainer# {:>5}'.format(l1_trainer_steps) + \
-      ', L2 steps: model# {:>5}'.format(l2_model_steps) + \
-      ', trainer# {:>5}'.format(l2_trainer_steps)
+    if l1_model_steps > 0 or l1_trainer_steps > 0:
+      summary = summary + \
+        ', L1 steps: model# {:>5}'.format(l1_model_steps) + \
+        ', trainer# {:>5}'.format(l1_trainer_steps)
+    if l2_model_steps > 0 or l2_trainer_steps > 0:
+      summary = summary + \
+        ', L2 steps: model# {:>5}'.format(l2_model_steps) + \
+        ', trainer# {:>5}'.format(l2_trainer_steps)
     
   if ini.get('steps_stats') or ini.get('steps_verbose'):
     agent.l1_model.reset_steps()
