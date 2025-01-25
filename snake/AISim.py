@@ -133,7 +133,10 @@ def train():
     agent.train_short_memory(state_old, final_move, reward, state_new, done)
     # Remember
     agent.remember(state_old, final_move, reward, state_new, done)
+
+    # If the game is over
     if done:
+      ## Dynamically add layers
       # Add a new layer when a specific score is reached
       if ini.get('b1_score') > 0 and score >= ini.get('b1_score'):
         ini.set_value('b1_score', 0) # Make sure we don't add another layer
@@ -180,6 +183,8 @@ def train():
         # New highscore!!! YAY!
         record = score
         # Save a checkpoint of the current AI model
+        ini.set_value('sim_checkpoint_basename', f'checkpoint_l1_score_{record}.ptc')
+        ini.set_value('l2_sim_checkpoint_basename', f'checkpoint_l2_score_{record}.ptc')
         agent.save_checkpoint()
         # Check if the model has dynamic dropout layers
         if agent.l1_model.has_dynamic_dropout():

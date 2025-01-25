@@ -187,6 +187,9 @@ class AISnakeGameConfig():
       print(f"ERROR: You must set b3_nodes to a non-zero value if you set b3_layers")
       sys.exit(1)
 
+    # Create the simulation data directory if it does not exist
+    os.makedirs(self.get('sim_data_dir'), exist_ok=True) 
+
   def get(self, key):
     """
     Return a value for a given key. The key/value pairs are stored in the
