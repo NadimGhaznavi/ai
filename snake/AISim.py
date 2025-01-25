@@ -41,8 +41,8 @@ def print_game_summary(ini, agent, score, record, game, l2_score):
   # Level 1 and 2 statistics
   if ini.get('steps_stats'):
     l1_model_steps = agent.l1_model.get_steps()
-    l2_model_steps = agent.l2_model.get_steps()
     l1_trainer_steps = agent.l1_trainer.get_steps()
+    l2_model_steps = agent.l2_model.get_steps()
     l2_trainer_steps = agent.l2_trainer.get_steps()
     if l1_model_steps > 0 or l1_trainer_steps > 0:
       summary = summary + \

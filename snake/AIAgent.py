@@ -275,7 +275,11 @@ class AIAgent:
 
     # Get the states, actions, rewards, next_states, and dones from the mini_sample
     states, actions, rewards, next_states, dones = zip(*mini_sample)
-    self.l2_trainer.train_step(states, actions, rewards, next_states, dones)
+    
+    if game_score <= l2_score:
+      self.l1_trainer.train_step(states, actions, rewards, next_states, dones)
+    else:
+      self.l2_trainer.train_step(states, actions, rewards, next_states, dones)
 
   def train_short_memory(self, state, action, reward, next_state, done):
     if self.game.score <= self.ini.get('l2_score'):
