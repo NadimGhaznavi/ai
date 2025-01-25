@@ -15,8 +15,9 @@ sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 
 class EpsilonAlgo():
-  def __init__(self, ini, level):
+  def __init__(self, ini, log, level):
     self.ini = ini
+    self.log = log
     # Set this random seed so things are repeatable
     random.seed(ini.get('random_seed')) 
 
@@ -37,11 +38,11 @@ class EpsilonAlgo():
     self.level = level
     
     if self.epsilon_value == 0:
-      print(f"EpsilonAlgo({level}): EpsilonAlgo is disabled")
+      self.log.log(f"EpsilonAlgo({level}): EpsilonAlgo is disabled")
       # If the epsilon value is set to zero, disable the algorithm and don't print epsilon stats
       self.ini.set_value('epsilon_print_stats', 'False')
     else:
-      print(f"EpsilonAlgo({level}): New instance with epsilon value of {self.epsilon_value}")
+      self.log.log(f"EpsilonAlgo({level}): New instance with epsilon value of {self.epsilon_value}")
 
   def get_epsilon(self):
     if self.epsilon < 0:
@@ -59,7 +60,7 @@ class EpsilonAlgo():
   def get_move(self):
     rand_num = randint(0, self.epsilon_value)
     if self.epsilon < 0 and self.depleted == False:
-      print(f"EpilsonAlgo: Model ({self.level}): Epsilon pool has been depleted")
+      self.log.log(f"EpilsonAlgo: Model ({self.level}): Epsilon pool has been depleted")
       self.depleted = True
 
     if rand_num < self.epsilon:

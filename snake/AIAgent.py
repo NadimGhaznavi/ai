@@ -21,19 +21,21 @@ from EpsilonAlgo import EpsilonAlgo
 from ReplayMemory import ReplayMemory
 
 class AIAgent:
-  def __init__(self, ini, game):
-    self.game = game
+  def __init__(self, ini, log, game):
     self.ini = ini
+    self.log = log
+    self.game = game
+    
 
     # Level 1 instances
-    self.l1_epsilon_algo = EpsilonAlgo(ini, 1) # Epsilon Algorithm for exploration/exploitation
+    self.l1_epsilon_algo = EpsilonAlgo(ini, log, 1) # Epsilon Algorithm for exploration/exploitation
     self.l1_memory = ReplayMemory(ini)
-    self.l1_model = LinearQNet(ini, 1)
+    self.l1_model = LinearQNet(ini, log, 1)
     self.l1_trainer = QTrainer(ini, self.l1_model)
 
-    self.l2_epsilon_algo = EpsilonAlgo(ini, 2)
+    self.l2_epsilon_algo = EpsilonAlgo(ini, log, 2)
     self.l2_memory = ReplayMemory(ini)
-    self.l2_model = LinearQNet(ini, 2)
+    self.l2_model = LinearQNet(ini, log, 2)
     self.l2_trainer = QTrainer(ini, self.l2_model)
 
 
@@ -213,16 +215,16 @@ class AIAgent:
       model_file = self.ini.get('restore_l2')
     # Make sure the model file exists
     if not os.path.isfile(model_file):
-      print(f"ERROR: Model file {model_file} does not exist, exiting")
+      self.log.log(f"ERROR: Model file {model_file} does not exist, exiting")
       sys.exit(1)
 
     if level == 1:
       self.l1_model.restore_model(self.l1_trainer.optimizer, model_file)
-      print(f"Loaded simulation model ({model_file})")
+      self.log.log(f"Loaded simulation model ({model_file})")
     # Repeat for the level 2 model
     else:
       self.l2_model.restore_model(self.l2_trainer.optimizer, model_file)
-      print(f"Loaded simulation model ({model_file})")
+      self.log.log(f"Loaded simulation model ({model_file})")
 
   def save_checkpoint(self):
     # Get the checkpoint filename componenets
@@ -232,8 +234,8 @@ class AIAgent:
       self.l1_model.save_checkpoint(self.l1_trainer.optimizer, checkpoint_file)
       self.l2_model.save_checkpoint(self.l2_trainer.optimizer, checkpoint_file_l2)
       if self.ini.get('sim_checkpoint_verbose'):
-        print(f"Saved simulation checkpoint ({checkpoint_file})")
-        print(f"Saved simulation checkpoint ({checkpoint_file_l2})")
+        self.log.log(f"Saved simulation checkpoint ({checkpoint_file})")
+        self.log.log(f"Saved simulation checkpoint ({checkpoint_file_l2})")
   
   def save_highscore(self, highscore):
     # Get the highscore filename components
@@ -258,8 +260,8 @@ class AIAgent:
     # Save the simulation models
     self.l1_model.save_model(self.l1_trainer.optimizer, model_file)
     self.l2_model.save_model(self.l2_trainer.optimizer, model_file_l2)
-    print(f"Saved simulation model ({model_file})")
-    print(f"Saved simulation model ({model_file_l2})")
+    self.log.log(f"Saved simulation model ({model_file})")
+    self.log.log(f"Saved simulation model ({model_file_l2})")
 
   def train_long_memory(self):
     l2_score = self.ini.get('l2_score')

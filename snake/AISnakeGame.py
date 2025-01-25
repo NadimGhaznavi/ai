@@ -46,7 +46,10 @@ class AISnakeGame():
   uses the AIAgent class as the player. It also loads game parameters
   from the AISnakeGame.ini file using the StartConfig class.
   """
-  def __init__(self, ini, plot):
+  def __init__(self, ini, log, plot):
+    # Logging object
+    self.log = log
+
     # Get a matplotlib plot object, so we can save the plot when the 
     # game quits
     self.plot = plot
@@ -100,13 +103,13 @@ class AISnakeGame():
     # this setting doesn't go haywire
     if self.num_games == self.num_games_cur:
       self.game_speed = self.game_speed - 10
-      print(f"AiSnakeGame: Decreasing game speed to {self.game_speed}")
+      self.log(f"AiSnakeGame: Decreasing game speed to {self.game_speed}")
       self.num_games_cur += 1
 
   def game_speed_increase(self):
     if self.num_games == self.num_games_cur:
         self.game_speed = self.game_speed + 10
-        print(f"AiSnakeGame: Increasing game speed to {self.game_speed}")
+        self.log(f"AiSnakeGame: Increasing game speed to {self.game_speed}")
         self.num_games_cur += 1
 
   def get_score(self):
@@ -185,7 +188,7 @@ class AISnakeGame():
     is_paused = True
     # The loop is *FAST* make sure that we only print this info message once
     if self.num_games == self.num_games_cur:
-      print("AISnakeGame: Game paused, press SPACE to continue. Press 'm' to print the models. Press 'q' to quit. Press 'a/z' to speedup/slowdown the game.")
+      self.log("AISnakeGame: Game paused, press SPACE to continue. Press 'm' to print the models. Press 'q' to quit. Press 'a/z' to speedup/slowdown the game.")
       self.num_games_cur += 1
     # Create pause loop
     while is_paused:
@@ -304,17 +307,17 @@ class AISnakeGame():
     Print simulation metrics.
     """
     if self.print_stats:
-      print(f"Total simulation time    : {self.total_sim_time}")
-      print(f"Total number of games    : {self.num_games}")
-      print(f"High score               : {self.sim_high_score}")
-      print(f"Total simulation score   : {self.sim_score}")
-      print(f"Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
-      print(f"Wall collision count     : {self.sim_wall_collision_count}")
-      print(f"Snake collision count    : {self.sim_snake_collision_count}")
+      self.log(f"Total simulation time    : {self.total_sim_time}")
+      self.log(f"Total number of games    : {self.num_games}")
+      self.log(f"High score               : {self.sim_high_score}")
+      self.log(f"Total simulation score   : {self.sim_score}")
+      self.log(f"Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
+      self.log(f"Wall collision count     : {self.sim_wall_collision_count}")
+      self.log(f"Snake collision count    : {self.sim_snake_collision_count}")
       if self.agent.nu_algo.print_stats:
-        print(f"Nu algorithm score       : {self.agent.nu_algo.get_nu_score()}")
-      print(f"Average game score       : {self.avg_game_score}")
-      print(f"Average game time        : {self.avg_game_time} sec")
+        self.log(f"Nu algorithm score       : {self.agent.nu_algo.get_nu_score()}")
+      self.log(f"Average game score       : {self.avg_game_score}")
+      self.log(f"Average game time        : {self.avg_game_time} sec")
 
   def quit_game(self):
     self.sim_score += self.score

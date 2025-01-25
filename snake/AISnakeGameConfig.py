@@ -73,6 +73,9 @@ class AISnakeGameConfig():
 
     # Read in the INI file
     if args.ini_file:
+      if not os.path.isfile(args.ini_file):
+        print(f"ERROR: Unable to find configuration file ({args.ini_file}), exiting")
+        sys.exit(1)
       self.config.read(args.ini_file)
       self.set_value('ini_file', args.ini_file)
     else:

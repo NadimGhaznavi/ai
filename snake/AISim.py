@@ -7,7 +7,6 @@ The frontend to the AI Snake Game.
 import os, sys
 import matplotlib.pyplot as plt
 import torch.nn as nn
-import signal
 
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
@@ -16,8 +15,9 @@ from AISnakeGame import AISnakeGame
 from LinearQNet import LinearQNet
 from AIAgent import AIAgent
 from SnakeGamePlots import MyPlot
+from AILogger import AILogger
 
-def print_game_summary(ini, agent, score, record, game, l2_score):
+def print_game_summary(ini, log, agent, score, record, game, l2_score):
   ai_version = ini.get('ai_version')
   # Standard game summary metrics
   summary = 'Snake AI (v' + str(ai_version) + ') ' + \
@@ -62,7 +62,7 @@ def print_game_summary(ini, agent, score, record, game, l2_score):
 
   # Print the lose reason
   summary = summary + ' - ' + game.lose_reason
-  print(summary)
+  log.log(summary)
 
 def train():
   """
@@ -70,15 +70,18 @@ def train():
   """
   # Get the AI Snake Game configuration
   ini = AISnakeGameConfig()
-  
+
+  # Get a logger object
+  log = AILogger(ini)
+
   # Get our Matplotlib object
   my_plot = MyPlot(ini)
 
   # Get a mew instance of the AI Snake Game
-  game = AISnakeGame(ini, my_plot)
+  game = AISnakeGame(ini, log, my_plot)
 
   # Get a new instance of the AI Agent
-  agent = AIAgent(ini, game) # Get a new instance of the AI Agent
+  agent = AIAgent(ini, log, game) # Get a new instance of the AI Agent
 
   # Pass the agent to the game, we have to do this after instantiating
   # the game and the agent so that we avoid a circular reference
@@ -115,9 +118,9 @@ def train():
   # This is the score when we switch to using the level two network
   l2_score = ini.get('l2_score')
 
-  print(f"AI Snake Game simulation number is {ini.get('ai_version')}")
-  print(f"Configuration file being used is {ini.get('ini_file')}")
-  print(f"The second neural network will be used for scores above {ini.get('l2_score')}")
+  log.log(f"AI Snake Game simulation number is {ini.get('ai_version')}")
+  log.log(f"Configuration file being used is {ini.get('ini_file')}")
+  log.log(f"The second neural network will be used for scores above {ini.get('l2_score')}")
 
   ## The actual training loop
   while True:
@@ -127,9 +130,9 @@ def train():
       l1_trainer_steps = agent.l1_trainer.get_steps()
       l2_trainer_steps = agent.l2_trainer.get_steps()
       steps_summary = 'Steps: ' + \
-        'L1 steps: model# {:>3}'.format(l1_model_steps) + ' trainer# {:>3}'.format(l1_trainer_steps) + \
-        ', L2 steps: model# {:>3}'.format(l2_model_steps) + ' trainer# {:>3}'.format(l2_trainer_steps)
-      print(steps_summary)
+        'L1 steps: model# {:>4}'.format(l1_model_steps) + ' trainer# {:>4}'.format(l1_trainer_steps) + \
+        ', L2 steps: model# {:>4}'.format(l2_model_steps) + ' trainer# {:>4}'.format(l2_trainer_steps)
+      log.log(steps_summary)
       
     # Get old state
     state_old = agent.get_state()
@@ -167,10 +170,17 @@ def train():
         ini.set_value('l2_b3_score', 0)
         agent.l2_model.insert_layer(3)
       
+      # Update the epsilon algorithm instances
       if game.score <= l2_score:
         agent.l1_epsilon_algo.played_game()
       else:
         agent.l2_epsilon_algo.played_game()
+
+      # Perform a checkpoint every 100 games
+      if agent.n_games % 100 == 0:
+        ini.set_value('sim_checkpoint_basename', f'_checkpoint_l1_game_{agent.n_games}.ptc')
+        ini.set_value('l2_sim_checkpoint_basename', f'_checkpoint_l2_game_{agent.n_games}.ptc')
+        agent.save_checkpoint()
       
       # Train long memory
       game.reset()
@@ -231,7 +241,7 @@ def train():
           my_plot.save()
           game.quit_game()
 
-      print_game_summary(ini, agent, score, record, game, l2_score)
+      print_game_summary(ini, log, agent, score, record, game, l2_score)
       plot_scores.append(score)
       total_score += score
       mean_score = round(total_score / agent.n_games, 2)

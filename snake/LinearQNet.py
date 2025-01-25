@@ -18,7 +18,7 @@ class LinearQNet(nn.Module):
   #             b2_nodes, b2_layers,
   #             b3_nodes, b3_layers,
   #             out_features, ai_version):
-  def __init__(self, ini, label):
+  def __init__(self, ini, log, label):
     """
     The class accepts the following parameters:
 
@@ -65,6 +65,7 @@ class LinearQNet(nn.Module):
     the pattern (ReLU followed by Linear) is repeated b3_layers times.
     """  
     super().__init__()
+    self.log = log
     # This should be "1" or "2" to indicate whether this is a level 1 or level 2 model
     self.label = label 
     
@@ -216,19 +217,24 @@ class LinearQNet(nn.Module):
 
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
-    print(f"====== Level {self.label} Neural Network Architecture ==========")
-    print("Blocks           Nodes   Layers  Total  Nodes")
-    print("------------------------------------------------------")
-    print("Input block      {:>5} {:>8} {:>13}".format(self.in_features, 1, self.in_features))
-    print("B1 block         {:>5} {:>8} {:>13}".format(self.b1_nodes, self.b1_layers, self.b1_nodes*self.b1_layers))
-    print("B2 block         {:>5} {:>8} {:>13}".format(self.b2_nodes, self.b2_layers, self.b2_nodes*self.b2_layers))
-    print("B3 block         {:>5} {:>8} {:>13}".format(self.b3_nodes, self.b3_layers, self.b3_nodes*self.b3_layers))
-    print("Output block     {:>5} {:>8} {:>13}".format(self.out_features, 1, self.out_features))
-    print("------------------------------------------------------")
-    print("Total compute nodes          {:>16}".format(
-      (self.b1_nodes*self.b1_layers) + (self.b2_nodes*self.b2_layers) + (self.b3_nodes*self.b3_layers)))
+    self.log.log(f"====== Level {self.label} Neural Network Architecture ==========")
+    self.log.log("Blocks           Nodes   Layers  Total  Nodes")
+    self.log.log("------------------------------------------------------")
+
+    log_msg = \
+      "Input block      {:>5} {:>8} {:>13}\n".format(self.in_features, 1, self.in_features) + \
+      "B1 block         {:>5} {:>8} {:>13}\n".format(self.b1_nodes, self.b1_layers, self.b1_nodes*self.b1_layers) + \
+      "B2 block         {:>5} {:>8} {:>13}\n".format(self.b2_nodes, self.b2_layers, self.b2_nodes*self.b2_layers) + \
+      "B3 block         {:>5} {:>8} {:>13}\n".format(self.b3_nodes, self.b3_layers, self.b3_nodes*self.b3_layers) + \
+      "Output block     {:>5} {:>8} {:>13}\n".format(self.out_features, 1, self.out_features) + \
+      "------------------------------------------------------\n" + \
+      "Total compute nodes          {:>16}\n".format(
+        (self.b1_nodes*self.b1_layers) + (self.b2_nodes*self.b2_layers) + (self.b3_nodes*self.b3_layers))
+    self.log.log(log_msg)
+    
     if self.dropout:
-      print("Dropout layers, p-value is {:>16}".format(self.p_value))
+      log_msg = "Dropout layers, p-value is {:>16}".format(self.p_value)
+      self.log.log(log_msg)
 
   def forward(self, x):
     """
@@ -253,8 +259,8 @@ class LinearQNet(nn.Module):
   
   def insert_layer(self, block_num):
     # Insert the new layer
-    print(f"LinearQNet: Inserting new B{block_num} layer")
-    print("----- Before -------------------------------------------------")
+    self.log.log(f"LinearQNet: Inserting new B{block_num} layer")
+    self.log.log("----- Before -------------------------------------------------")
     self.ascii_print()
 
     self.main_block[0].append(nn.ReLU())
@@ -281,7 +287,7 @@ class LinearQNet(nn.Module):
       self.main_block[1].append(nn.ReLU())
       self.main_block[1].append(nn.Linear(in_features=self.b3_nodes, out_features=self.out_features))
 
-    print("----- After --------------------------------------------------")
+    self.log.log("----- After --------------------------------------------------")
     self.ascii_print()
     
   def restore_model(self, optimizer, load_path):
@@ -330,6 +336,6 @@ class LinearQNet(nn.Module):
     for layer in self.main_block:
       for block in layer:
         if isinstance(block, nn.Dropout):
-          print(f"LinearQNet: Setting P value for dropout layer(s) to {p_value}")
+          self.log.log(f"LinearQNet: Setting P value for dropout layer(s) to {p_value}")
           block.p = p_value
 
