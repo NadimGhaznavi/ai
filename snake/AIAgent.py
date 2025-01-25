@@ -19,7 +19,7 @@ from LinearQNet import LinearQNet
 from SnakeGameElement import Direction
 from SnakeGameElement import Point
 from EpsilonAlgo import EpsilonAlgo
-from NuAlgo import NuAlgo
+from ReplayMemory import ReplayMemory
 
 class AIAgent:
   def __init__(self, ini, game):
@@ -28,12 +28,12 @@ class AIAgent:
 
     # Level 1 instances
     self.l1_epsilon_algo = EpsilonAlgo(ini, 1) # Epsilon Algorithm for exploration/exploitation
-    self.l1_memory = deque(maxlen=ini.get('max_memory'))
+    self.l1_memory = ReplayMemory(ini)
     self.l1_model = LinearQNet(ini, 1)
     self.l1_trainer = QTrainer(ini, self.l1_model)
 
     self.l2_epsilon_algo = EpsilonAlgo(ini, 2)
-    self.l2_memory = deque(maxlen=self.ini.get('max_memory'))
+    self.l2_memory = ReplayMemory(ini)
     self.l2_model = LinearQNet(ini, 2)
     self.l2_trainer = QTrainer(ini, self.l2_model)
 
@@ -268,25 +268,14 @@ class AIAgent:
 
     if game_score <= l2_score:
       # Use the level 1 memory
-      if len(self.l1_memory) > self.batch_size:
-        # Sample a random batch of memories
-        mini_sample = random.sample(self.l1_memory, self.batch_size)
-      else:
-        mini_sample = self.l1_memory
-      # Get the states, actions, rewards, next_states, and dones from the mini_sample
-      states, actions, rewards, next_states, dones = zip(*mini_sample)
-      self.l1_trainer.train_step(states, actions, rewards, next_states, dones)
-
+      mini_sample = self.l1_memory.get_memory()
     else:
       # Use the level 2 memory
-      if len(self.l2_memory) > self.batch_size:
-        # Sample a random batch of memories
-        mini_sample = random.sample(self.l2_memory, self.batch_size)
-      else:
-        mini_sample = self.l2_memory
-      # Get the states, actions, rewards, next_states, and dones from the mini_sample
-      states, actions, rewards, next_states, dones = zip(*mini_sample)
-      self.l2_trainer.train_step(states, actions, rewards, next_states, dones)
+      mini_sample = self.l2_memory.get_memory()
+
+    # Get the states, actions, rewards, next_states, and dones from the mini_sample
+    states, actions, rewards, next_states, dones = zip(*mini_sample)
+    self.l2_trainer.train_step(states, actions, rewards, next_states, dones)
 
   def train_short_memory(self, state, action, reward, next_state, done):
     if self.game.score <= self.ini.get('l2_score'):
