@@ -46,7 +46,6 @@ class AIAgent:
     self.n_games = 0 # Number of games played
     self.n_games_buf = -1    
     
-    self.load_checkpoint() # Load the simulation state from file if it exists
     self.save_highscore(0) # Initialize the highscore file
 
     # Create the simulation data directory if it does not exist
@@ -196,29 +195,6 @@ class AIAgent:
     self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
     return np.array(state, dtype=int)
 
-  def load_checkpoint(self):
-    # Get the checkpoint filenames
-    checkpoint_file, checkpoint_file_l2 = self.get_checkpoint_filenames()
-    # Load the level 1 model checkpoint
-    if os.path.isfile(checkpoint_file):
-      self.l1_model.load_checkpoint(self.l1_trainer.optimizer, checkpoint_file)
-      print(f"Loaded simulation checkpoint ({checkpoint_file})")
-    # Repeat for the level 2 model checkpoint
-    if os.path.isfile(checkpoint_file_l2):
-      self.l2_model.load_checkpoint(self.l2_trainer.optimizer, checkpoint_file_l2)
-      print(f"Loaded simulation checkpoint ({checkpoint_file_l2})")
-
-  def load_model(self):
-    model_file, model_file_l2 = self.get_model_filenames()
-    # Load the level 1 model
-    if os.path.isfile(model_file):
-      self.l1_model.load_model(self.l1_trainer.optimizer, model_file)
-      print(f"Loaded simulation model ({model_file})")
-    # Repeat for the level 2 model
-    if os.path.isfile(model_file_l2):
-      self.l2_model.load_model(self.l2_trainer.optimizer, model_file_l2)
-      print(f"Loaded simulation model ({model_file_l2})")
-
   def remember(self, state, action, reward, next_state, done):
     # Store the state, action, reward, next_state, and done in memory
     # Recall that memory is a deque, so it will automatically remove the oldest memory 
@@ -229,6 +205,25 @@ class AIAgent:
     else:
       # User the level 2 memory
       self.l2_memory.append((state, action, reward, next_state, done))
+
+  def restore_model(self, level):
+    # Get the L1 or L2 model filenames
+    if level == 1:
+      model_file = self.ini.get('restore_l1')
+    else:
+      model_file = self.ini.get('restore_l2')
+    # Make sure the model file exists
+    if not os.path.isfile(model_file):
+      print(f"ERROR: Model file {model_file} does not exist, exiting")
+      sys.exit(1)
+
+    if level == 1:
+      self.l1_model.restore_model(self.l1_trainer.optimizer, model_file)
+      print(f"Loaded simulation model ({model_file})")
+    # Repeat for the level 2 model
+    else:
+      self.l2_model.restore_model(self.l2_trainer.optimizer, model_file)
+      print(f"Loaded simulation model ({model_file})")
 
   def save_checkpoint(self):
     # Get the checkpoint filename componenets

@@ -63,21 +63,24 @@ class AISnakeGameConfig():
     parser.add_argument('-rl1', '--restore_l1', type=str, default=None, help='Load a previous L1 model.')
     parser.add_argument('-rl2', '--restore_l2', type=str, default=None, help='Load a previous L2 model.')
     parser.add_argument('-s', '--speed', type=int, default=0, help='Set the game speed.')
-    parser.add_argument('-sd', '--sim_data_dir', type=str, default=None, help='Set a custom directory to store simulation results.')
-    parser.add_argument('-v', '--ai_version', type=int, default=None, help='Load a previous simulation with version ai_version.')
-
+    parser.add_argument('-sd', '--custom_data_dir', type=str, default=None, help='Set a custom directory to store simulation results.')
+    
     # Parse arguments
     args = parser.parse_args()
 
     self.config = configparser.ConfigParser()
 
+    # Read in the INI file
     if args.ini_file:
-      # User specified an INI file
       self.config.read(args.ini_file)
       self.set_value('ini_file', args.ini_file)
     else:
       self.config.read(default_ini_file)
       self.set_value('ini_file', default_ini_file)
+
+    # Get a new ai_version number
+    ai_version = self.get_next_ai_version_num()
+    self.set_value('ai_version', str(ai_version))
 
     # Override INI file settings if values were passed in via command line switches
     default = self.config['default']
@@ -163,8 +166,8 @@ class AISnakeGameConfig():
       default['restore_l1'] = args.restore_l1
     if args.restore_l2:
       default['restore_l2'] = args.restore_l2
-    if args.sim_data_dir:
-      default['custom_sim_data_dir'] = args.sim_data_dir
+    if args.custom_data_dir:
+      default['custom_data_dir'] = args.custom_data_dir
     if args.speed:
       default['game_speed'] = str(args.speed)
 
@@ -191,10 +194,10 @@ class AISnakeGameConfig():
     # Create the base simulation data directory if it does not exist
     os.makedirs(self.get('sim_data_dir'), exist_ok=True)
     # Create the custom simulation data directory if it was specified
-    if self.get('custom_sim_data_dir'):
-      os.makedirs(self.get('custom_sim_data_dir'), exist_ok=True)
+    if self.get('custom_data_dir'):
+      os.makedirs(self.get('custom_data_dir'), exist_ok=True)
       # Set the simulation data directory to the custom one
-      custom_sim_data_dir = os.path.join(self.get('sim_data_dir'), self.get('custom_sim_data_dir'))
+      custom_sim_data_dir = os.path.join(self.get('sim_data_dir'), self.get('custom_data_dir'))
       self.set_value('sim_data_dir', custom_sim_data_dir)
 
   def get(self, key):

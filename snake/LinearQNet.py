@@ -284,7 +284,7 @@ class LinearQNet(nn.Module):
     print("----- After --------------------------------------------------")
     self.ascii_print()
     
-  def load_checkpoint(self, optimizer, load_path):
+  def restore_model(self, optimizer, load_path):
     """
     Loads the model including the weights, epoch from the 
     load_path file.
@@ -294,17 +294,6 @@ class LinearQNet(nn.Module):
     self.load_state_dict(state_dict)
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     
-  def load_model(self, optimizer, load_path):
-    """
-    Load the model from the load path. Do not include the weights 
-    or epoch. Initialize the epoch to 0.
-    """
-    checkpoint = torch.load(load_path, weights_only=True)
-    state_dict = checkpoint['model_state_dict']
-    self.load_state_dict(state_dict)
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    state_dict['num_games'] = 0
-
   def reset_steps(self):
     """
     Resets the number of steps to 0. Should be called at the beginning of

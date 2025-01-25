@@ -66,8 +66,7 @@ def train():
   """
   # Get the AI Snake Game configuration
   ini = AISnakeGameConfig()
-  ai_version = ini.get('ai_version')
-
+  
   # Get our Matplotlib object
   my_plot = MyPlot(ini)
 
@@ -81,15 +80,20 @@ def train():
   # the game and the agent so that we avoid a circular reference
   game.set_agent(agent) # Pass the agent to the game
 
-  if ini.get('new_simulation'):
-    # This is a new simulation
-    agent.save_model()
-    agent.save_highscore(0)
-    agent.ini.save_sim_desc()
-    
-  else:
-    # A version was passed into this script
-    agent.load_checkpoint()
+  # Take a snapshot of the configuration
+  agent.save_model()
+
+  # Initalize the highscore file
+  agent.save_highscore(0)
+
+  # Save the simulation configuration
+  agent.ini.save_sim_desc()
+
+  # Check if we are restoring a model
+  if ini.get('restore_l1'):
+    agent.restore_model(1)
+  if ini.get('restore_l2'):
+    agent.restore_model(2)
 
   # Reset the AI Snake Game
   game.reset()
@@ -107,7 +111,7 @@ def train():
   # This is the score when we switch to using the level two network
   l2_score = ini.get('l2_score')
 
-  print(f"AI version is {ai_version}")
+  print(f"AI Snake Game simulation number is {ini.get('ai_version')}")
   print(f"The second neural network will be used for scores above {ini.get('l2_score')}")
 
   ## The actual training loop

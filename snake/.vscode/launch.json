@@ -12,13 +12,9 @@
             "program": "AISim.py",
             "console": "integratedTerminal",
             "args": [
-                "--max_score", "1",
-                "-b1n", "200",
-                "-b1l", "2",
-                "-dss", "0.2",
-                "-l2b1n", "400",
-                "-l2b1l", "2",
-                "-l2dss", "0.2"
+                "-i", "configs/L2_v1_0.ini",
+                "-rl1", "sim_data/L2_tests/1125_checkpoint_l1_score_33.ptc",
+                "-e", "0"
             ]
         }
     ]
