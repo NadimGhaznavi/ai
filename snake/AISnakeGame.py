@@ -61,11 +61,15 @@ class AISnakeGame():
     # Game speed
     self.game_speed = ini.get('game_speed')
 
+    # For headless mode
+    self.headless = ini.get('headless')
+
     # Initialize the display
     self.screen_width = self.board_width
     self.screen_height = self.board_height
-    self.display = pygame.display.set_mode((self.board_width, self.board_height))
-    pygame.display.set_caption(GAME_TITLE + ' (v' + str(ini.get('ai_version')) + ')')
+    if not self.headless:
+      self.display = pygame.display.set_mode((self.board_width, self.board_height))
+      pygame.display.set_caption(GAME_TITLE + ' (v' + str(ini.get('ai_version')) + ')')
     self.clock = pygame.time.Clock()
 
     # Display periodic status message
@@ -278,6 +282,7 @@ class AISnakeGame():
 
     # 5. update ui and clock
     self.update_ui()
+      
     self.clock.tick(self.game_speed)
 
     # 6. return game over and score
@@ -377,24 +382,25 @@ class AISnakeGame():
     self.agent = agent
 
   def update_ui(self):
-    # Paint the background black
-    self.display.fill(BLACK)
-    
-    # Draw the snake
-    for pt in self.snake:
-      pygame.draw.rect(self.display, GREEN, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-      pygame.draw.rect(self.display, BLUE, pygame.Rect(pt.x+1, pt.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
-
-    # Draw the food            
-    pygame.draw.rect(self.display, GREEN, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
-    pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x+1, self.food.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
-
-    # Render the score, number of moves and the game time
-    score_string = "Score: " + str(self.score)
     self.elapsed_time = round(float((time.time() - self.start_time)), 2)
-    text = FONT.render(score_string + ', Time ' + str(self.elapsed_time) + 's', True, WHITE)
-    self.display.blit(text, [0, 0])    
-    pygame.display.flip()        
+    if not self.headless:
+      # Paint the background black
+      self.display.fill(BLACK)
+      
+      # Draw the snake
+      for pt in self.snake:
+        pygame.draw.rect(self.display, GREEN, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+        pygame.draw.rect(self.display, BLUE, pygame.Rect(pt.x+1, pt.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
+
+      # Draw the food            
+      pygame.draw.rect(self.display, GREEN, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+      pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x+1, self.food.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
+
+      # Render the score, number of moves and the game time
+      score_string = "Score: " + str(self.score)
+      text = FONT.render(score_string + ', Time ' + str(self.elapsed_time) + 's', True, WHITE)
+      self.display.blit(text, [0, 0])    
+      pygame.display.flip()        
     
     
     

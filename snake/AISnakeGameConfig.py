@@ -35,8 +35,8 @@ class AISnakeGameConfig():
     parser.add_argument('-dsx', '--dropout_min', type=int, default=0, help='Activate the p value of the droput layer when reaching this score.')
     parser.add_argument('-dsy', '--dropout_max', type=int, default=0, help='Deactivate the p value of the droput layer when reaching this score.')
     parser.add_argument('-e', '--epsilon', type=int, default=0, help='Epsilon value for exploration.')
-    parser.add_argument('-l2e', '--l2_epsilon', type=int, default=0, help='Level 2 epsilon value for exploration.')
-    parser.add_argument('-i', '--ini_file', type=str, default='AISnakeGame.ini', help='The path to the configuration file.')
+    parser.add_argument('-he', '--headless', type=bool, default=False, help='Run the game in headless mode.')
+    parser.add_argument('-i', '--ini_file', type=str, default=None, help='The path to the configuration file.')
     parser.add_argument('-l', '--learning_rate', type=float, default=0, help='Optimizer learning rate.')
     parser.add_argument('-l2b1n', '--l2_b1_nodes', type=int, default=0, help='Number of nodes in the first level 2, block 1 layer.')
     parser.add_argument('-l2b1l', '--l2_b1_layers', type=int, default=0, help='Number of hidden level 2, block 1 layers.')
@@ -48,6 +48,7 @@ class AISnakeGameConfig():
     parser.add_argument('-l2b3l', '--l2_b3_layers', type=int, default=0, help='Number of level 2, block 3 hidden layers.')
     parser.add_argument('-l2b3s', '--l2_b3_score', type=int, default=0, help='Insert a level 2, B3 layer when reaching this score.')
     parser.add_argument('-l2dss', '--l2_dropout_static', type=float, default=0, help='Create dropout layers and set the p value to this value.')
+    parser.add_argument('-l2e', '--l2_epsilon', type=int, default=0, help='Level 2 epsilon value for exploration.')
     parser.add_argument('-l2s', '--l2_score', type=int, default=0, help='The level 2 AI is triggered when the score exceeds l2_score.')
     parser.add_argument('-mg', '--max_games', type=int, default=0, help='Exit the simulation after max_games games.')
     parser.add_argument('-ms', '--max_score', type=int, default=0, help='Exit the simulation if a score of max_score is achieved.')
@@ -232,7 +233,7 @@ class AISnakeGameConfig():
     # Key/value pairs where the value is a float
     float_values = ['discount', 'dropout_p', 'dropout_static', 'l2_dropout_static', 'learning_rate']
     # Key/value pairs where the value is a boolean
-    boolean_values = ['epsilon_print_stats', 'print_stats', 'new_simulation',
+    boolean_values = ['epsilon_print_stats', 'headless', 'print_stats', 'new_simulation',
                       'sim_checkpoint_enable', 'sim_checkpoint_verbose', 'sim_desc_verbose',
                       'steps_stats', 'steps_verbose',
                       ]
@@ -248,7 +249,7 @@ class AISnakeGameConfig():
     elif key in float_values:
       return float(value) # Return a float
     elif key in boolean_values:
-      if value == 'False':
+      if value == 'False' or value == 'false' or value == '0':
         return False
       else:
         return True

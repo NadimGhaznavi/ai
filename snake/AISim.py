@@ -7,6 +7,7 @@ The frontend to the AI Snake Game.
 import os, sys
 import matplotlib.pyplot as plt
 import torch.nn as nn
+import signal
 
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
@@ -115,6 +116,7 @@ def train():
   l2_score = ini.get('l2_score')
 
   print(f"AI Snake Game simulation number is {ini.get('ai_version')}")
+  print(f"Configuration file being used is {ini.get('ini_file')}")
   print(f"The second neural network will be used for scores above {ini.get('l2_score')}")
 
   ## The actual training loop
@@ -242,6 +244,7 @@ def train():
       my_plot.plot(plot_scores, plot_mean_scores, plot_times, plot_mean_times)
 
 if __name__ == '__main__':
+
   train()
   
 
