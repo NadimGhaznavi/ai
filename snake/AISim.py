@@ -182,10 +182,8 @@ def train():
       if score > record:
         # New highscore!!! YAY!
         record = score
-        # Save a checkpoint of the current AI model
-        ini.set_value('sim_checkpoint_basename', f'checkpoint_l1_score_{record}.ptc')
-        ini.set_value('l2_sim_checkpoint_basename', f'checkpoint_l2_score_{record}.ptc')
-        agent.save_checkpoint()
+
+        ## Dynamic dropout layers
         # Check if the model has dynamic dropout layers
         if agent.l1_model.has_dynamic_dropout():
           if agent.l1_model.dropout_min != 0:
@@ -204,8 +202,12 @@ def train():
             elif score <= agent.l2_model.dropout_max:
               # Turn dropout off
               agent.l2_model.set_p_value(0.0)
+
+        ## Save a checkpoint of the current AI model
+        ini.set_value('sim_checkpoint_basename', f'_checkpoint_l1_score_{record}.ptc')
+        ini.set_value('l2_sim_checkpoint_basename', f'_checkpoint_l2_score_{record}.ptc')
+        agent.save_checkpoint()
             
-        agent.save_checkpoint() # Save the simulation state
         game.sim_high_score = record
         agent.save_highscore(record) # Update the highscore file
         agent.highscore = record
