@@ -225,9 +225,8 @@ class LinearQNet(nn.Module):
     print("B3 block         {:>5} {:>8} {:>13}".format(self.b3_nodes, self.b3_layers, self.b3_nodes*self.b3_layers))
     print("Output block     {:>5} {:>8} {:>13}".format(self.out_features, 1, self.out_features))
     print("------------------------------------------------------")
-    print("Totals                       {:>16}".format(self.in_features + (self.b1_nodes*self.b1_layers) + \
-                                                   (self.b2_nodes*self.b2_layers) + \
-                                                    (self.b3_nodes*self.b3_layers) + self.out_features))
+    print("Total compute nodes          {:>16}".format(
+      (self.b1_nodes*self.b1_layers) + (self.b2_nodes*self.b2_layers) + (self.b3_nodes*self.b3_layers)))
     if self.dropout:
       print("Dropout layers, p-value is {:>16}".format(self.p_value))
 
