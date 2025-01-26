@@ -12,7 +12,7 @@
             "program": "AISim.py",
             "console": "integratedTerminal",
             "args": [
-                "-i", "configs/L2_v1_3.ini",
+                "-he", "False",
             ]
         }
     ]

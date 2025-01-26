@@ -35,7 +35,7 @@ class AISnakeGameConfig():
     parser.add_argument('-dsx', '--dropout_min', type=int, default=0, help='Activate the p value of the droput layer when reaching this score.')
     parser.add_argument('-dsy', '--dropout_max', type=int, default=0, help='Deactivate the p value of the droput layer when reaching this score.')
     parser.add_argument('-e', '--epsilon', type=int, default=0, help='Epsilon value for exploration.')
-    parser.add_argument('-he', '--headless', type=bool, default=False, help='Run the game in headless mode.')
+    parser.add_argument('-he', '--headless', type=int, default=1, help='Run the game in headless mode.')
     parser.add_argument('-i', '--ini_file', type=str, default=None, help='The path to the configuration file.')
     parser.add_argument('-l', '--learning_rate', type=float, default=0, help='Optimizer learning rate.')
     parser.add_argument('-l2b1n', '--l2_b1_nodes', type=int, default=0, help='Number of nodes in the first level 2, block 1 layer.')
@@ -120,6 +120,8 @@ class AISnakeGameConfig():
       default['dropout_static'] = str(args.dropout_static)
     if args.epsilon:
       default['epsilon_value'] = str(args.epsilon)
+    if args.headless == 0:
+      default['headless'] = str(0)
     if args.l2_b1_nodes:
       default['l2_b1_nodes'] = str(args.l2_b1_nodes)
     if args.l2_b1_layers:
@@ -222,7 +224,7 @@ class AISnakeGameConfig():
                       'b2_layers', 'b2_score', 'b3_nodes', 'b3_layers', 'b3_score', 
                       'batch_size', 'board_border', 'board_height', 'board_width', 
                       'dropout_max','dropout_min', 'epsilon_value', 'game_speed', 
-                      'in_features', 
+                      'headless', 'in_features', 
                       'l2_b1_nodes', 'l2_b1_layers', 'l2_b1_score', 
                       'l2_b2_nodes', 'l2_b2_layers', 'l2_b2_score',
                       'l2_b3_nodes', 'l2_b3_layers', 'l2_b3_score',
@@ -238,7 +240,7 @@ class AISnakeGameConfig():
     # Key/value pairs where the value is a float
     float_values = ['discount', 'dropout_p', 'dropout_static', 'l2_dropout_static', 'learning_rate']
     # Key/value pairs where the value is a boolean
-    boolean_values = ['epsilon_enabled', 'epsilon_print_stats', 'headless', 'print_stats', 'new_simulation',
+    boolean_values = ['epsilon_enabled', 'epsilon_print_stats', 'print_stats', 'new_simulation',
                       'nu_enable', 'nu_print_stats', 'nu_verbose',
                       'sim_checkpoint_enable', 'sim_checkpoint_verbose', 'sim_desc_verbose',
                       'steps_stats', 'steps_verbose',
