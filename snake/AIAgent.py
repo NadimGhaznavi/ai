@@ -19,6 +19,7 @@ from SnakeGameElement import Direction
 from SnakeGameElement import Point
 from EpsilonAlgo import EpsilonAlgo
 from ReplayMemory import ReplayMemory
+from NuAlgo import NuAlgo
 
 class AIAgent:
   def __init__(self, ini, log, game):
@@ -29,11 +30,13 @@ class AIAgent:
 
     # Level 1 instances
     self.l1_epsilon_algo = EpsilonAlgo(ini, log, 1) # Epsilon Algorithm for exploration/exploitation
+    self.l1_nu_algo = NuAlgo(ini, log, 1)
     self.l1_memory = ReplayMemory(ini)
     self.l1_model = LinearQNet(ini, log, 1)
     self.l1_trainer = QTrainer(ini, self.l1_model)
 
     self.l2_epsilon_algo = EpsilonAlgo(ini, log, 2)
+    self.l2_nu_algo = NuAlgo(ini, log, 2)
     self.l2_memory = ReplayMemory(ini)
     self.l2_model = LinearQNet(ini, log, 2)
     self.l2_trainer = QTrainer(ini, self.l2_model)
@@ -57,7 +60,7 @@ class AIAgent:
     l2_score = self.ini.get('l2_score')
     game_score = self.game.get_score()
     
-    # Random epsilon based action (exploration)
+    # Epsilon random injections of random moves (exploration)
     if game_score <= l2_score:
       # Use the Level 1 epsilon algorithm, with its own epsilon value
       random_move = self.l1_epsilon_algo.get_move()
@@ -65,8 +68,16 @@ class AIAgent:
       # Use the Level 2 epsilon algorithm, with its own epsilon value
       random_move = self.l2_epsilon_algo.get_move()
     
+    # NuAlgo random injections of random moves (exploration)
+    if game_score <= l2_score:
+      # Use the Level 1 nu algorithm
+      random_move = self.l1_nu_algo.get_move(game_score)
+    else:
+      # Use the Level 2 nu algorithm
+      random_move = self.l2_nu_algo.get_move(game_score)
+
     if random_move:
-      # Epsilon algorithm returned a move (not False)
+      # Random move was returned
       self.n_games_buf = self.n_games
       return random_move
     

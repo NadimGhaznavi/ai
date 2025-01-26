@@ -29,6 +29,7 @@ class EpsilonAlgo():
       self.epsilon_value = ini.get('l2_epsilon_value')
 
     self.print_stats = ini.get('epsilon_print_stats')
+    self.enabled = ini.get('epsilon_enabled')
     
     self.epsilon = self.epsilon_value
     
@@ -37,9 +38,8 @@ class EpsilonAlgo():
     self.depleted = False
     self.level = level
     
-    if self.epsilon_value == 0:
+    if not self.enabled:
       self.log.log(f"EpsilonAlgo({level}): EpsilonAlgo is disabled")
-      # If the epsilon value is set to zero, disable the algorithm and don't print epsilon stats
       self.ini.set_value('epsilon_print_stats', 'False')
     else:
       self.log.log(f"EpsilonAlgo({level}): New instance with epsilon value of {self.epsilon_value}")
@@ -59,7 +59,7 @@ class EpsilonAlgo():
   
   def get_move(self):
     rand_num = randint(0, self.epsilon_value)
-    if self.epsilon < 0 and self.depleted == False:
+    if self.enabled and self.epsilon < 0 and self.depleted == False:
       self.log.log(f"EpilsonAlgo: Model ({self.level}): Epsilon pool has been depleted")
       self.depleted = True
 

@@ -228,15 +228,18 @@ class AISnakeGameConfig():
                       'l2_b3_nodes', 'l2_b3_layers', 'l2_b3_score',
                       'l2_dropout_p', 'l2_dropout_max', 'l2_dropout_min', 
                       'l2_epsilon_value', 'l2_score',
+                      'l2_nu_pool', 'l2_nu_score', 'l2_nu_bad_games', 'l2_nu_high_grace',
                       'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
-                      'max_score_num', 'out_features', 'random_seed', 'score_height', 
+                      'max_score_num', 
+                      'nu_pool', 'nu_score', 'nu_bad_games', 'nu_high_grace', 'nu_max_zero_scores',
+                      'nu_max_moves', 'out_features', 'random_seed', 'score_height', 
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
-                      'new_layer_score', 'nu_bad_games', 'nu_max_zero_scores', 
-                      'nu_max_moves', 'nu_score', 'nu_value']
+                      'new_layer_score']
     # Key/value pairs where the value is a float
     float_values = ['discount', 'dropout_p', 'dropout_static', 'l2_dropout_static', 'learning_rate']
     # Key/value pairs where the value is a boolean
-    boolean_values = ['epsilon_print_stats', 'headless', 'print_stats', 'new_simulation',
+    boolean_values = ['epsilon_enabled', 'epsilon_print_stats', 'headless', 'print_stats', 'new_simulation',
+                      'nu_enable', 'nu_print_stats', 'nu_verbose',
                       'sim_checkpoint_enable', 'sim_checkpoint_verbose', 'sim_desc_verbose',
                       'steps_stats', 'steps_verbose',
                       ]

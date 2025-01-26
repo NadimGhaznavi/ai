@@ -39,6 +39,17 @@ def print_game_summary(ini, log, agent, score, record, game, l2_score):
         summary = summary + ', L2 EpsilonAlgo: inject# {:>3}'.format(agent.l2_epsilon_algo.get_injected()) + \
           ', units# {:>3}'.format(agent.l2_epsilon_algo.get_epsilon())
 
+  # Print the nu values
+  if ini.get('nu_print_stats'):
+    if score <= l2_score:
+      # Level 1 NuAlgo
+      summary = summary + ', {}'.format(agent.l1_nu_algo)
+    else:
+      # Level 2 NuAlgo
+      summary = summary + ', {}'.format(agent.l2_nu_algo)
+    agent.l1_nu_algo.reset_injected()
+    agent.l2_nu_algo.reset_injected()
+
   # Level 1 and 2 statistics
   if ini.get('steps_stats'):
     l1_model_steps = agent.l1_model.get_steps()
@@ -133,7 +144,7 @@ def train():
         'L1 steps: model# {:>4}'.format(l1_model_steps) + ' trainer# {:>4}'.format(l1_trainer_steps) + \
         ', L2 steps: model# {:>4}'.format(l2_model_steps) + ' trainer# {:>4}'.format(l2_trainer_steps)
       log.log(steps_summary)
-      
+
     # Get old state
     state_old = agent.get_state()
     # Get move
@@ -176,6 +187,13 @@ def train():
       else:
         agent.l2_epsilon_algo.played_game()
 
+      # Update the NuAlgo instances
+      if ini.get('nu_enable'):
+        if score <= l2_score:
+          agent.l1_nu_algo.played_game(score)
+        else:
+          agent.l2_nu_algo.played_game(score)
+      
       # Perform a checkpoint every 100 games
       if agent.n_games % 100 == 0:
         ini.set_value('sim_checkpoint_basename', f'_checkpoint_l1_game_{agent.n_games}.ptc')
@@ -201,6 +219,13 @@ def train():
       if score > record:
         # New highscore!!! YAY!
         record = score
+
+        # NuAlgo
+        if ini.get('nu_enable'):
+          if score <= l2_score:
+            agent.l1_nu_algo.new_highscore(score)
+          else:
+            agent.l2_nu_algo.new_highscore(score)
 
         ## Dynamic dropout layers
         # Check if the model has dynamic dropout layers
