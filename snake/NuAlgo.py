@@ -49,6 +49,7 @@ class NuAlgo():
     self.bad_game_count = 0 # A 'number of bad games' counter
     self.new_high = False # Whether a new high score has been found
     self.new_high_grace_count = 0 # Counter for self.new_high_grace
+    self.l2_score = ini.get('l2_score')
 
     if self.enabled == False:
       self.log.log("NuAlgo: NuAlgo is disabled")
@@ -139,8 +140,15 @@ class NuAlgo():
         self.score = self.score - self.reset_count
         self.cur_pool = self.pool # Refill the pool
 
-      if self.score < 0:
-        self.score = 0
+      if self.level == 1:
+        # For level 1, we can go as low as zero
+        if self.score < 0:
+          self.score = 0
+      else:
+        # For level 2, we want to go as low as the l2_score
+        if self.score < self.l2_score:
+          self.score = self.l2_score
+          
       self.reset_count += 1
       if self.verbose:
         self.log.log(f"NuAlgo: Played ({self.reset_count * self.bad_games}) games without a new high score, incrementing reset count to ({self.reset_count + 1}), decreasing score to ({self.score})")
