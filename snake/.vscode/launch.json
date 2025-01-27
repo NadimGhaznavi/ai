@@ -6,13 +6,17 @@
     "configurations": [
         
         {
-            "name": "AISnakeGame (L2_v1_3)",
+            "name": "AISnakeGame b1n = 100, b1l = 1, b2n = 150, b2l = 1",
             "type": "debugpy",
             "request": "launch",
             "program": "AISim.py",
             "console": "integratedTerminal",
             "args": [
-                "-he", "False",
+                "-he", "0",
+                "-b1n", "100",
+                "-b1l", "1",
+                "-b2n", "150",
+                "-b2l", "1"
             ]
         }
     ]

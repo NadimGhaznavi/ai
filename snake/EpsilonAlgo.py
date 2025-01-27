@@ -21,13 +21,7 @@ class EpsilonAlgo():
     # Set this random seed so things are repeatable
     random.seed(ini.get('random_seed')) 
 
-    if level == 1:
-      # This instance is for the Level 1 neural network
-      self.epsilon_value = ini.get('epsilon_value')
-    else:
-      # This instance is for the Level 2 neural network
-      self.epsilon_value = ini.get('l2_epsilon_value')
-
+    self.epsilon_value = ini.get('epsilon_value')
     self.print_stats = ini.get('epsilon_print_stats')
     self.enabled = ini.get('epsilon_enabled')
     
@@ -39,7 +33,6 @@ class EpsilonAlgo():
     self.level = level
     
     if not self.enabled:
-      self.log.log(f"EpsilonAlgo({level}): EpsilonAlgo is disabled")
       self.ini.set_value('epsilon_print_stats', 'False')
     else:
       self.log.log(f"EpsilonAlgo({level}): New instance with epsilon value of {self.epsilon_value}")

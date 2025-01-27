@@ -16,13 +16,14 @@ from AISnakeGameConfig import AISnakeGameConfig
 
 
 class QTrainer:
-  def __init__(self, ini, model):
+  def __init__(self, ini, model, model_level):
     """
     The constructor accepts the following parameters:
         * model - A sub-class of nn.Module
         * lr    - The learning rate
         * gamma - The gamma value
     """
+    self.model_level = model_level
     torch.manual_seed(ini.get('random_seed'))
     self.lr = ini.get('learning_rate')
     self.gamma = ini.get('discount')
@@ -34,10 +35,7 @@ class QTrainer:
     self.steps = 0
   
   def get_steps(self):
-    """
-    Returns the number of steps the AI agent has taken with this instance.
-    """
-    return self.steps
+    return 'L{} trainer steps# {:>5}'.format(self.model_level, self.steps)
   
   def reset_steps(self):
     """
@@ -83,5 +81,6 @@ class QTrainer:
 
     self.optimizer.zero_grad() # Reset the gradients to zero
     loss = self.criterion(target, pred) # Calculate the loss
+    #print("Loss: ", loss.item())
     loss.backward() # Backpropagate the loss
     self.optimizer.step() # Adjust the weights

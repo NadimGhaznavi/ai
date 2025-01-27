@@ -18,7 +18,7 @@ class LinearQNet(nn.Module):
   #             b2_nodes, b2_layers,
   #             b3_nodes, b3_layers,
   #             out_features, ai_version):
-  def __init__(self, ini, log, label):
+  def __init__(self, ini, log, model_level):
     """
     The class accepts the following parameters:
 
@@ -67,7 +67,7 @@ class LinearQNet(nn.Module):
     super().__init__()
     self.log = log
     # This should be "1" or "2" to indicate whether this is a level 1 or level 2 model
-    self.label = label 
+    self.level = model_level
     
     # Set this random seed so things are repeatable. Also set this so that we
     # can change the random seed to make sure the overall results are consistent,
@@ -79,34 +79,19 @@ class LinearQNet(nn.Module):
     # was used. It will get reset at the beginning of each game.
     self.steps = 0
     self.in_features = ini.get('in_features')
-    if self.label == 1:
-      # Level 1 neural network
-      self.b1_nodes = ini.get('b1_nodes')
-      self.b1_layers = ini.get('b1_layers')
-      self.b2_nodes = ini.get('b2_nodes')
-      self.b2_layers = ini.get('b2_layers')
-      self.b3_nodes = ini.get('b3_nodes')
-      self.b3_layers = ini.get('b3_layers')
-      self.out_features = ini.get('out_features')
-      self.dropout_p = ini.get('dropout_p')
-      self.dropout_min = ini.get('dropout_min')
-      self.dropout_max = ini.get('dropout_max')
-      self.dropout_static = ini.get('dropout_static')
-      self.p_value = 0
-    elif self.label == 2:
-      # Level 2 neural network
-      self.b1_nodes = ini.get('l2_b1_nodes')
-      self.b1_layers = ini.get('l2_b1_layers')
-      self.b2_nodes = ini.get('l2_b2_nodes')
-      self.b2_layers = ini.get('l2_b2_layers')
-      self.b3_nodes = ini.get('l2_b3_nodes')
-      self.b3_layers = ini.get('l2_b3_layers')
-      self.out_features = ini.get('out_features')
-      self.dropout_p = ini.get('l2_dropout_p')
-      self.dropout_min = ini.get('l2_dropout_min')
-      self.dropout_max = ini.get('l2_dropout_max')
-      self.dropout_static = ini.get('l2_dropout_static')
-      self.p_value = 0
+    # Level 1 neural network
+    self.b1_nodes = ini.get('b1_nodes')
+    self.b1_layers = ini.get('b1_layers')
+    self.b2_nodes = ini.get('b2_nodes')
+    self.b2_layers = ini.get('b2_layers')
+    self.b3_nodes = ini.get('b3_nodes')
+    self.b3_layers = ini.get('b3_layers')
+    self.out_features = ini.get('out_features')
+    self.dropout_p = ini.get('dropout_p')
+    self.dropout_min = ini.get('dropout_min')
+    self.dropout_max = ini.get('dropout_max')
+    self.dropout_static = ini.get('dropout_static')
+    self.p_value = 0
 
     # Enable dropout layers in the model if the user has specified a dynamic
     # ( --dropout_p, --dropout_min and --dropout_max) or static ( --dropout_staic)
@@ -123,7 +108,6 @@ class LinearQNet(nn.Module):
     else:
       self.dropout = False
 
-    self.ascii_print()
 
     # The basic main model framework
     main_block = nn.Sequential()
@@ -181,12 +165,10 @@ class LinearQNet(nn.Module):
         main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b3_nodes))
       else:
         # with no B3 block
-        main_block[2].append(nn.ReLU())
-        main_block[2].append(nn.Linear(in_features=self.b3_nodes, out_features=self.out_features))
         layer_count = 0
         while layer_count < self.b2_layers and layer_count != self.b2_layers:
           main_block[2].append(nn.ReLU())
-          main_block[2].append(nn.Linear(in_features=self.b1_nodes, out_features=self.b1_nodes))
+          main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.b2_nodes))
           layer_count += 1
     
     ## B3 Block
@@ -214,22 +196,24 @@ class LinearQNet(nn.Module):
       main_block[3].append(nn.Linear(in_features=self.b3_nodes, out_features=self.out_features))
       
     self.main_block = main_block
+    self.ascii_print()
 
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
-    self.log.log(f"====== Level {self.label} Neural Network Architecture ==========")
-    self.log.log("Blocks           Nodes   Layers  Total  Nodes")
-    self.log.log("------------------------------------------------------")
-
-    log_msg = \
-      "Input block      {:>5} {:>8} {:>13}\n".format(self.in_features, 1, self.in_features) + \
-      "B1 block         {:>5} {:>8} {:>13}\n".format(self.b1_nodes, self.b1_layers, self.b1_nodes*self.b1_layers) + \
-      "B2 block         {:>5} {:>8} {:>13}\n".format(self.b2_nodes, self.b2_layers, self.b2_nodes*self.b2_layers) + \
-      "B3 block         {:>5} {:>8} {:>13}\n".format(self.b3_nodes, self.b3_layers, self.b3_nodes*self.b3_layers) + \
-      "Output block     {:>5} {:>8} {:>13}\n".format(self.out_features, 1, self.out_features) + \
-      "------------------------------------------------------\n" + \
-      "Total compute nodes          {:>16}\n".format(
-        (self.b1_nodes*self.b1_layers) + (self.b2_nodes*self.b2_layers) + (self.b3_nodes*self.b3_layers))
+    self.log.log(f"====== Level {self.level} Neural Network Architecture ==========")
+    self.log.log("Layers           Input        Output")
+    self.log.log("---------------------------------------------")
+    log_msg = ''
+    for block in self.main_block:
+      for layer in block:
+        if isinstance(layer, nn.Dropout):
+          log_msg = log_msg + "Dropout block    {:>5} {:>13}\n".format('', '')
+        if isinstance(layer, nn.ReLU):
+          log_msg = log_msg + "ReLU block       {:>5} {:>13}\n".format('', '')
+        if isinstance(layer, nn.Linear):
+          in_features = layer.in_features
+          out_features = layer.out_features
+          log_msg = log_msg + "Linear block     {:>5} {:>13}\n".format(in_features, out_features)
     self.log.log(log_msg)
     
     if self.dropout:
@@ -247,7 +231,7 @@ class LinearQNet(nn.Module):
     """
     Returns the number of steps the AI agent has taken.
     """
-    return self.steps
+    return 'L{} model steps# {:>5}'.format(self.level, self.steps)
 
   def has_dynamic_dropout(self):
     """

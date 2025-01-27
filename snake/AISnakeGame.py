@@ -70,9 +70,8 @@ class AISnakeGame():
     # Initialize the display
     self.screen_width = self.board_width
     self.screen_height = self.board_height
-    if not self.headless:
-      self.display = pygame.display.set_mode((self.board_width, self.board_height))
-      pygame.display.set_caption(GAME_TITLE + ' (v' + str(ini.get('ai_version')) + ')')
+    self.display = pygame.display.set_mode((self.board_width, self.board_height))
+    pygame.display.set_caption(GAME_TITLE + ' (v' + str(ini.get('ai_version')) + ')')
     self.clock = pygame.time.Clock()
 
     # Display periodic status message
@@ -194,7 +193,7 @@ class AISnakeGame():
     is_paused = True
     # The loop is *FAST* make sure that we only print this info message once
     if self.num_games == self.num_games_cur:
-      self.log.log("AISnakeGame: Game paused, press SPACE to continue. Press 'm' to print the models. Press 'q' to quit. Press 'a/z' to speedup/slowdown the game.")
+      self.log.log("AISnakeGame: Game paused, press SPACE to continue. Press 'm' to print the models. Press 'q' to quit. Press 'a/z' to speedup/slowdown the game. Press 'h' to headless mode. Press 'i' to interactive mode.")
       self.num_games_cur += 1
     # Create pause loop
     while is_paused:
@@ -209,7 +208,11 @@ class AISnakeGame():
       if keys[pygame.K_s]:
         self.print_status()
       if keys[pygame.K_m]:
-        self.print_model()   
+        self.print_model()
+      if keys[pygame.K_h]:
+        self.headless = 1
+      if keys[pygame.K_i]:
+        self.headless = 0
       if keys[pygame.K_a]:
         self.game_speed_increase()
       if keys[pygame.K_z]:
@@ -241,6 +244,10 @@ class AISnakeGame():
       self.print_status()
     if keys[pygame.K_m]:
       self.print_model()
+    if keys[pygame.K_h]:
+      self.headless = 1
+    if keys[pygame.K_i]:
+      self.headless = 0
     if keys[pygame.K_a]:
       self.game_speed_increase
     if keys[pygame.K_z]:

@@ -27,20 +27,20 @@ class AIAgent:
     self.log = log
     self.game = game
     
+    level_score = self.ini.get('level_score')
 
-    # Level 1 instances
-    self.l1_epsilon_algo = EpsilonAlgo(ini, log, 1) # Epsilon Algorithm for exploration/exploitation
-    self.l1_nu_algo = NuAlgo(ini, log, 1)
-    self.l1_memory = ReplayMemory(ini)
-    self.l1_model = LinearQNet(ini, log, 1)
-    self.l1_trainer = QTrainer(ini, self.l1_model)
+    # Level 1 initialization
+    self.level = { 
+      level_score: {
+        'epsilon_algo': EpsilonAlgo(ini, log, level_score),
+        'memory': ReplayMemory(ini),
+        'model': LinearQNet(ini, log, level_score),
+      }
+    }
+    model = self.level[level_score]['model']
+    self.level[level_score]['trainer'] = QTrainer(ini, model, level_score)
 
-    self.l2_epsilon_algo = EpsilonAlgo(ini, log, 2)
-    self.l2_nu_algo = NuAlgo(ini, log, 2)
-    self.l2_memory = ReplayMemory(ini)
-    self.l2_model = LinearQNet(ini, log, 2)
-    self.l2_trainer = QTrainer(ini, self.l2_model)
-
+    self.nu_algo = NuAlgo(ini, log)
 
     # Used in the state map, this initializes it to some random direction
     self.last_dirs = [ 0, 0, 1, 0 ]
@@ -55,26 +55,34 @@ class AIAgent:
     # Create the simulation data directory if it does not exist
     os.makedirs(self.ini.get('sim_data_dir'), exist_ok=True)
 
+  def add_level(self, score):
+    # Create a new level, complete with model, trainer, and epsilon/nu algorithms
+    model_level = score // 10 * 10 + 10
+    self.level[model_level] = {
+      'epsilon_algo': EpsilonAlgo(self.ini, self.log, model_level),
+      'memory': ReplayMemory(self.ini),
+      'model': LinearQNet(self.ini, self.log, model_level),
+    }
+    model = self.level[model_level]['model']
+    self.level[model_level]['trainer'] = QTrainer(self.ini, model, model_level)
+    # Copy the previous model weights to the new model
+    tmp_file = str(self.ini.get('ai_version')) + '_tmp.pt'
+    optimizer = self.level[model_level - 10]['trainer'].optimizer
+    self.level[model_level - 10]['model'].save_checkpoint(optimizer, tmp_file)
+    self.level[model_level]['model'].restore_model(optimizer, tmp_file)
+    os.remove(tmp_file)
+
+
   def get_action(self, state):
 
-    l2_score = self.ini.get('l2_score')
     game_score = self.game.get_score()
+    model = game_score // 10 * 10 + 10
     
-    # Epsilon random injections of random moves (exploration)
-    if game_score <= l2_score:
-      # Use the Level 1 epsilon algorithm, with its own epsilon value
-      random_move = self.l1_epsilon_algo.get_move()
-    else:
-      # Use the Level 2 epsilon algorithm, with its own epsilon value
-      random_move = self.l2_epsilon_algo.get_move()
+    # Use the epsilon algorithm; exploration
+    random_move = self.level[model]['epsilon_algo'].get_move()
     
-    # NuAlgo random injections of random moves (exploration)
-    if game_score <= l2_score:
-      # Use the Level 1 nu algorithm
-      random_move = self.l1_nu_algo.get_move(game_score)
-    else:
-      # Use the Level 2 nu algorithm
-      random_move = self.l2_nu_algo.get_move(game_score)
+    # Use the nu algorithm; exploration
+    random_move = self.nu_algo.get_move(game_score)
 
     if random_move:
       # Random move was returned
@@ -85,41 +93,28 @@ class AIAgent:
     final_move = [0, 0, 0]
     state0 = torch.tensor(state, dtype=torch.float)
 
-    if game_score <= l2_score:
-      # Use the Level 1 model
-      prediction = self.l1_model(state0)
-    else:
-      # Use the Level 2 model
-      prediction = self.l2_model(state0)
-
+    # Get the prediction
+    prediction = self.level[model]['model'](state0)
     move = torch.argmax(prediction).item()
     final_move[move] = 1 
       
     return final_move
 
-  def get_checkpoint_filenames(self):
-    # Get the checkpoint filename componenets
-    ai_version = self.ini.get('ai_version')
-    checkpoint_basename = self.ini.get('sim_checkpoint_basename')
-    checkpoint_basename_l2 = self.ini.get('l2_sim_checkpoint_basename')
-    sim_data_dir = self.ini.get('sim_data_dir')
-    # Construct the file names
-    checkpoint_file = os.path.join(sim_data_dir, str(ai_version) + checkpoint_basename)
-    checkpoint_file_l2 = os.path.join(sim_data_dir, str(ai_version) + checkpoint_basename_l2)
-    # Return the filenames
-    return checkpoint_file, checkpoint_file_l2
-  
-  def get_model_filenames(self):
-    # Get the model filename componenets
-    ai_version = self.ini.get('ai_version')
-    model_basename = self.ini.get('sim_model_basename')
-    model_basename_l2 = self.ini.get('l2_sim_model_basename')
-    sim_data_dir = self.ini.get('sim_data_dir')
-    # Construct the file names
-    model_file = os.path.join(sim_data_dir, str(ai_version) + model_basename)
-    model_file_l2 = os.path.join(sim_data_dir, str(ai_version) + model_basename_l2)
-    return model_file, model_file_l2
+  def get_epsilon(self, score):
+    model = score // 10 * 10 + 10
+    return self.level[model]['epsilon_algo'].get_epsilon()
 
+  def get_epsilon_injected(self, score):
+    model = score // 10 * 10 + 10
+    return self.level[model]['epsilon_algo'].get_epsilon_injected()
+
+  def get_model_steps(self, score):
+    model = score // 10 * 10 + 10
+    return self.level[model]['model'].get_steps()
+
+  def get_nu_algo(self, score):
+    return self.nu_algo
+  
   def get_snake_length_in_binary(self):
     # Get the length of the snake in binary.
     # This is used in the state map, the get_state() function.
@@ -207,16 +202,34 @@ class AIAgent:
     self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
     return np.array(state, dtype=int)
 
+  def get_trainer_steps(self, score):
+    model = score // 10 * 10 + 10
+    return self.level[model]['trainer'].get_steps()
+
+  def played_game(self, score):
+    model = score // 10 * 10 + 10
+    self.level[model]['epsilon_algo'].played_game()
+    self.nu_algo.played_game(score)
+
   def remember(self, state, action, reward, next_state, done):
     # Store the state, action, reward, next_state, and done in memory
     # Recall that memory is a deque, so it will automatically remove the oldest memory 
     # if the memory exceeds MAX_MEMORY
-    if self.game.get_score() <= self.ini.get('l2_score'):
-      # Use the level 1 memory
-      self.l1_memory.append((state, action, reward, next_state, done))
-    else:
-      # User the level 2 memory
-      self.l2_memory.append((state, action, reward, next_state, done))
+    score = self.game.get_score()
+    model_num = score // 10 * 10 + 10
+    self.level[model_num]['memory'].append((state, action, reward, next_state, done))
+      
+
+  def reset_nu_algo_injected(self, score):
+    self.nu_algo.reset_injected()
+
+  def reset_model_steps(self, score):
+    model = score // 10 * 10 + 10
+    self.level[model]['model'].reset_steps()
+
+  def reset_trainer_steps(self, score):
+    model = score // 10 * 10 + 10
+    self.level[model]['trainer'].reset_steps()
 
   def restore_model(self, level):
     # Get the L1 or L2 model filenames
@@ -238,15 +251,16 @@ class AIAgent:
       self.log.log(f"Loaded simulation model ({model_file})")
 
   def save_checkpoint(self):
-    # Get the checkpoint filename componenets
-    checkpoint_file, checkpoint_file_l2 = self.get_checkpoint_filenames()
-    # Save the simulation state
+    # Save the models for each level
     if self.ini.get('sim_checkpoint_enable'):
-      self.l1_model.save_checkpoint(self.l1_trainer.optimizer, checkpoint_file)
-      self.l2_model.save_checkpoint(self.l2_trainer.optimizer, checkpoint_file_l2)
-      if self.ini.get('sim_checkpoint_verbose'):
-        self.log.log(f"Saved simulation checkpoint ({checkpoint_file})")
-        self.log.log(f"Saved simulation checkpoint ({checkpoint_file_l2})")
+      data_dir = self.ini.get('sim_data_dir')
+      checkpoint_basename = self.ini.get('sim_checkpoint_basename')
+      for level in self.level:
+        checkpoint_file = os.path.join(data_dir, str(self.ini.get('ai_version')) + '_L' + str(level) + checkpoint_basename)
+        optimizer = self.level[level]['trainer'].optimizer
+        self.level[level]['model'].save_checkpoint(optimizer, checkpoint_file)
+        if self.ini.get('sim_checkpoint_verbose'):
+          self.log.log(f"Saved simulation checkpoint ({checkpoint_file})")
   
   def save_highscore(self, highscore):
     # Get the highscore filename components
@@ -266,35 +280,37 @@ class AIAgent:
         file_handle.write(str(self.n_games) + ',' + str(highscore) + "\n")
 
   def save_model(self):
-    # Get the model filenames
-    model_file, model_file_l2 = self.get_model_filenames()
-    # Save the simulation models
-    self.l1_model.save_model(self.l1_trainer.optimizer, model_file)
-    self.l2_model.save_model(self.l2_trainer.optimizer, model_file_l2)
-    self.log.log(f"Saved simulation model ({model_file})")
-    self.log.log(f"Saved simulation model ({model_file_l2})")
+    # Save the model for each level
+    model_file = self.ini.get('sim_model_basename')
+    for level in self.level:
+      sim_data_dir = self.ini.get('sim_data_dir')
+      model_file = os.path.join(sim_data_dir, str(self.ini.get('ai_version')) + '_L' + str(level) + model_file)
+      optimizer = self.level[level]['trainer'].optimizer
+      self.level[level]['model'].save_model(optimizer, model_file)
+      self.log.log(f"Saved simulation model ({model_file})")
 
-  def train_long_memory(self):
-    l2_score = self.ini.get('l2_score')
-    game_score = self.game.get_score()
-
-    if game_score <= l2_score:
-      # Use the level 1 memory
-      mini_sample = self.l1_memory.get_memory()
-    else:
-      # Use the level 2 memory
-      mini_sample = self.l2_memory.get_memory()
-
-    # Get the states, actions, rewards, next_states, and dones from the mini_sample
-    states, actions, rewards, next_states, dones = zip(*mini_sample)
+  def set_nu_algo_highscore(self, score):
+    # We need to let *all* of the NuAlgo instances know about the new high score
+    self.nu_algo.new_highscore(score)
     
-    if game_score <= l2_score:
-      self.l1_trainer.train_step(states, actions, rewards, next_states, dones)
-    else:
-      self.l2_trainer.train_step(states, actions, rewards, next_states, dones)
+  def train_long_memory(self):
+    game_score = self.game.get_score()
+    model_num = game_score // 10 * 10 + 10
+    count = 0
+
+    while count != model_num:
+      count += 10
+      mini_sample = self.level[count]['memory'].get_memory()
+      # Get the states, actions, rewards, next_states, and dones from the mini_sample
+      states, actions, rewards, next_states, dones = zip(*mini_sample)
+      self.level[count]['trainer'].train_step(states, actions, rewards, next_states, dones)
 
   def train_short_memory(self, state, action, reward, next_state, done):
-    if self.game.score <= self.ini.get('l2_score'):
-      self.l1_trainer.train_step(state, action, reward, next_state, done)
-    else:
-      self.l2_trainer.train_step(state, action, reward, next_state, done)
+    game_score = self.game.get_score()
+    model_num = game_score // 10 * 10 + 10
+    if model_num not in self.level:
+      self.add_level(game_score)
+    count = 0
+    while count != model_num:
+      count += 10
+      self.level[count]['trainer'].train_step(state, action, reward, next_state, done)

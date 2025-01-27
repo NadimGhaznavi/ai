@@ -18,25 +18,17 @@ from AISnakeGameConfig import AISnakeGameConfig
 from collections import deque
 
 class NuAlgo():
-  def __init__(self, ini, log, level):
+  def __init__(self, ini, log):
     # Constructor
     self.ini = ini
     self.log = log
-    self.level = level
     # Set this random seed so things are repeatable
     random.seed(ini.get('random_seed')) 
-    if level == 1:
-      self.pool = ini.get('nu_pool') # Size of the pool (like epsilon, but dynamic)
-      self.score = ini.get('nu_score') # The game score before the algorithm injects a random move
-      self.bad_games = ini.get('nu_bad_games') # How many games in a row where no high score is reached
-      self.new_high_grace = ini.get('nu_high_grace') # Number of games after a high score has been found where no random moves are injected
-      self.enabled = ini.get('nu_enable') # Whether this algorithm is enabled
-    else:
-      self.pool = ini.get('l2_nu_pool') # 60
-      self.score = ini.get('l2_score') # 1
-      self.bad_games = ini.get('l2_nu_bad_games') # 25
-      self.new_high_grace = ini.get('l2_nu_high_grace') 
-      self.enabled = ini.get('l2_nu_enable') # Whether this algorithm is enabled
+    self.pool = ini.get('nu_pool') # Size of the pool (like epsilon, but dynamic)
+    self.bad_games = ini.get('nu_bad_games') # How many games in a row where no high score is reached
+    self.new_high_grace = ini.get('nu_high_grace') # Number of games after a high score has been found where no random moves are injected
+    self.enabled = ini.get('nu_enable') # Whether this algorithm is enabled
+    self.score = 0
 
     # Print additional stats in the console
     self.verbose = ini.get('nu_verbose')
@@ -48,8 +40,8 @@ class NuAlgo():
     self.cur_pool = self.pool # Size of the random move pool
     self.bad_game_count = 0 # A 'number of bad games' counter
     self.new_high = False # Whether a new high score has been found
+    self.cur_high = False # Whether the current score game matched the high score
     self.new_high_grace_count = 0 # Counter for self.new_high_grace
-    self.l2_score = ini.get('l2_score')
 
     if self.enabled == False:
       self.log.log("NuAlgo: NuAlgo is disabled")
@@ -60,8 +52,8 @@ class NuAlgo():
         self.log.log(f"NuAlgo: New instance with pool size ({self.pool}), score ({self.score}) and bad games ({self.bad_games})")
 
   def __str__(self):
-    str_value = 'L{} NuAlgo: injected {:>3}, score {:>2}, pool {:>2}, bad games {:>2}, reset {:>2}'.format(
-      self.level, self.injected, self.score, self.cur_pool, self.bad_game_count, self.reset_count)
+    str_value = 'NuAlgo: score {:>2}, injected {:>3}, pool {:>2}, bad games {:>2}, reset {:>2}'.format(
+      self.score, self.injected, self.cur_pool, self.bad_game_count, self.reset_count)
     return str_value
 
   def get_move(self, cur_score):
@@ -76,12 +68,13 @@ class NuAlgo():
       # Current game score too low to inject random moves
       return False
     
-    if self.new_high:
+    if self.new_high or self.cur_high:
       # A new high score has been found, give the AI new_high_grace games to find a new high score
       # before starting to inject random moves
       self.new_high_grace_count += 1
       if self.new_high_grace_count == self.new_high_grace:
         self.new_high = False
+        self.cur_high = False
         self.new_high_grace_count = 0
       return False
     
@@ -126,6 +119,7 @@ class NuAlgo():
 
     if cur_score == self.score and self.reset_count > 1:
       self.reset_count = 1
+      self.cur_high = True
       if self.verbose:
         self.log.log(f"NuAlgo: Played a game matching the high score, resetting the reset count to (1)")
 
@@ -137,18 +131,13 @@ class NuAlgo():
         self.score -= 1
         self.cur_pool = self.pool # Refill the pool
       elif self.reset_count > 1:        
+        #self.score = self.score - (self.reset_count * 2)
         self.score = self.score - self.reset_count
         self.cur_pool = self.pool # Refill the pool
 
-      if self.level == 1:
-        # For level 1, we can go as low as zero
-        if self.score < 0:
-          self.score = 0
-      else:
-        # For level 2, we want to go as low as the l2_score
-        if self.score < self.l2_score:
-          self.score = self.l2_score
-          
+      if self.score < 0:
+        self.score = 0
+
       self.reset_count += 1
       if self.verbose:
         self.log.log(f"NuAlgo: Played ({self.reset_count * self.bad_games}) games without a new high score, incrementing reset count to ({self.reset_count + 1}), decreasing score to ({self.score})")

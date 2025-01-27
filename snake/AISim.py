@@ -28,48 +28,23 @@ def print_game_summary(ini, log, agent, score, record, game, l2_score):
 
   # Print the epsilon values
   if ini.get('epsilon_print_stats'):
-    if score <= l2_score:
-      if agent.l1_epsilon_algo.get_print_stats() and \
-        agent.l1_epsilon_algo.get_epsilon() != 0:
-        summary = summary + ', L1 EpsilonAlgo: inject# {:>3}'.format(agent.l1_epsilon_algo.get_injected()) + \
-          ', units# {:>3}'.format(agent.l1_epsilon_algo.get_epsilon())
-    else:
-      if agent.l2_epsilon_algo.get_print_stats() and \
-        agent.l2_epsilon_algo.get_epsilon() != 0:
-        summary = summary + ', L2 EpsilonAlgo: inject# {:>3}'.format(agent.l2_epsilon_algo.get_injected()) + \
-          ', units# {:>3}'.format(agent.l2_epsilon_algo.get_epsilon())
+    if agent.l1_epsilon_algo.get_print_stats() and \
+      agent.l1_epsilon_algo.get_epsilon() != 0:
+      summary = summary + ', L1 EpsilonAlgo: inject# {:>3}'.format(agent.get_epsilon_injected(score)) + \
+        ', units# {:>3}'.format(agent.get_epsilon(score))
 
   # Print the nu values
   if ini.get('nu_print_stats'):
-    if score <= l2_score:
-      # Level 1 NuAlgo
-      summary = summary + ', {}'.format(agent.l1_nu_algo)
-    else:
-      # Level 2 NuAlgo
-      summary = summary + ', {}'.format(agent.l2_nu_algo)
-    agent.l1_nu_algo.reset_injected()
-    agent.l2_nu_algo.reset_injected()
+    summary = summary + ', {}'.format(agent.get_nu_algo(score))
+    agent.reset_nu_algo_injected(score)
 
-  # Level 1 and 2 statistics
+  # Model and trainer steps
   if ini.get('steps_stats'):
-    l1_model_steps = agent.l1_model.get_steps()
-    l1_trainer_steps = agent.l1_trainer.get_steps()
-    l2_model_steps = agent.l2_model.get_steps()
-    l2_trainer_steps = agent.l2_trainer.get_steps()
-    if l1_model_steps > 0 or l1_trainer_steps > 0:
-      summary = summary + \
-        ', L1 steps: model# {:>5}'.format(l1_model_steps) + \
-        ', trainer# {:>5}'.format(l1_trainer_steps)
-    if l2_model_steps > 0 or l2_trainer_steps > 0:
-      summary = summary + \
-        ', L2 steps: model# {:>5}'.format(l2_model_steps) + \
-        ', trainer# {:>5}'.format(l2_trainer_steps)
-    
+    summary = summary + ', ' + agent.get_model_steps(score)
+    summary = summary + ', ' + agent.get_trainer_steps(score)
   if ini.get('steps_stats') or ini.get('steps_verbose'):
-    agent.l1_model.reset_steps()
-    agent.l2_model.reset_steps()
-    agent.l1_trainer.reset_steps()
-    agent.l2_trainer.reset_steps()
+    agent.reset_model_steps(score)
+    agent.reset_trainer_steps(score)
 
   # Print the lose reason
   summary = summary + ' - ' + game.lose_reason
@@ -108,10 +83,11 @@ def train():
   agent.ini.save_sim_desc()
 
   # Check if we are restoring a model
-  if ini.get('restore_l1'):
-    agent.restore_model(1)
-  if ini.get('restore_l2'):
-    agent.restore_model(2)
+  if False:
+    if ini.get('restore_l1'):
+      agent.restore_model(1)
+    if ini.get('restore_l2'):
+      agent.restore_model(2)
 
   # Reset the AI Snake Game
   game.reset()
@@ -133,17 +109,11 @@ def train():
   log.log(f"Configuration file being used is {ini.get('ini_file')}")
   log.log(f"The second neural network will be used for scores above {ini.get('l2_score')}")
 
+  # Flag, indicating whether the L2 model was updated from L1
+  L2_updated = False
+
   ## The actual training loop
   while True:
-    if ini.get('steps_verbose'):
-      l1_model_steps = agent.l1_model.get_steps()
-      l2_model_steps = agent.l2_model.get_steps()
-      l1_trainer_steps = agent.l1_trainer.get_steps()
-      l2_trainer_steps = agent.l2_trainer.get_steps()
-      steps_summary = 'Steps: ' + \
-        'L1 steps: model# {:>4}'.format(l1_model_steps) + ' trainer# {:>4}'.format(l1_trainer_steps) + \
-        ', L2 steps: model# {:>4}'.format(l2_model_steps) + ' trainer# {:>4}'.format(l2_trainer_steps)
-      log.log(steps_summary)
 
     # Get old state
     state_old = agent.get_state()
@@ -159,45 +129,14 @@ def train():
 
     # If the game is over
     if done:
-      ## Dynamically add layers
-      # Add a new layer when a specific score is reached
-      if ini.get('b1_score') > 0 and score >= ini.get('b1_score'):
-        ini.set_value('b1_score', 0) # Make sure we don't add another layer
-        agent.l1_model.insert_layer(1)
-      if ini.get('b2_score') > 0 and score >= ini.get('b2_score'):
-        ini.set_value('b2_score', 0)
-        agent.l1_model.insert_layer(2)
-      if ini.get('b3_score') > 0 and score >= ini.get('b3_score'):
-        ini.set_value('b3_score', 0)
-        agent.l1_model.insert_layer(3)
-      # Add a new layer when a specific score is reached
-      if ini.get('l2_b1_score') > 0 and score >= ini.get('l2_b1_score'):
-        ini.set_value('l2_b1_score', 0) # Make sure we don't add another layer
-        agent.l2_model.insert_layer(1)
-      if ini.get('l2_b2_score') > 0 and score >= ini.get('l2_b2_score'):
-        ini.set_value('l2_b2_score', 0)
-        agent.l2_model.insert_layer(2)
-      if ini.get('l2_b3_score') > 0 and score >= ini.get('l2_b3_score'):
-        ini.set_value('l2_b3_score', 0)
-        agent.l2_model.insert_layer(3)
-      
-      # Update the epsilon algorithm instances
-      if game.score <= l2_score:
-        agent.l1_epsilon_algo.played_game()
-      else:
-        agent.l2_epsilon_algo.played_game()
+      # Update the Agent with the new score (used by epsilon and NuAlgo)
+      agent.played_game(score)
 
-      # Update the NuAlgo instances
-      if ini.get('nu_enable'):
-        if score <= l2_score:
-          agent.l1_nu_algo.played_game(score)
-        else:
-          agent.l2_nu_algo.played_game(score)
-      
+      # Copy the model's weights and bias' to the L2 model when the L2 score is reached
+      agent.save_checkpoint()
+
       # Perform a checkpoint every 100 games
       if agent.n_games % 100 == 0:
-        ini.set_value('sim_checkpoint_basename', f'_checkpoint_l1_game_{agent.n_games}.ptc')
-        ini.set_value('l2_sim_checkpoint_basename', f'_checkpoint_l2_game_{agent.n_games}.ptc')
         agent.save_checkpoint()
       
       # Train long memory
@@ -222,30 +161,7 @@ def train():
 
         # NuAlgo
         if ini.get('nu_enable'):
-          if score <= l2_score:
-            agent.l1_nu_algo.new_highscore(score)
-          else:
-            agent.l2_nu_algo.new_highscore(score)
-
-        ## Dynamic dropout layers
-        # Check if the model has dynamic dropout layers
-        if agent.l1_model.has_dynamic_dropout():
-          if agent.l1_model.dropout_min != 0:
-            if score >= agent.l1_model.dropout_min:
-              # Turn dropout on
-              agent.l1_model.set_p_value(agent.l1_model.dropout_p)
-            elif score <= agent.l1_model.dropout_max:
-              # Turn dropout off
-              agent.l1_model.set_p_value(0.0)
-        # Check if the level 2 model has dynamic dropout layers
-        if agent.l2_model.has_dynamic_dropout():
-          if agent.l2_model.dropout_min != 0:
-            if score >= agent.l2_model.dropout_min:
-              # Turn dropout on
-              agent.l2_model.set_p_value(agent.l2_model.dropout_p)
-            elif score <= agent.l2_model.dropout_max:
-              # Turn dropout off
-              agent.l2_model.set_p_value(0.0)
+          agent.set_nu_algo_highscore(score)
 
         ## Save a checkpoint of the current AI model
         ini.set_value('sim_checkpoint_basename', f'_checkpoint_l1_score_{record}.ptc')

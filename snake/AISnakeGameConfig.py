@@ -38,18 +38,6 @@ class AISnakeGameConfig():
     parser.add_argument('-he', '--headless', type=int, default=1, help='Run the game in headless mode.')
     parser.add_argument('-i', '--ini_file', type=str, default=None, help='The path to the configuration file.')
     parser.add_argument('-l', '--learning_rate', type=float, default=0, help='Optimizer learning rate.')
-    parser.add_argument('-l2b1n', '--l2_b1_nodes', type=int, default=0, help='Number of nodes in the first level 2, block 1 layer.')
-    parser.add_argument('-l2b1l', '--l2_b1_layers', type=int, default=0, help='Number of hidden level 2, block 1 layers.')
-    parser.add_argument('-l2b1s', '--l2_b1_score', type=int, default=0, help='Insert a level 2, B1 layer when reaching this score.')
-    parser.add_argument('-l2b2n', '--l2_b2_nodes', type=int, default=0, help='Number of nodes in the hidden level 2, block 2 layer(s).')
-    parser.add_argument('-l2b2l', '--l2_b2_layers', type=int, default=0, help='Number of hidden level 2, block 2 layers.')
-    parser.add_argument('-l2b2s', '--l2_b2_score', type=int, default=0, help='Insert a level 2, B2 layer when reaching this score.')
-    parser.add_argument('-l2b3n', '--l2_b3_nodes', type=int, default=0, help='Number of nodes in the level 2, block 3 hidden layer(s).')
-    parser.add_argument('-l2b3l', '--l2_b3_layers', type=int, default=0, help='Number of level 2, block 3 hidden layers.')
-    parser.add_argument('-l2b3s', '--l2_b3_score', type=int, default=0, help='Insert a level 2, B3 layer when reaching this score.')
-    parser.add_argument('-l2dss', '--l2_dropout_static', type=float, default=0, help='Create dropout layers and set the p value to this value.')
-    parser.add_argument('-l2e', '--l2_epsilon', type=int, default=0, help='Level 2 epsilon value for exploration.')
-    parser.add_argument('-l2s', '--l2_score', type=int, default=0, help='The level 2 AI is triggered when the score exceeds l2_score.')
     parser.add_argument('-mg', '--max_games', type=int, default=0, help='Exit the simulation after max_games games.')
     parser.add_argument('-ms', '--max_score', type=int, default=0, help='Exit the simulation if a score of max_score is achieved.')
     parser.add_argument('-msn', '--max_score_num', type=int, default=0, help='Exit the simulation if a score of max_score is achieved max_num times.')
@@ -61,8 +49,7 @@ class AISnakeGameConfig():
     parser.add_argument('-nv', '--nu_value', type=int, default=0, help='The initial amount of randomness the nu algorithm injects.')
     parser.add_argument('-nvm', '--nu_value_max', type=int, default=0, help='Number of random moves to add to the nu pool if nu_num_games_same_score_count_max is exceeded')
     parser.add_argument('-r', '--random_seed', type=int, default=0, help='Random seed used by random and torch.')
-    parser.add_argument('-rl1', '--restore_l1', type=str, default=None, help='Load a previous L1 model.')
-    parser.add_argument('-rl2', '--restore_l2', type=str, default=None, help='Load a previous L2 model.')
+    parser.add_argument('-re', '--restore', type=str, default=None, help='Load a previous L1 model.')
     parser.add_argument('-s', '--speed', type=int, default=0, help='Set the game speed.')
     parser.add_argument('-sd', '--custom_data_dir', type=str, default=None, help='Set a custom directory to store simulation results.')
     
@@ -122,30 +109,6 @@ class AISnakeGameConfig():
       default['epsilon_value'] = str(args.epsilon)
     if args.headless == 0:
       default['headless'] = str(0)
-    if args.l2_b1_nodes:
-      default['l2_b1_nodes'] = str(args.l2_b1_nodes)
-    if args.l2_b1_layers:
-      default['l2_b1_layers'] = str(args.l2_b1_layers)
-    if args.l2_b1_score:
-      default['l2_b1_score'] = str(args.l2_b1_score)
-    if args.l2_b2_nodes:
-      default['l2_b2_nodes'] = str(args.l2_b2_nodes)
-    if args.l2_b2_layers:
-      default['l2_b2_layers'] = str(args.l2_b2_layers)
-    if args.l2_b2_score:
-      default['l2_b2_score'] = str(args.l2_b2_score)
-    if args.l2_b3_nodes:
-      default['l2_b3_nodes'] = str(args.l2_b3_nodes)
-    if args.l2_b3_layers:
-      default['l2_b3_layers'] = str(args.l2_b3_layers)
-    if args.l2_b3_score:
-      default['l2_b3_score'] = str(args.l2_b3_score)
-    if args.l2_dropout_static:
-      default['l2_dropout_static'] = str(args.l2_dropout_static)
-    if args.l2_epsilon:
-      default['l2_epsilon_value'] = str(args.l2_epsilon)
-    if args.l2_score:
-      default['l2_score'] = str(args.l2_score)
     if args.learning_rate:
       default['learning_rate'] = str(args.learning_rate)
     if args.max_games:
@@ -170,10 +133,6 @@ class AISnakeGameConfig():
       default['nu_value_max'] = str(args.nu_value_max)
     if args.random_seed:
       default['random_seed'] = str(args.random_seed)
-    if args.restore_l1:
-      default['restore_l1'] = args.restore_l1
-    if args.restore_l2:
-      default['restore_l2'] = args.restore_l2
     if args.custom_data_dir:
       default['custom_data_dir'] = args.custom_data_dir
     if args.speed:
@@ -225,12 +184,7 @@ class AISnakeGameConfig():
                       'batch_size', 'board_border', 'board_height', 'board_width', 
                       'dropout_max','dropout_min', 'epsilon_value', 'game_speed', 
                       'headless', 'in_features', 
-                      'l2_b1_nodes', 'l2_b1_layers', 'l2_b1_score', 
-                      'l2_b2_nodes', 'l2_b2_layers', 'l2_b2_score',
-                      'l2_b3_nodes', 'l2_b3_layers', 'l2_b3_score',
-                      'l2_dropout_p', 'l2_dropout_max', 'l2_dropout_min', 
-                      'l2_epsilon_value', 'l2_score',
-                      'l2_nu_pool', 'l2_nu_score', 'l2_nu_bad_games', 'l2_nu_high_grace',
+                      'level_score',
                       'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
                       'max_score_num', 
                       'nu_pool', 'nu_score', 'nu_bad_games', 'nu_high_grace', 'nu_max_zero_scores',
@@ -238,7 +192,7 @@ class AISnakeGameConfig():
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
                       'new_layer_score']
     # Key/value pairs where the value is a float
-    float_values = ['discount', 'dropout_p', 'dropout_static', 'l2_dropout_static', 'learning_rate']
+    float_values = ['discount', 'dropout_p', 'dropout_static', 'learning_rate']
     # Key/value pairs where the value is a boolean
     boolean_values = ['epsilon_enabled', 'epsilon_print_stats', 'print_stats', 'new_simulation',
                       'nu_enable', 'nu_print_stats', 'nu_verbose',
@@ -246,11 +200,7 @@ class AISnakeGameConfig():
                       'steps_stats', 'steps_verbose',
                       ]
     # For all other key/value pairs, the value is a string.
-    try:
-      value = self.config['default'][key]
-    except:
-      print(f"ERROR: Cannot find setting ({key}) in {self.get('ini_file')}, exiting")
-      sys.exit(1)
+    value = self.config['default'][key]
 
     if key in integer_values:
       return int(value) # Return an int
