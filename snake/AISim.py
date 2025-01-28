@@ -38,11 +38,11 @@ def print_game_summary(ini, log, agent, score, record, game):
 
   # Model and trainer steps
   if ini.get('steps_stats'):
-    summary = summary + ', ' + agent.get_model_steps(score)
-    summary = summary + ', ' + agent.get_trainer_steps(score)
+    summary = summary + ', ' + agent.get_model_steps()
+    summary = summary + ', ' + agent.get_trainer_steps()
   if ini.get('steps_stats') or ini.get('steps_verbose'):
-    agent.reset_model_steps(score)
-    agent.reset_trainer_steps(score)
+    agent.reset_model_steps()
+    agent.reset_trainer_steps()
 
   if ini.get('steps_stats_all'):
     # All model and trainer steps and lose reason
@@ -52,8 +52,8 @@ def print_game_summary(ini, log, agent, score, record, game):
     # Lose reason
     summary = summary + ' - ' + game.lose_reason
 
-  agent.reset_model_steps(score)
-  agent.reset_trainer_steps(score)
+  agent.reset_model_steps()
+  agent.reset_trainer_steps()
 
 
   log.log(summary)

@@ -227,13 +227,13 @@ class AIAgent:
   def reset_nu_algo_injected(self):
     self.nu_algo.reset_injected()
 
-  def reset_model_steps(self, score):
-    model = score // 10 * 10 + 10
-    self.level[model]['model'].reset_steps()
+  def reset_model_steps(self):
+    for model_num in self.level:
+      self.level[model_num]['model'].reset_steps()
 
-  def reset_trainer_steps(self, score):
-    model = score // 10 * 10 + 10
-    self.level[model]['trainer'].reset_steps()
+  def reset_trainer_steps(self):
+    for model_num in self.level:
+      self.level[model_num]['trainer'].reset_steps()
 
   def save_checkpoint(self):
     # Save the models for each level
