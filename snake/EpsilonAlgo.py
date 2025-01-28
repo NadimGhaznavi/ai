@@ -59,7 +59,8 @@ class EpsilonAlgo():
   def played_game(self):
     self.num_games += 1
     self.epsilon = self.epsilon_value - self.num_games
-
+    if self.epsilon < 0:
+      self.epsilon = 0
   def reset_injected(self):
     self.injected = 0
 
