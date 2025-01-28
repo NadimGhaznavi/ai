@@ -38,6 +38,9 @@ class EpsilonAlgo():
       str_val = 'Epsilon: injected# {:>3}, units# {:>3}'.format(self.injected, self.epsilon)
     return str_val
 
+  def get_epsilon_value(self):
+    return self.epsilon
+  
   def get_move(self):
     if self.enabled and self.depleted == False and self.epsilon < 0:
       self.log.log(f"EpilsonAlgo: Pool has been depleted")

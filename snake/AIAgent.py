@@ -96,6 +96,9 @@ class AIAgent:
 
   def get_epsilon(self):
     return self.epsilon_algo
+  
+  def get_epsilon_value(self):
+    return self.epsilon_algo.get_epsilon_value()
 
   def get_all_steps(self):
     all_steps = ''

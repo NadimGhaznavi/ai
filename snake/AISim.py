@@ -27,7 +27,7 @@ def print_game_summary(ini, log, agent, score, record, game):
     'Time ' + '{:>6}'.format(game.elapsed_time) + 's'
 
   # Print the epsilon values
-  if ini.get('epsilon_print_stats') and agent.get_epsilon():
+  if ini.get('epsilon_print_stats') and agent.get_epsilon_value():
     summary = summary + ', {}'.format(agent.get_epsilon())
     agent.reset_epsilon_injected()
 
