@@ -49,7 +49,7 @@ class NuAlgo():
       self.verbose = False
     else:
       if self.verbose:
-        self.log.log(f"NuAlgo: New instance with pool size ({self.pool}), score ({self.score}) and bad games ({self.bad_games})")
+        self.log.log(f"NuAlgo: New instance with pool size ({self.pool}), score ({self.score}) and bad games ({self.bad_games+1})")
 
   def __str__(self):
     str_value = 'NuAlgo: score {:>2}, injected {:>3}, pool {:>2}, bad games {:>2}, reset {:>2}'.format(
