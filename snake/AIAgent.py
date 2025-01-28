@@ -97,6 +97,13 @@ class AIAgent:
   def get_epsilon(self):
     return self.epsilon_algo
 
+  def get_all_steps(self):
+    all_steps = ''
+    for model_num in self.level:
+      all_steps = all_steps + 'Game# {:>5}, '.format(self.n_games)
+      all_steps = all_steps + self.level[model_num]['model'].get_steps() + ', '
+      all_steps = all_steps + self.level[model_num]['trainer'].get_steps() + '\n'
+    return all_steps[:-1] # Chop off the trailing newline
   def get_model_steps(self, score):
     model_num = score // 10 * 10 + 10
     return self.level[model_num]['model'].get_steps()

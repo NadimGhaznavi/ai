@@ -39,7 +39,7 @@ class EpsilonAlgo():
     return str_val
 
   def get_move(self):
-    if self.enabled and self.epsilon < 0 and self.depleted == False:
+    if self.enabled and self.depleted == False and self.epsilon < 0:
       self.log.log(f"EpilsonAlgo: Pool has been depleted")
       self.depleted = True
 

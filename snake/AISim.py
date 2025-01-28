@@ -27,7 +27,7 @@ def print_game_summary(ini, log, agent, score, record, game):
     'Time ' + '{:>6}'.format(game.elapsed_time) + 's'
 
   # Print the epsilon values
-  if ini.get('epsilon_print_stats'):
+  if ini.get('epsilon_print_stats') and agent.get_epsilon():
     summary = summary + ', {}'.format(agent.get_epsilon())
     agent.reset_epsilon_injected()
 
@@ -44,8 +44,18 @@ def print_game_summary(ini, log, agent, score, record, game):
     agent.reset_model_steps(score)
     agent.reset_trainer_steps(score)
 
-  # Print the lose reason
-  summary = summary + ' - ' + game.lose_reason
+  if ini.get('steps_stats_all'):
+    # All model and trainer steps and lose reason
+    summary = summary + ' - ' + game.lose_reason + '\n'
+    summary = summary + agent.get_all_steps()
+  else:
+    # Lose reason
+    summary = summary + ' - ' + game.lose_reason
+
+  agent.reset_model_steps(score)
+  agent.reset_trainer_steps(score)
+
+
   log.log(summary)
 
 def train():
@@ -110,6 +120,10 @@ def train():
     agent.train_short_memory(state_old, final_move, reward, state_new, done)
     # Remember
     agent.remember(state_old, final_move, reward, state_new, done)
+
+    # Print verbose step stats
+    if ini.get('steps_verbose'):
+      print(agent.get_all_steps())
 
     # If the game is over
     if done:

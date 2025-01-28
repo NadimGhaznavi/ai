@@ -165,7 +165,7 @@ class AISnakeGameConfig():
     boolean_values = ['epsilon_enabled', 'epsilon_print_stats', 'print_stats', 'new_simulation',
                       'nu_enable', 'nu_print_stats', 'nu_verbose',
                       'sim_checkpoint_enable', 'sim_checkpoint_verbose', 'sim_desc_verbose',
-                      'steps_stats', 'steps_verbose',
+                      'steps_stats', 'steps_stats_all', 'steps_verbose',
                       ]
     # For all other key/value pairs, the value is a string.
     value = self.config['default'][key]
