@@ -185,8 +185,6 @@ class LinearQNet(nn.Module):
       
     self.main_block = main_block
     self.ascii_print()
-    print(self.main_block)
-    sys.exit(1)
 
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
