@@ -16,13 +16,14 @@ title: AI Snake Game
 * [Codebase Architecture](#codebase-architecture)
 * [Introducing the Concept of Level 2](#introducing-the-concept-of-level-2)
 * [Introducing the Level 2 Neural Network Architecture](#introducing-the-level-2-neural-network-architecture)
+* [Introducing the Dynamic Neural Network Architecture](#introducing-the-dynamic-neural-network-architecture)
 * [Command Line Options](#command-line-options)
 * [Specifying Numbers of Nodes and Layers](#specifying-numbers-of-nodes-and-layers)
 * [Adding Layers On The Fly](#adding-layers-on-the-fly)
 * [Adding Dropout Layers](#adding-dropout-layers)
-* [Changing P Values of Dropout Layers On the Fly](#changing-p-values-of-dropout-layers-on-the-fly)
 * [Matplotlib Game Score Plot](#matplotlib-game-score-plot)
 * [Using Batch Scripts to Fine Tune Hyperparameters](#using-batch-scripts-to-fine-tune-hyperparameters)
+* [Highscore Files](#highscore-files)
 * [Limitations and Lessons Learned](#limitations-and-lessons-learned)
 * [Links](#Links)
 * [Credits and Acknowledgements](#credits-and-acknowledgements)
@@ -34,10 +35,7 @@ This project is based on the classic *Snake Game* where the player uses the arro
 
 As the snake moves, the goal of the game is to maneuver the snake so that it *eats* the food. Every time the snake eats a block of food it grows one segment. The game ends when the snake hits the edge of the screen or the food. The score corresponds to the number of food chunks the snake has eaten.
 
-The AI Snake Game has an AI controlling the snake. At the beginning of the game the AI is pretty terrible, but after about twenty-five games it has a length of eight and after a couple hundred or more games it can achieve
-scores of forty or more!
-
-Please note that I am still actively tinkering with this project, so the command line switches may be slightly different (usually more of them) than documented on this page. 
+The AI Snake Game has an AI controlling the snake. At the beginning of the game the AI is pretty terrible, but after about twenty-five games it has a length of eight and after a couple hundred or more games it can achieve scores of forty or more!
 
 # My Motivation
 It is clear to me that the *next new thing* is Artificial Intelligence. It's amazing how quickly it is pervading society! AI assistants, AI generated content writing, images and film. Self driving cars, movie recomendations and market analysis.
@@ -53,19 +51,15 @@ I'm always trying to improve my coding skills. I know that parts of the code are
 * See how different neural network shapes affect the AI agent's learning process
 * See how different hyper-parameters affect the AI agent's learning process
 * See how adding layers *on-the-fly* affects the performance of the AI
-
-If you look at the [command line options](#command-line-options) section you will see that I have implemented switches to do the following:
-
-* Set the number of nodes in the neural network
-* Set the number of layers in the neural network
-* Set three different layer sizes in the neural network
-* Dynamically add a layer when the AI reaches a specific score
+* See how adding dropout layers affected the performance of the AI
+* See how activating dropout layers on the fly affected the performance of the AI
+* **Try to get an amazing highscore** :)
 
 # Technical Components
 This project is written in Python. It uses the following components:
 
 * [Python](https://python.org) - The Python programming language
-* [Git](https://git-scm.com/) - Distributed version control system
+* [Git](https://git-scm.com/) - Distributed version control system, not used in the game, but used to get the game
 * [PyGame](https://www.pygame.org/docs/) - Python library for creating graphical games and user interfaces
 * [PyTorch](https://pytorch.org/get-started/locally/) - Backend library for AI development
 * [Matplotlib](https://matplotlib.org/) - Visualization library
@@ -137,6 +131,9 @@ Key       | Description
  m        | Print the neural network to console
  a        | Speed the game up
  z        | Slow the game down
+ h        | Stop displaying the game, while letting it continue to run
+ i        | Resume displaying the game
+ m        | Print the runtime neural network
  p        | Pause the game
  spacebar | Resume the game
  q        | Quit the game
@@ -154,9 +151,19 @@ At the end of each move, the AI Snake Game simulation calls the AI Agent's `trai
 # Codebase Architecture
 The `AISim.py` is the main front end to the AI Snake Game. It's the code that you need to execute in order to run a simulation. 
 
-I have implemented a neural network architecture with three blocks; B1, B2, B3. By using the `--b1_nodes`, `--b1_layers`, `--b2_nodes` and so on, you can configure the number of nodes and layers in each block when you start the simulation.  I also implemented `--b1_score`, `--b2_score` and `--b3_score` switches to insert a B1, B2 or B3 layer *on-the-fly* when a particular score is reached.
+I have implemented a neural network architecture with three blocks; B1, B2, B3. By using the `--b1_nodes`, `--b1_layers`, `--b2_nodes` and so on, you can configure the number of nodes and layers in each block when you start the simulation.  i
 
-I have refactored and extended the code a *LOT* from the original version that I started with. Here's a breakdown of the files and directories and what they are.
+After a lot of re-design and re-factoring of the code, I have settled on the following architecture for the AI Agent:
+
+* The initial neural network architecture is selected from the INI file settings or from the `--b1_nodes`, `--b1_layers`, `--b2_nodes` ... etc. I refer to this as the *L10 neural network* or just *L10*.
+* The *L10* level also includes a *ReplayMemory*, *Trainer* and *Epsilon Greedy* instances.
+* This *L10* component handles Snake Game scores up to 10. When the AI achieves a score between 11 and 20 a new component, *L20* is created with it's own *ReplayMemory*, *Trainer* and *Epsilon Greedy* instances. The neural network architecture is the same as the *L10* component with respect to node numbers, layers, dropout layers etc.
+* When the AI achieves a score of 20 a *L30* component is created... and so on, indefinitely.
+* When a new *L* component is created, the weights and biases from the lower layer are copied in so it has the experience and the training from the lower neural network. After that, it operates independently.
+* I disable the *Epsilon Greedy* instance by default and use my own *NuAlgo* instead
+* Like the *Epsilon Greedy* object, the *NuAlgo* object inserts random moves into the game as part of the AI's *exploration/exploitation* training process. But unlike the Epsilon Greedy, the NuAlgo is dynamic: It injects random moves based on the AI's (poor) performance.
+
+Here's a breakdown of the files and directories and what they are.
 
 ## AIAgent.py
 This file houses the *AI Agent* or the AI player.
@@ -222,143 +229,33 @@ The original Snake Game that you can play.
 
 # Introducing the Concept of Level 2
 
+I implemented this concept and then took it back out and replaced it with the more dynamic *one-neural-network-for-every-10-points* as described in the [codebase architecture](#codebase-architecture) section of this document. I included this section to show the evolution of the code architecture.
+
 The Snake Game becomes significantly more challenging when the Snake's length is more than twice the width of the board. At that point the strategy needed to continue to improve the scores doesn't just rely on finding the food, it also includes the challenge of moving in a manner such that collisions with the Snake itself are avoided. 
 
-I'm defining *level 1* as scores up to this point. E.g. Given a board size of 40x40, with a snake segment and a food segment occupying one square, the level one score would be 40. Scores above 40 are considered *level 2*.
+I defined *level 1* as scores up to this point. E.g. Given a board size of 40x40, with a snake segment and a food segment occupying one square, the level one score would be 40. Scores above 40 are considered *level 2*.
 
 A very basic and simple neural network architecture consisting of one layer with 100 nodes is easily able to achieve *level 1* scores. Reaching *level 2* e.g. consistent scores in the 50 to 60 range on a 20x20 board is much, much harder.
 
 # Introducing the Level 2 Neural Network Architecture
 
-In my quest to improve the AI Agent's ability to play the Snake Game, I have introduced what I call a *Level 2* neural network. This is basically a second, independent neural network that is only fed data when the game score in the level two range ie. scores from 41 on.
+In my quest to improve the AI Agent's ability to play the Snake Game, I have implemented what I called a *Level 2* neural network. This is basically a second, independent neural network that is only fed data when the game score in the level two range ie. scores from 41 on.
 
-This approach has been successful and I am currently experimenting with the exact neural network architecture of the L1 and L2 neural networks to reduce the amount of training required to reach level two scores.
-
-To support these experiements, I have implemented a slew of level two switches to configure the L2 neural network:
+This approach was somewhat successful, but achieving scores above 50 proved difficult and finding the magic hyperparameters for the NuAlgo and Epsilon required a ton of simulation runs. In the end I abandoned this approach.
 
 # Command Line Options
-I've implemented a lot of options to the `AISim.py` front end:
+I've implemented quite a few options to the `AISim.py` front end:
 
 ```
-usage: AISim.py [-h] [-b1n B1_NODES] [-b1l B1_LAYERS] [-b1s B1_SCORE]
-                [-b2n B2_NODES] [-b2l B2_LAYERS] [-b2s B2_SCORE]
-                [-b3n B3_NODES] [-b3l B3_LAYERS] [-b3s B3_SCORE]
-                [-l2b1n L2_B1_NODES] [-l2b1l L2_B1_LAYERS]
-                [-l2b1s L2_B1_SCORE] [-l2b2n L2_B2_NODES]
-                [-l2b2l L2_B2_LAYERS] [-l2b2s L2_B2_SCORE]
-                [-l2b3n L2_B3_NODES] [-l2b3l L2_B3_LAYERS]
-                [-l2b3s L2_B3_SCORE] [-d DISCOUNT] [-do DROPOUT_P]
-                [-dss DROPOUT_STATIC] [-dsx DROPOUT_MIN] [-dsy DROPOUT_MAX]
-                [-e EPSILON] [-l2e L2_EPSILON] [-i INI_FILE]
-                [-l LEARNING_RATE] [-mg MAX_GAMES] [-ms MAX_SCORE]
-                [-msn MAX_SCORE_NUM] [-nls NEW_LAYER_SCORE]
-                [-nbg NU_BAD_GAMES] [-nmm NU_MAX_MOVES] [-nps NU_PRINT_STATS]
-                [-ns NU_SCORE] [-nv NU_VALUE] [-nvm NU_VALUE_MAX]
-                [-r RANDOM_SEED] [-s SPEED] [-sd SIM_DATA_DIR] [-v AI_VERSION]
+usage: AISim.py [-h] [-b1n B1_NODES] [-b1l B1_LAYERS] [-b2n B2_NODES] [-b2l B2_LAYERS] [-b3n B3_NODES]
+                [-b3l B3_LAYERS] [-c CUSTOM_DATA_DIR] [-d DISCOUNT] [-ds DROPOUT_STATIC] [-e EPSILON]
+                [-he HEADLESS] [-i INI_FILE] [-l LEARNING_RATE] [-mg MAX_GAMES] [-ms MAX_SCORE]
+                [-nbg NU_BAD_GAMES] [-nps NU_PRINT_STATS] [-nus NU_SCORE] [-nuv NU_VALUE] [-r RANDOM_SEED]
+                [-re RESTORE] [-s SPEED]
 ```
+Running the `AISim.py` frontend with the `-h` switch provides a more detailed description of these options. **IMPORTANT NOTE:** I am still tinkering with this project, so like they say at Microsoft, *the implementation is the specification*...
 
-Running the `AISim.py` frontend with the `-h` switch provides a more detailed description of these options.
-
-```
-AI Snake Game
-
-options:
-  -h, --help            show this help message and exit
-  -b1n B1_NODES, --b1_nodes B1_NODES
-                        Number of nodes in the first block 1 layer.
-  -b1l B1_LAYERS, --b1_layers B1_LAYERS
-                        Number of hidden block 1 layers.
-  -b1s B1_SCORE, --b1_score B1_SCORE
-                        Insert a B1 layer when reaching this score.
-  -b2n B2_NODES, --b2_nodes B2_NODES
-                        Number of nodes in the hidden block 2 layer(s).
-  -b2l B2_LAYERS, --b2_layers B2_LAYERS
-                        Number of hidden block 2 layers.
-  -b2s B2_SCORE, --b2_score B2_SCORE
-                        Insert a B2 layer when reaching this score.
-  -b3n B3_NODES, --b3_nodes B3_NODES
-                        Number of nodes in the block 3 hidden layer(s).
-  -b3l B3_LAYERS, --b3_layers B3_LAYERS
-                        Number of block 3 hidden layers.
-  -b3s B3_SCORE, --b3_score B3_SCORE
-                        Insert a B3 layer when reaching this score.
-  -l2b1n L2_B1_NODES, --l2_b1_nodes L2_B1_NODES
-                        Number of nodes in the first level 2, block 1 layer.
-  -l2b1l L2_B1_LAYERS, --l2_b1_layers L2_B1_LAYERS
-                        Number of hidden level 2, block 1 layers.
-  -l2b1s L2_B1_SCORE, --l2_b1_score L2_B1_SCORE
-                        Insert a level 2, B1 layer when reaching this score.
-  -l2b2n L2_B2_NODES, --l2_b2_nodes L2_B2_NODES
-                        Number of nodes in the hidden level 2, block 2
-                        layer(s).
-  -l2b2l L2_B2_LAYERS, --l2_b2_layers L2_B2_LAYERS
-                        Number of hidden level 2, block 2 layers.
-  -l2b2s L2_B2_SCORE, --l2_b2_score L2_B2_SCORE
-                        Insert a level 2, B2 layer when reaching this score.
-  -l2b3n L2_B3_NODES, --l2_b3_nodes L2_B3_NODES
-                        Number of nodes in the level 2, block 3 hidden
-                        layer(s).
-  -l2b3l L2_B3_LAYERS, --l2_b3_layers L2_B3_LAYERS
-                        Number of level 2, block 3 hidden layers.
-  -l2b3s L2_B3_SCORE, --l2_b3_score L2_B3_SCORE
-                        Insert a level 2, B3 layer when reaching this score.
-  -d DISCOUNT, --discount DISCOUNT
-                        The Linear Q discount factor.
-  -do DROPOUT_P, --dropout_p DROPOUT_P
-                        Insert a Droput layer with this p value, used with the
-                        --dropout_score switch.
-  -dss DROPOUT_STATIC, --dropout_static DROPOUT_STATIC
-                        Create dropout layers and set the p value to this
-                        value.
-  -dsx DROPOUT_MIN, --dropout_min DROPOUT_MIN
-                        Activate the p value of the droput layer when reaching
-                        this score.
-  -dsy DROPOUT_MAX, --dropout_max DROPOUT_MAX
-                        Deactivate the p value of the droput layer when
-                        reaching this score.
-  -e EPSILON, --epsilon EPSILON
-                        Epsilon value for exploration.
-  -l2e L2_EPSILON, --l2_epsilon L2_EPSILON
-                        Level 2 epsilon value for exploration.
-  -i INI_FILE, --ini_file INI_FILE
-                        The path to the configuration file.
-  -l LEARNING_RATE, --learning_rate LEARNING_RATE
-                        Optimizer learning rate.
-  -mg MAX_GAMES, --max_games MAX_GAMES
-                        Exit the simulation after max_games games.
-  -ms MAX_SCORE, --max_score MAX_SCORE
-                        Exit the simulation if a score of max_score is
-                        achieved.
-  -msn MAX_SCORE_NUM, --max_score_num MAX_SCORE_NUM
-                        Exit the simulation if a score of max_score is
-                        achieved max_num times.
-  -nls NEW_LAYER_SCORE, --new_layer_score NEW_LAYER_SCORE
-                        Drop in a new layer at this score
-  -nbg NU_BAD_GAMES, --nu_bad_games NU_BAD_GAMES
-                        The number of games with no new high score.
-  -nmm NU_MAX_MOVES, --nu_max_moves NU_MAX_MOVES
-                        Maximum number of random moves injected by NuAlgo.
-  -nps NU_PRINT_STATS, --nu_print_stats NU_PRINT_STATS
-                        Print NuAlgo status information in the console.
-  -ns NU_SCORE, --nu_score NU_SCORE
-                        The nu algorithm is triggered when the score exceeds
-                        nu_score.
-  -nv NU_VALUE, --nu_value NU_VALUE
-                        The initial amount of randomness the nu algorithm
-                        injects.
-  -nvm NU_VALUE_MAX, --nu_value_max NU_VALUE_MAX
-                        Number of random moves to add to the nu pool if
-                        nu_num_games_same_score_count_max is exceeded
-  -r RANDOM_SEED, --random_seed RANDOM_SEED
-                        Random seed used by random and torch.
-  -s SPEED, --speed SPEED
-                        Set the game speed.
-  -sd SIM_DATA_DIR, --sim_data_dir SIM_DATA_DIR
-                        Set a custom directory to store simulation results.
-  -v AI_VERSION, --ai_version AI_VERSION
-                        Load a previous simulation with version ai_version.
-```
-## Specifying Numbers of Nodes and Layers
+# Specifying Numbers of Nodes and Layers
 
 I have implemented switches to select the number of layers and the number of nodes in each layer when starting the simulation. I've coded in three blocks where the number of nodes in each block can be different. The code takes care of making sure the layer shapes line up so that the resulting neural network is valid. These options are controllec by the following switches:
 
@@ -368,29 +265,19 @@ I have implemented switches to select the number of layers and the number of nod
 
 These features allow easy experimentation with different neural network architectures.
 
-## Adding Layers On The Fly
+# Adding Layers On The Fly
 
 I was curious about the effect of adding layers on the fly. You may want to experiment with this option using the `--b1_score`, `--b2_score` and `--b3_score` which are features that drop in a B1, B2 or B3 layer when the AI reaches a particular score. What I learned was that adding layers on-the-fly disrupts the performance of the AI (no big surprise). When adding a B1 layer i.e. one that matches the shape of the existing B1 layer is much less disruptive: The AI recovers relatively quickly and carries on. Adding a new B2 layer i.e. when you didn't have any B2 layers and the shape is different than the B1 layer is **extremely** disruptive to the perfomance of the neural network.
 
-## Adding Dropout Layers
+These features weren't helpful in achieving higher scores, so I removed the functionality.
+
+# Adding Dropout Layers
 
 I have implemented a `--dropout-static` switch that instructs the `AISim.py` to create PyTorch `nn.Dropout` layers with a *P Value* that is passed in with an argument to the `--dropout-static` switch. The code takes care of inserting these *dropout layers* are in between the hidden B1, B2 and B3 hidden layers.
 
 I implemented this feature to see if adding additional noise to the simulation would stop the AI from getting stuck in sub-optimal game strategy. It's stuck now: When the snake reaches a length that is more than twice the width of the board (I'm using a 20x20 board), then there is an added challenge. With my current setup, the AI can achieve scores of up to around 50, but not really any higher. At that point in the game, the AI has settled into a strategy of moving the snake around the edge of the screen and then cutting through the middle to get the food. It continues to the other edge and then circles again. While this strategy is good for scores up to 40, it fails to reach scores in the 60s because it ends up hitting itself.
 
 I currently have a [batch script](#using-batch-scripts-to-fine-tune-hyperparameters) that is running simulations with varying learning rates to see if tweaking that value will help it get past this challenge.
-
-## Changing P Values of Dropout Layers On the Fly
-
-I have implemented the following switches to experiment with the effect of dropout layers on the performance of the neural network and how it can help the AI to overcome local minimums:
-
-* `--dropout_p` - The `P` value of the dropout layer
-* `--dropout_min` - The Snake Game score where the P value is set 
-* `--dropout_max` - The Snake Game score where the P value is unset 
-
-The way I have configured the code is that these three switches must all be used together. Initially, the code sets the P value of the dropout layer to zero. When the AI agent achieves a Snake Game score specified by the `--dropout_min` value the P value of the drop out layer(s) are activated. Once the score specified by the `--dropout_max` score is reached the P value is set back to zero.
-
-The dropout layers are inserted before each ReLU layer of the model, except for the output and input layers. 
 
 # Using Batch Scripts to Fine Tune Hyperparameters
 
@@ -424,7 +311,7 @@ while [ $COUNT != 6 ]; do
 	COUNT=$((COUNT+1))
 done
 ```
-
+# Highscore Files
 The simulation runs produce a CSV high scores file which allows me to easily analyse the results of the batch runs:
 ```
 $ echo; for x in $(ls *high*); do echo $x; cat $x; echo; done
