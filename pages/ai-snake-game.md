@@ -103,6 +103,7 @@ Once you have activated the virtual environment you will need to install some Py
 (ai_dev) nadim@mypc:~$ pip install torch --index-url https://download.pytorch.org/whl/cpu
 (ai_dev) nadim@mypc:~$ pip install pygame
 (ai_dev) nadim@mypc:~$ pip install IPython
+(ai_dev) nadim@mypc:~$ pip install scipy
 ```
 
 # Running the Snake Game
@@ -163,6 +164,7 @@ After a lot of re-design and re-factoring of the code, I have settled on the fol
 * I disable the *Epsilon Greedy* instance by default and use my own *NuAlgo* instead
 * Like the *Epsilon Greedy* object, the *NuAlgo* object inserts random moves into the game as part of the AI's *exploration/exploitation* training process. But unlike the Epsilon Greedy, the NuAlgo is dynamic: It injects random moves based on the AI's (poor) performance.
 
+# Codebase Components
 Here's a breakdown of the files and directories and what they are.
 
 ## AIAgent.py
@@ -210,6 +212,9 @@ A standard GitHub README file. It points at this page.
 
 ## reference_sims
 A few simulation files I saved, because they performed well. You can copy them into the *sim_data* directory and load them with the `-v` switch to run them.
+
+## ReplayMemory
+This class implements a replay memory function, essentially a Python deque to store a fixed number of states which are used for training.
 
 ## sim_data
 This directory is automatically created when you run the AISim.py script. Here are three example files that were created during a simulation run:
