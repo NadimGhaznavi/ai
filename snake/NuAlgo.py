@@ -28,7 +28,7 @@ class NuAlgo():
     self.bad_games = ini.get('nu_bad_games') # How many games in a row where no high score is reached
     self.new_high_grace = ini.get('nu_high_grace') # Number of games after a high score has been found where no random moves are injected
     self.enabled = ini.get('nu_enable') # Whether this algorithm is enabled
-    self.score = 0
+    self.score = ini.get('nu_score') # The game score that triggers the nu algorithm
 
     # Print additional stats in the console
     self.verbose = ini.get('nu_verbose')

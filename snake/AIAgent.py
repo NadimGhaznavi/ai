@@ -8,7 +8,6 @@ import os, sys
 from collections import deque
 from collections import namedtuple
 import numpy as np
-import random
 import torch
 
 lib_dir = os.path.dirname(__file__)
@@ -32,7 +31,6 @@ class AIAgent:
     # Level 1 initialization
     self.level = { 
       level_score: {
-        'epsilon_algo': EpsilonAlgo(ini, log, level_score),
         'memory': ReplayMemory(ini),
         'model': LinearQNet(ini, log, level_score),
       }
@@ -41,6 +39,7 @@ class AIAgent:
     self.level[level_score]['trainer'] = QTrainer(ini, model, level_score)
 
     self.nu_algo = NuAlgo(ini, log)
+    self.epsilon_algo = EpsilonAlgo(ini, log)
 
     # Used in the state map, this initializes it to some random direction
     self.last_dirs = [ 0, 0, 1, 0 ]
@@ -59,7 +58,6 @@ class AIAgent:
     # Create a new level, complete with model, trainer, and epsilon/nu algorithms
     model_level = score // 10 * 10 + 10
     self.level[model_level] = {
-      'epsilon_algo': EpsilonAlgo(self.ini, self.log, model_level),
       'memory': ReplayMemory(self.ini),
       'model': LinearQNet(self.ini, self.log, model_level),
     }
@@ -72,17 +70,13 @@ class AIAgent:
     self.level[model_level]['model'].restore_model(optimizer, tmp_file)
     os.remove(tmp_file)
 
-
   def get_action(self, state):
 
-    game_score = self.game.get_score()
-    model = game_score // 10 * 10 + 10
-    
     # Use the epsilon algorithm; exploration
-    random_move = self.level[model]['epsilon_algo'].get_move()
+    random_move = self.epsilon_algo.get_move()
     
     # Use the nu algorithm; exploration
-    random_move = self.nu_algo.get_move(game_score)
+    random_move = self.nu_algo.get_move(self.game.get_score())
 
     if random_move:
       # Random move was returned
@@ -94,23 +88,18 @@ class AIAgent:
     state0 = torch.tensor(state, dtype=torch.float)
 
     # Get the prediction
-    prediction = self.level[model]['model'](state0)
+    model_num = self.game.get_score() // 10 * 10 + 10
+    prediction = self.level[model_num]['model'](state0)
     move = torch.argmax(prediction).item()
     final_move[move] = 1 
-      
     return final_move
 
   def get_epsilon(self, score):
-    model = score // 10 * 10 + 10
-    return self.level[model]['epsilon_algo'].get_epsilon()
-
-  def get_epsilon_injected(self, score):
-    model = score // 10 * 10 + 10
-    return self.level[model]['epsilon_algo'].get_epsilon_injected()
+    return self.epsilon_algo
 
   def get_model_steps(self, score):
-    model = score // 10 * 10 + 10
-    return self.level[model]['model'].get_steps()
+    model_num = score // 10 * 10 + 10
+    return self.level[model_num]['model'].get_steps()
 
   def get_nu_algo(self, score):
     return self.nu_algo
@@ -127,7 +116,7 @@ class AIAgent:
     for x in range(7):
       out_list[x] = int(out_list[x])
     return out_list
-
+  
   def get_state(self):
     # Returns the current state of the game.
     game = self.game
@@ -145,39 +134,37 @@ class AIAgent:
     slb = self.get_snake_length_in_binary()
 
     state = [
-      ## Wall collision danger
-      # Danger straight 
+      # Wall collision straight ahead
       (dir_r and game.is_wall_collision(point_r)),
       (dir_l and game.is_wall_collision(point_l)),
       (dir_u and game.is_wall_collision(point_u)),
       (dir_d and game.is_wall_collision(point_d)),
 
-      # Danger right
+      # Wall collision to the right
       (dir_u and game.is_wall_collision(point_r)),
       (dir_d and game.is_wall_collision(point_l)),
       (dir_l and game.is_wall_collision(point_u)),
       (dir_r and game.is_wall_collision(point_d)),
 
-      # Danger left
+      # Wall collision to the left
       (dir_d and game.is_wall_collision(point_r)),
       (dir_u and game.is_wall_collision(point_l)),
       (dir_r and game.is_wall_collision(point_u)),
       (dir_l and game.is_wall_collision(point_d)),
 
-      ## Self collision danger
-      # Danger straight
+      # Snake collision straight ahead
       (dir_r and game.is_snake_collision(point_r)),
       (dir_l and game.is_snake_collision(point_l)),
       (dir_u and game.is_snake_collision(point_u)),
       (dir_d and game.is_snake_collision(point_d)),
 
-      # Danger right
+      # Snake collision to the right
       (dir_u and game.is_snake_collision(point_r)),
       (dir_d and game.is_snake_collision(point_l)),
       (dir_l and game.is_snake_collision(point_u)),
       (dir_r and game.is_snake_collision(point_d)),
 
-      # Danger left
+      # Snake collision to the left
       (dir_d and game.is_snake_collision(point_r)),
       (dir_u and game.is_snake_collision(point_l)),
       (dir_r and game.is_snake_collision(point_u)),
@@ -196,7 +183,7 @@ class AIAgent:
       slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6],
     ]
 
-    # Include the previous direction of the snake in the state
+    # Previous direction of the snake
     for aDir in self.last_dirs:
       state.append(aDir)
     self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
@@ -206,10 +193,16 @@ class AIAgent:
     model = score // 10 * 10 + 10
     return self.level[model]['trainer'].get_steps()
 
+  def increment_games(self):
+    self.n_games += 1
+
   def played_game(self, score):
-    model = score // 10 * 10 + 10
-    self.level[model]['epsilon_algo'].played_game()
+    self.epsilon_algo.played_game()
     self.nu_algo.played_game(score)
+
+  def print_model(self):
+    # All of the models share the same structure, return one of them
+    print(self.level[10]['model'])
 
   def remember(self, state, action, reward, next_state, done):
     # Store the state, action, reward, next_state, and done in memory
@@ -218,7 +211,6 @@ class AIAgent:
     score = self.game.get_score()
     model_num = score // 10 * 10 + 10
     self.level[model_num]['memory'].append((state, action, reward, next_state, done))
-      
 
   def reset_nu_algo_injected(self, score):
     self.nu_algo.reset_injected()
@@ -230,25 +222,6 @@ class AIAgent:
   def reset_trainer_steps(self, score):
     model = score // 10 * 10 + 10
     self.level[model]['trainer'].reset_steps()
-
-  def restore_model(self, level):
-    # Get the L1 or L2 model filenames
-    if level == 1:
-      model_file = self.ini.get('restore_l1')
-    else:
-      model_file = self.ini.get('restore_l2')
-    # Make sure the model file exists
-    if not os.path.isfile(model_file):
-      self.log.log(f"ERROR: Model file {model_file} does not exist, exiting")
-      sys.exit(1)
-
-    if level == 1:
-      self.l1_model.restore_model(self.l1_trainer.optimizer, model_file)
-      self.log.log(f"Loaded simulation model ({model_file})")
-    # Repeat for the level 2 model
-    else:
-      self.l2_model.restore_model(self.l2_trainer.optimizer, model_file)
-      self.log.log(f"Loaded simulation model ({model_file})")
 
   def save_checkpoint(self):
     # Save the models for each level
@@ -279,15 +252,9 @@ class AIAgent:
       with open(highscore_file, 'a') as file_handle:
         file_handle.write(str(self.n_games) + ',' + str(highscore) + "\n")
 
-  def save_model(self):
-    # Save the model for each level
-    model_file = self.ini.get('sim_model_basename')
-    for level in self.level:
-      sim_data_dir = self.ini.get('sim_data_dir')
-      model_file = os.path.join(sim_data_dir, str(self.ini.get('ai_version')) + '_L' + str(level) + model_file)
-      optimizer = self.level[level]['trainer'].optimizer
-      self.level[level]['model'].save_model(optimizer, model_file)
-      self.log.log(f"Saved simulation model ({model_file})")
+  def set_highscore(self, score):
+    self.highscore = score
+    self.save_highscore(score)
 
   def set_nu_algo_highscore(self, score):
     # We need to let *all* of the NuAlgo instances know about the new high score

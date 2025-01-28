@@ -96,18 +96,10 @@ class LinearQNet(nn.Module):
     # Enable dropout layers in the model if the user has specified a dynamic
     # ( --dropout_p, --dropout_min and --dropout_max) or static ( --dropout_staic)
     # configuration
-    if self.dropout_min > 0 or self.dropout_static > 0:
+    if self.dropout_static > 0:
       self.dropout = True
-      if self.dropout_min:
-        # Dynamic dropout configuration
-        self.p_value = self.dropout_p
-      else:
-        # Static droptout configuration 
-        self.p_value = self.dropout_static
-
     else:
       self.dropout = False
-
 
     # The basic main model framework
     main_block = nn.Sequential()
@@ -121,7 +113,6 @@ class LinearQNet(nn.Module):
     main_block.append(nn.Sequential()) # output block
 
     # Input layer
-    main_block[0].append(nn.ReLU())
     main_block[0].append(nn.Linear(in_features=self.in_features, out_features=self.b1_nodes))
     if self.dropout:
       main_block[0].append(nn.Dropout(p=self.p_value))
@@ -184,19 +175,18 @@ class LinearQNet(nn.Module):
     ## Output block
     if self.b2_layers == 0:
       # Only a B1 block
-      main_block[1].append(nn.ReLU())
       main_block[1].append(nn.Linear(in_features=self.b1_nodes, out_features=self.out_features))
     elif self.b3_layers == 0:
       # B1 and B2 layers, no B3 layer
-      main_block[2].append(nn.ReLU())
       main_block[2].append(nn.Linear(in_features=self.b2_nodes, out_features=self.out_features))
     else:
       # B1, B2 and B3 layers
-      main_block[3].append(nn.ReLU())
       main_block[3].append(nn.Linear(in_features=self.b3_nodes, out_features=self.out_features))
       
     self.main_block = main_block
     self.ascii_print()
+    print(self.main_block)
+    sys.exit(1)
 
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
@@ -207,13 +197,13 @@ class LinearQNet(nn.Module):
     for block in self.main_block:
       for layer in block:
         if isinstance(layer, nn.Dropout):
-          log_msg = log_msg + "Dropout block    {:>5} {:>13}\n".format('', '')
+          log_msg = log_msg + "Dropout layer    {:>5} {:>13}\n".format('', '')
         if isinstance(layer, nn.ReLU):
-          log_msg = log_msg + "ReLU block       {:>5} {:>13}\n".format('', '')
+          log_msg = log_msg + "Activation (ReLU) layer\n"
         if isinstance(layer, nn.Linear):
           in_features = layer.in_features
           out_features = layer.out_features
-          log_msg = log_msg + "Linear block     {:>5} {:>13}\n".format(in_features, out_features)
+          log_msg = log_msg + "Linear layer     {:>5} {:>13}\n".format(in_features, out_features)
     self.log.log(log_msg)
     
     if self.dropout:

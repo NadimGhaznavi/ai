@@ -15,58 +15,42 @@ sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 
 class EpsilonAlgo():
-  def __init__(self, ini, log, level):
+  def __init__(self, ini, log):
     self.ini = ini
     self.log = log
     # Set this random seed so things are repeatable
     random.seed(ini.get('random_seed')) 
-
     self.epsilon_value = ini.get('epsilon_value')
     self.print_stats = ini.get('epsilon_print_stats')
     self.enabled = ini.get('epsilon_enabled')
-    
     self.epsilon = self.epsilon_value
-    
     self.num_games = 0
     self.injected = 0
     self.depleted = False
-    self.level = level
-    
     if not self.enabled:
       self.ini.set_value('epsilon_print_stats', 'False')
     else:
-      self.log.log(f"EpsilonAlgo({level}): New instance with epsilon value of {self.epsilon_value}")
+      self.log.log(f"EpsilonAlgo: New instance with epsilon value of {self.epsilon_value}")
 
-  def get_epsilon(self):
-    if self.epsilon < 0:
-      return 0
-    return self.epsilon
+  def __str__(self):
+    str_val = 'Epsilon: injected# {:>3}, units# {:>3}'.format(self.injected, self.epsilon)
+    return str_val
 
-  def get_epsilon_value(self):
-    return self.epsilon_value
-  
-  def get_injected(self):
-    injected = self.injected
-    self.injected = 0
-    return injected
-  
   def get_move(self):
-    rand_num = randint(0, self.epsilon_value)
     if self.enabled and self.epsilon < 0 and self.depleted == False:
       self.log.log(f"EpilsonAlgo: Model ({self.level}): Epsilon pool has been depleted")
       self.depleted = True
 
+    rand_num = randint(0, self.epsilon_value)
     if rand_num < self.epsilon:
       rand_move = [ 0, 0, 0 ]
       rand_idx = randint(0, 2)
       rand_move[rand_idx] = 1
       self.injected += 1
       return rand_move
+    
     return False
   
-  def get_print_stats(self):
-    return self.ini.get('epsilon_print_stats')
-
   def played_game(self):
     self.num_games += 1
     self.epsilon = self.epsilon_value - self.num_games

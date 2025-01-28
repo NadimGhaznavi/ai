@@ -17,7 +17,7 @@ from AIAgent import AIAgent
 from SnakeGamePlots import MyPlot
 from AILogger import AILogger
 
-def print_game_summary(ini, log, agent, score, record, game, l2_score):
+def print_game_summary(ini, log, agent, score, record, game):
   ai_version = ini.get('ai_version')
   # Standard game summary metrics
   summary = 'Snake AI (v' + str(ai_version) + ') ' + \
@@ -28,10 +28,7 @@ def print_game_summary(ini, log, agent, score, record, game, l2_score):
 
   # Print the epsilon values
   if ini.get('epsilon_print_stats'):
-    if agent.l1_epsilon_algo.get_print_stats() and \
-      agent.l1_epsilon_algo.get_epsilon() != 0:
-      summary = summary + ', L1 EpsilonAlgo: inject# {:>3}'.format(agent.get_epsilon_injected(score)) + \
-        ', units# {:>3}'.format(agent.get_epsilon(score))
+    summary = summary + ', {}'.format(agent.get_epsilon(score))
 
   # Print the nu values
   if ini.get('nu_print_stats'):
@@ -73,21 +70,11 @@ def train():
   # the game and the agent so that we avoid a circular reference
   game.set_agent(agent) # Pass the agent to the game
 
-  # Take a snapshot of the configuration
-  agent.save_model()
-
   # Initalize the highscore file
-  agent.save_highscore(0)
+  agent.set_highscore(0)
 
   # Save the simulation configuration
   agent.ini.save_sim_desc()
-
-  # Check if we are restoring a model
-  if False:
-    if ini.get('restore_l1'):
-      agent.restore_model(1)
-    if ini.get('restore_l2'):
-      agent.restore_model(2)
 
   # Reset the AI Snake Game
   game.reset()
@@ -102,12 +89,8 @@ def train():
   plot_times = [] # Times for each game
   plot_mean_times = [] # Average times over a rolling window
 
-  # This is the score when we switch to using the level two network
-  l2_score = ini.get('l2_score')
-
   log.log(f"AI Snake Game simulation number is {ini.get('ai_version')}")
   log.log(f"Configuration file being used is {ini.get('ini_file')}")
-  log.log(f"The second neural network will be used for scores above {ini.get('l2_score')}")
 
   # Flag, indicating whether the L2 model was updated from L1
   L2_updated = False
@@ -136,21 +119,21 @@ def train():
       agent.save_checkpoint()
 
       # Perform a checkpoint every 100 games
-      if agent.n_games % 100 == 0:
+      if game.get_num_games() % 100 == 0:
         agent.save_checkpoint()
       
       # Train long memory
       game.reset()
       # Number of games the agent has played
-      agent.n_games += 1
+      agent.increment_games()
       # Implement the max_games feature where the simulation ends when the number 
       # of games reaches the max_games threashold
       if ini.get('max_games') != 0 and agent.n_games == ini.get('max_games'):
         lose_reason = "Executed max_games value of " + str(ini.get('max_games'))
-        game.lose_reason = lose_reason
+        game.set_lose_reason(lose_reason)
         ini.set_value('lose_reason', lose_reason)
         agent.ini.save_sim_desc()
-        print_game_summary(ini, agent, score, record, game, l2_score)
+        print_game_summary(ini, agent, score, record, game)
         my_plot.save()
         game.quit_game()
 
@@ -164,25 +147,22 @@ def train():
           agent.set_nu_algo_highscore(score)
 
         ## Save a checkpoint of the current AI model
-        ini.set_value('sim_checkpoint_basename', f'_checkpoint_l1_score_{record}.ptc')
-        ini.set_value('l2_sim_checkpoint_basename', f'_checkpoint_l2_score_{record}.ptc')
         agent.save_checkpoint()
             
-        game.sim_high_score = record
-        agent.save_highscore(record) # Update the highscore file
-        agent.highscore = record
+        game.set_highscore(record)
+        agent.set_highscore(record)
         
         if ini.get('max_score') != 0 and score >= ini.get('max_score'):
           # Exit the simulation if a score of max_score is achieved
           lose_reason = "Achieved max_score value of " + str(ini.get('max_score'))
-          game.lose_reason = lose_reason
+          game.set_lose_reason(lose_reason)
           ini.set_value('lose_reason', lose_reason) 
           agent.ini.save_sim_desc()
-          print_game_summary(ini, agent, score, record, game, l2_score)
+          print_game_summary(ini, agent, score, record, game)
           my_plot.save()
           game.quit_game()
 
-      print_game_summary(ini, log, agent, score, record, game, l2_score)
+      print_game_summary(ini, log, agent, score, record, game)
       plot_scores.append(score)
       total_score += score
       mean_score = round(total_score / agent.n_games, 2)
@@ -190,12 +170,9 @@ def train():
       plot_times.append(game.elapsed_time)
       mean_time = round(game.sim_time / agent.n_games, 1)
       plot_mean_times.append(mean_time)
-
-      
       my_plot.plot(plot_scores, plot_mean_scores, plot_times, plot_mean_times)
 
 if __name__ == '__main__':
-
   train()
   
 

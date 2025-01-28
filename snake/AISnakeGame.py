@@ -309,10 +309,7 @@ class AISnakeGame():
     Print the neural network model.
     """
     if self.num_games == self.num_games_cur:
-      self.agent.l1_model.ascii_print()
-      print(self.agent.l1_model)    
-      self.agent.l2_model.ascii_print()
-      print(self.agent.l2_model)    
+      self.agent.print_model()
       self.num_games_cur += 1
 
   def print_status(self):
@@ -396,6 +393,12 @@ class AISnakeGame():
     The Trainer uses this to pass in the current instance of the AI agent.
     """
     self.agent = agent
+
+  def set_highscore(self, score):
+    self.sim_high_score = score
+
+  def set_lose_reason(self, reason):
+    self.lose_reason = reason
 
   def update_ui(self):
     self.elapsed_time = round(float((time.time() - self.start_time)), 2)

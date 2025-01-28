@@ -22,36 +22,26 @@ class AISnakeGameConfig():
     parser = argparse.ArgumentParser(description='AI Snake Game')
     parser.add_argument('-b1n', '--b1_nodes', type=int, help='Number of nodes in the first block 1 layer.')
     parser.add_argument('-b1l', '--b1_layers', type=int, default=0, help='Number of hidden block 1 layers.')
-    parser.add_argument('-b1s', '--b1_score', type=int, default=0, help='Insert a B1 layer when reaching this score.')
     parser.add_argument('-b2n', '--b2_nodes', type=int, default=0, help='Number of nodes in the hidden block 2 layer(s).')
     parser.add_argument('-b2l', '--b2_layers', type=int, default=0, help='Number of hidden block 2 layers.')
-    parser.add_argument('-b2s', '--b2_score', type=int, default=0, help='Insert a B2 layer when reaching this score.')
     parser.add_argument('-b3n', '--b3_nodes', type=int, default=0, help='Number of nodes in the block 3 hidden layer(s).')
     parser.add_argument('-b3l', '--b3_layers', type=int, default=0, help='Number of block 3 hidden layers.')
-    parser.add_argument('-b3s', '--b3_score', type=int, default=0, help='Insert a B3 layer when reaching this score.')
+    parser.add_argument('-c', '--custom_data_dir', type=str, default=None, help='Set a custom directory to store simulation results.')
     parser.add_argument('-d', '--discount', type=float, default=0, help='The Linear Q discount factor.')
-    parser.add_argument('-do', '--dropout_p', type=float, default=0, help='Insert a Droput layer with this p value, used with the --dropout_score switch.')
-    parser.add_argument('-dss', '--dropout_static', type=float, default=0, help='Create dropout layers and set the p value to this value.')
-    parser.add_argument('-dsx', '--dropout_min', type=int, default=0, help='Activate the p value of the droput layer when reaching this score.')
-    parser.add_argument('-dsy', '--dropout_max', type=int, default=0, help='Deactivate the p value of the droput layer when reaching this score.')
+    parser.add_argument('-ds', '--dropout_static', type=float, default=0, help='Create dropout layers and set the p value to this value.')
     parser.add_argument('-e', '--epsilon', type=int, default=0, help='Epsilon value for exploration.')
     parser.add_argument('-he', '--headless', type=int, default=1, help='Run the game in headless mode.')
     parser.add_argument('-i', '--ini_file', type=str, default=None, help='The path to the configuration file.')
     parser.add_argument('-l', '--learning_rate', type=float, default=0, help='Optimizer learning rate.')
     parser.add_argument('-mg', '--max_games', type=int, default=0, help='Exit the simulation after max_games games.')
     parser.add_argument('-ms', '--max_score', type=int, default=0, help='Exit the simulation if a score of max_score is achieved.')
-    parser.add_argument('-msn', '--max_score_num', type=int, default=0, help='Exit the simulation if a score of max_score is achieved max_num times.')
-    parser.add_argument('-nls', '--new_layer_score', type=int, default=0, help='Drop in a new layer at this score')
     parser.add_argument('-nbg', '--nu_bad_games', type=int, default=0, help='The number of games with no new high score.')
-    parser.add_argument('-nmm', '--nu_max_moves', type=int, default=0, help="Maximum number of random moves injected by NuAlgo.")
     parser.add_argument('-nps', '--nu_print_stats', type=bool, default=0, help="Print NuAlgo status information in the console.")
-    parser.add_argument('-ns', '--nu_score', type=int, default=0, help='The nu algorithm is triggered when the score exceeds nu_score.')
-    parser.add_argument('-nv', '--nu_value', type=int, default=0, help='The initial amount of randomness the nu algorithm injects.')
-    parser.add_argument('-nvm', '--nu_value_max', type=int, default=0, help='Number of random moves to add to the nu pool if nu_num_games_same_score_count_max is exceeded')
+    parser.add_argument('-nus', '--nu_score', type=int, default=0, help='The nu algorithm is triggered when the score exceeds nu_score.')
+    parser.add_argument('-nuv', '--nu_value', type=int, default=0, help='The initial amount of randomness the nu algorithm injects.')
     parser.add_argument('-r', '--random_seed', type=int, default=0, help='Random seed used by random and torch.')
     parser.add_argument('-re', '--restore', type=str, default=None, help='Load a previous L1 model.')
     parser.add_argument('-s', '--speed', type=int, default=0, help='Set the game speed.')
-    parser.add_argument('-sd', '--custom_data_dir', type=str, default=None, help='Set a custom directory to store simulation results.')
     
     # Parse arguments
     args = parser.parse_args()
@@ -79,30 +69,18 @@ class AISnakeGameConfig():
       default['b1_nodes'] = str(args.b1_nodes)
     if args.b1_layers:
       default['b1_layers'] = str(args.b1_layers)    
-    if args.b1_score:
-      default['b1_score'] = str(args.b1_score)    
     if args.b2_nodes:
       default['b2_nodes'] = str(args.b2_nodes)
     if args.b2_layers:
       default['b2_layers'] = str(args.b2_layers)
-    if args.b2_score:
-      default['b2_score'] = str(args.b2_score)    
     if args.b3_nodes:
       default['b3_nodes'] = str(args.b3_nodes)
     if args.b3_layers:
       default['b3_layers'] = str(args.b3_layers)
-    if args.b3_score:
-      default['b3_score'] = str(args.b3_score)
     if args.custom_data_dir:
       default['custom_data_dir'] = args.custom_data_dir
     if args.discount:
       default['discount'] = str(args.discount)
-    if args.dropout_p:
-      default['dropout_p'] = str(args.dropout_p)
-    if args.dropout_max:
-      default['dropout_max'] = str(args.dropout_max)
-    if args.dropout_min:
-      default['dropout_min'] = str(args.dropout_min)
     if args.dropout_static:
       default['dropout_static'] = str(args.dropout_static)
     if args.epsilon:
@@ -115,26 +93,16 @@ class AISnakeGameConfig():
       default['max_games'] = str(args.max_games)
     if args.max_score:
       default['max_score'] = str(args.max_score)
-    if args.max_score_num:
-      default['max_score_num'] = str(args.max_score_num)
-    if args.new_layer_score:
-      default['new_layer_score'] = str(args.new_layer_score)
     if args.nu_bad_games:
       default['nu_bad_games'] = str(args.nu_bad_games)
-    if args.nu_max_moves:
-      default['nu_max_moves'] = str(args.nu_max_moves)
     if args.nu_score:
       default['nu_score'] = str(args.nu_score)
     if args.nu_print_stats:
       default['nu_print_stats'] = str(args.nu_print_stats)
     if args.nu_value:
       default['nu_value'] = str(args.nu_value)
-    if args.nu_value_max:
-      default['nu_value_max'] = str(args.nu_value_max)
     if args.random_seed:
       default['random_seed'] = str(args.random_seed)
-    if args.custom_data_dir:
-      default['custom_data_dir'] = args.custom_data_dir
     if args.speed:
       default['game_speed'] = str(args.speed)
 
