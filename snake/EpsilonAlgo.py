@@ -33,12 +33,14 @@ class EpsilonAlgo():
       self.log.log(f"EpsilonAlgo: New instance with epsilon value of {self.epsilon_value}")
 
   def __str__(self):
-    str_val = 'Epsilon: injected# {:>3}, units# {:>3}'.format(self.injected, self.epsilon)
+    str_val = ''
+    if self.epsilon > 0:
+      str_val = 'Epsilon: injected# {:>3}, units# {:>3}'.format(self.injected, self.epsilon)
     return str_val
 
   def get_move(self):
     if self.enabled and self.epsilon < 0 and self.depleted == False:
-      self.log.log(f"EpilsonAlgo: Model ({self.level}): Epsilon pool has been depleted")
+      self.log.log(f"EpilsonAlgo: Pool has been depleted")
       self.depleted = True
 
     rand_num = randint(0, self.epsilon_value)
@@ -55,4 +57,6 @@ class EpsilonAlgo():
     self.num_games += 1
     self.epsilon = self.epsilon_value - self.num_games
 
+  def reset_injected(self):
+    self.injected = 0
 

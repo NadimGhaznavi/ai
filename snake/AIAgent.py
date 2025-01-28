@@ -94,14 +94,14 @@ class AIAgent:
     final_move[move] = 1 
     return final_move
 
-  def get_epsilon(self, score):
+  def get_epsilon(self):
     return self.epsilon_algo
 
   def get_model_steps(self, score):
     model_num = score // 10 * 10 + 10
     return self.level[model_num]['model'].get_steps()
 
-  def get_nu_algo(self, score):
+  def get_nu_algo(self):
     return self.nu_algo
   
   def get_snake_length_in_binary(self):
@@ -212,7 +212,9 @@ class AIAgent:
     model_num = score // 10 * 10 + 10
     self.level[model_num]['memory'].append((state, action, reward, next_state, done))
 
-  def reset_nu_algo_injected(self, score):
+  def reset_epsilon_injected(self):
+    self.epsilon_algo.reset_injected()
+  def reset_nu_algo_injected(self):
     self.nu_algo.reset_injected()
 
   def reset_model_steps(self, score):

@@ -28,12 +28,13 @@ def print_game_summary(ini, log, agent, score, record, game):
 
   # Print the epsilon values
   if ini.get('epsilon_print_stats'):
-    summary = summary + ', {}'.format(agent.get_epsilon(score))
+    summary = summary + ', {}'.format(agent.get_epsilon())
+    agent.reset_epsilon_injected()
 
   # Print the nu values
   if ini.get('nu_print_stats'):
-    summary = summary + ', {}'.format(agent.get_nu_algo(score))
-    agent.reset_nu_algo_injected(score)
+    summary = summary + ', {}'.format(agent.get_nu_algo())
+    agent.reset_nu_algo_injected()
 
   # Model and trainer steps
   if ini.get('steps_stats'):
