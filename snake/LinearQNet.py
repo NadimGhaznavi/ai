@@ -78,6 +78,7 @@ class LinearQNet(nn.Module):
     # A counter to keep track of the number of steps in a game where this model
     # was used. It will get reset at the beginning of each game.
     self.steps = 0
+    self.total_steps = 0 # A total step count that only increases
     self.in_features = ini.get('in_features')
     # Level 1 neural network
     self.b1_nodes = ini.get('b1_nodes')
@@ -213,6 +214,7 @@ class LinearQNet(nn.Module):
     Default nn.Module behaviour. 
     """
     self.steps += 1
+    self.total_steps += 1
     return self.main_block(x)
   
   def get_steps(self):
@@ -220,6 +222,12 @@ class LinearQNet(nn.Module):
     Returns the number of steps the AI agent has taken.
     """
     return 'L{} model steps# {:>5}'.format(self.level // 10, self.steps)
+  
+  def get_total_steps(self):
+    """
+    Returns the total number of steps the AI agent has taken.
+    """
+    return 'L{} total model steps# {:>9}'.format(self.level // 10, self.total_steps)
 
   def has_dynamic_dropout(self):
     """

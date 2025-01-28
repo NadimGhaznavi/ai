@@ -105,8 +105,11 @@ class AIAgent:
     for model_num in self.level:
       all_steps = all_steps + 'Game# {:>5}, '.format(self.n_games)
       all_steps = all_steps + self.level[model_num]['model'].get_steps() + ', '
-      all_steps = all_steps + self.level[model_num]['trainer'].get_steps() + '\n'
-    return all_steps[:-1] # Chop off the trailing newline
+      all_steps = all_steps + self.level[model_num]['trainer'].get_steps() + ', '
+      all_steps = all_steps + self.level[model_num]['model'].get_total_steps() + ', '
+      all_steps = all_steps + self.level[model_num]['trainer'].get_total_steps() + '\n'
+    all_steps = all_steps + '\n'
+    return all_steps
   def get_model_steps(self, score):
     model_num = score // 10 * 10 + 10
     return self.level[model_num]['model'].get_steps()

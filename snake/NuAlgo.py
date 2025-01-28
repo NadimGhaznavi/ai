@@ -45,7 +45,7 @@ class NuAlgo():
 
     if self.enabled == False:
       self.log.log("NuAlgo: NuAlgo is disabled")
-      self.ini.set_value('print_stats', False)
+      self.ini.set_value('print_stats', 'False')
       self.verbose = False
     else:
       if self.verbose:
@@ -55,6 +55,12 @@ class NuAlgo():
     str_value = 'NuAlgo: score {:>2}, injected {:>3}, pool {:>2}, bad games {:>2}, reset {:>2}'.format(
       self.score, self.injected, self.cur_pool, self.bad_game_count, self.reset_count)
     return str_value
+
+  def disable(self):
+    self.enabled = False
+
+  def is_enabled(self):
+    return self.enabled
 
   def get_move(self, cur_score):
     """

@@ -31,12 +31,16 @@ class QTrainer:
     # Mean Squared Error Loss... 
     self.criterion = nn.MSELoss()
     self.model = model
-    # Keep track of the number of steps executed by this instance
+    # Keep track of the number of steps executed by this instance for 1 game
     self.steps = 0
+    self.total_steps = 0 # Keep track of the total number of steps for all games
   
   def get_steps(self):
     return 'L{} trainer steps# {:>5}'.format(self.model_level // 10, self.steps)
   
+  def get_total_steps(self):
+    return 'L{} trainer total steps# {:>9}'.format(self.model_level // 10, self.total_steps)
+
   def reset_steps(self):
     """
     Resets the number of steps to zero.
@@ -74,6 +78,7 @@ class QTrainer:
     for idx in range(len(game_over)):
       # Track the number of steps executed by this instance
       self.steps += 1
+      self.total_steps += 1
       Q_new = reward[idx]
       if not game_over[idx]:
         Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))

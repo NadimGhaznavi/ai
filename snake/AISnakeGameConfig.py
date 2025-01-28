@@ -37,10 +37,11 @@ class AISnakeGameConfig():
     parser.add_argument('-ms', '--max_score', type=int, default=0, help='Exit the simulation if a score of max_score is achieved.')
     parser.add_argument('-nbg', '--nu_bad_games', type=int, default=0, help='The number of games with no new high score.')
     parser.add_argument('-nps', '--nu_print_stats', type=bool, default=0, help="Print NuAlgo status information in the console.")
+    parser.add_argument('-nud', '--nu_disable', type=bool, default=0, help="Disable NuAlgo, useful when restarting simulations.")
     parser.add_argument('-nus', '--nu_score', type=int, default=0, help='The nu algorithm is triggered when the score exceeds nu_score.')
     parser.add_argument('-nuv', '--nu_value', type=int, default=0, help='The initial amount of randomness the nu algorithm injects.')
     parser.add_argument('-r', '--random_seed', type=int, default=0, help='Random seed used by random and torch.')
-    parser.add_argument('-re', '--restore', type=str, default=None, help='Load a previous L1 model.')
+    parser.add_argument('-re', '--restart', type=int, default=0, help='Restart a previous simulation, the argument is the simulation AI version number.')
     parser.add_argument('-s', '--speed', type=int, default=0, help='Set the game speed.')
     
     # Parse arguments
@@ -95,6 +96,8 @@ class AISnakeGameConfig():
       default['max_score'] = str(args.max_score)
     if args.nu_bad_games:
       default['nu_bad_games'] = str(args.nu_bad_games)
+    if args.nu_disable:
+      default['nu_enable'] = 'False'
     if args.nu_score:
       default['nu_score'] = str(args.nu_score)
     if args.nu_print_stats:
@@ -103,6 +106,8 @@ class AISnakeGameConfig():
       default['nu_value'] = str(args.nu_value)
     if args.random_seed:
       default['random_seed'] = str(args.random_seed)
+    if args.restart:
+      default['restart'] = str(args.restart)
     if args.speed:
       default['game_speed'] = str(args.speed)
 
@@ -155,8 +160,8 @@ class AISnakeGameConfig():
                       'level_score',
                       'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
                       'max_score_num', 
-                      'nu_pool', 'nu_score', 'nu_bad_games', 'nu_high_grace', 'nu_max_zero_scores',
-                      'nu_max_moves', 'out_features', 'random_seed', 'score_height', 
+                      'nu_pool', 'nu_score', 'nu_bad_games', 'nu_high_grace', 'nu_max_zero_scores', 'nu_max_moves', 
+                      'out_features', 'random_seed', 'restart', 'score_height', 
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
                       'new_layer_score']
     # Key/value pairs where the value is a float

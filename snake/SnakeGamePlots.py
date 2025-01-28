@@ -26,6 +26,11 @@ class MyPlot():
     plt.title('Snake AI Training (v' + str(self.ini.get('ai_version')) + ')')
     plt.xlabel('Number of games')
     plt.ylabel('Score')
+    # Plot horizontal lines to differentiate the ranges of scores into groups of 10
+    # Only plot the horizontal lines if there is a score that is equal to or greater than 10
+    for y in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+      if max(scores) >= y:
+        plt.axhline(y=y, color='r', linestyle=':')
     plt.plot(scores)
     plt.plot(mean_scores)
     plt.ylim(ymin=0)

@@ -7,6 +7,7 @@ The frontend to the AI Snake Game.
 import os, sys
 import matplotlib.pyplot as plt
 import torch.nn as nn
+import torch
 
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
@@ -16,6 +17,8 @@ from LinearQNet import LinearQNet
 from AIAgent import AIAgent
 from SnakeGamePlots import MyPlot
 from AILogger import AILogger
+from ReplayMemory import ReplayMemory
+from QTrainer import QTrainer
 
 def print_game_summary(ini, log, agent, score, record, game):
   ai_version = ini.get('ai_version')
@@ -32,14 +35,14 @@ def print_game_summary(ini, log, agent, score, record, game):
     agent.reset_epsilon_injected()
 
   # Print the nu values
-  if ini.get('nu_print_stats'):
+  if ini.get('nu_print_stats') and agent.nu_algo.is_enabled():
     summary = summary + ', {}'.format(agent.get_nu_algo())
     agent.reset_nu_algo_injected()
 
   # Model and trainer steps
   if ini.get('steps_stats'):
-    summary = summary + ', ' + agent.get_model_steps()
-    summary = summary + ', ' + agent.get_trainer_steps()
+    summary = summary + ', ' + agent.get_model_steps(score)
+    summary = summary + ', ' + agent.get_trainer_steps(score)
   if ini.get('steps_stats') or ini.get('steps_verbose'):
     agent.reset_model_steps()
     agent.reset_trainer_steps()
@@ -57,6 +60,40 @@ def print_game_summary(ini, log, agent, score, record, game):
 
 
   log.log(summary)
+
+def restart_simulation(agent, ini, log):
+  """
+  Restart a simulation. This involves checking for checkpoint files and
+  loading them if they exist.
+  """
+  data_dir = ini.get('sim_data_dir')
+  checkpoint_basename = ini.get('sim_checkpoint_basename')
+  levels = [ 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 ]
+  for level in levels:
+    checkpoint_file = os.path.join(lib_dir, os.path.join(data_dir, str(ini.get('restart')) + '_L' + str(level) + checkpoint_basename))
+    print("Checking for checkpoint file (" + checkpoint_file, end='')
+    if os.path.isfile(checkpoint_file):
+      print(") [OK]")
+      # Level 10 was initialized in the AIAgent constructor
+      if level != 10:
+        # Get the new level 10 elements
+        model = LinearQNet(ini, log, level)
+        trainer = QTrainer(ini, model, level)
+        optimizer = trainer.optimizer
+        agent.level[level] = {}
+        agent.level[level]['model'] = model
+        agent.level[level]['memory'] = ReplayMemory(ini)
+        agent.level[level]['trainer'] = trainer
+      # Do the actual load
+      print(f"Loading L{level} checkpoint file: " + checkpoint_file)
+      checkpoint = torch.load(checkpoint_file, weights_only=False)
+      state_dict = checkpoint['model_state_dict']
+      model = agent.level[level]['model']
+      model.load_state_dict(state_dict)
+      optimizer = agent.level[level]['trainer'].optimizer
+      optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    else:
+      print(") [NOT FOUND]")
 
 def train():
   """
@@ -76,6 +113,10 @@ def train():
 
   # Get a new instance of the AI Agent
   agent = AIAgent(ini, log, game) # Get a new instance of the AI Agent
+
+  # Check if we are restarting a simulation
+  if ini.get('restart') > 0:
+    restart_simulation(agent, ini, log)
 
   # Pass the agent to the game, we have to do this after instantiating
   # the game and the agent so that we avoid a circular reference
@@ -127,6 +168,10 @@ def train():
 
     # If the game is over
     if done:
+      # Disable the NuAlgo after game number 600
+      if game.get_num_games() > 500:
+        agent.nu_algo.disable()
+
       # Update the Agent with the new score (used by epsilon and NuAlgo)
       agent.played_game(score)
 
