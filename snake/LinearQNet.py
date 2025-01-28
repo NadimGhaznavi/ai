@@ -188,7 +188,7 @@ class LinearQNet(nn.Module):
 
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
-    self.log.log(f"====== Level {self.level} Neural Network Architecture ==========")
+    self.log.log(f"====== Level {self.level // 10} Neural Network Architecture ==========")
     self.log.log("Layers           Input        Output")
     self.log.log("---------------------------------------------")
     log_msg = ''
@@ -219,7 +219,7 @@ class LinearQNet(nn.Module):
     """
     Returns the number of steps the AI agent has taken.
     """
-    return 'L{} model steps# {:>5}'.format(self.level, self.steps)
+    return 'L{} model steps# {:>5}'.format(self.level // 10, self.steps)
 
   def has_dynamic_dropout(self):
     """

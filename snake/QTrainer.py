@@ -35,7 +35,7 @@ class QTrainer:
     self.steps = 0
   
   def get_steps(self):
-    return 'L{} trainer steps# {:>5}'.format(self.model_level, self.steps)
+    return 'L{} trainer steps# {:>5}'.format(self.model_level // 10, self.steps)
   
   def reset_steps(self):
     """

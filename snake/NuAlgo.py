@@ -131,7 +131,6 @@ class NuAlgo():
         self.score -= 1
         self.cur_pool = self.pool # Refill the pool
       elif self.reset_count > 1:        
-        #self.score = self.score - (self.reset_count * 2)
         self.score = self.score - self.reset_count
         self.cur_pool = self.pool # Refill the pool
 
