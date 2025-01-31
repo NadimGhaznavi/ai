@@ -16,14 +16,14 @@ from AISnakeGameConfig import AISnakeGameConfig
 
 
 class QTrainer:
-  def __init__(self, ini, model, model_level):
+  def __init__(self, ini, model, level):
     """
     The constructor accepts the following parameters:
         * model - A sub-class of nn.Module
         * lr    - The learning rate
         * gamma - The gamma value
     """
-    self.model_level = model_level
+    self.level = level
     torch.manual_seed(ini.get('random_seed'))
     self.lr = ini.get('learning_rate')
     self.gamma = ini.get('discount')
@@ -36,10 +36,10 @@ class QTrainer:
     self.total_steps = 0 # Keep track of the total number of steps for all games
   
   def get_steps(self):
-    return 'L{} trainer steps# {:>5}'.format(self.model_level // 10, self.steps)
+    return 'L{:>2} trainer steps# {:>5}'.format(self.level, self.steps)
   
   def get_total_steps(self):
-    return 'L{} trainer total steps# {:>9}'.format(self.model_level // 10, self.total_steps)
+    return 'L{:>2} trainer total steps# {:>9}'.format(self.level, self.total_steps)
 
   def reset_steps(self):
     """
@@ -47,6 +47,9 @@ class QTrainer:
     """
     self.steps = 0
                 
+  def set_level(self, level):
+    self.level = level
+
   def train_step(self, state, action, reward, next_state, game_over):
     """
     The train_step() function accepts the following parameters

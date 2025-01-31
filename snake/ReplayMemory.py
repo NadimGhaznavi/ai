@@ -8,9 +8,12 @@ import random
 
 class ReplayMemory():
 
-  def __init__(self, ini):
+  def __init__(self, ini, max_len=0):
     random.seed(ini.get('random_seed'))
-    self.memory = deque(maxlen=ini.get('max_memory'))
+    if max_len != 0:
+      self.memory = deque(maxlen=max_len)
+    else:
+      self.memory = deque(maxlen=ini.get('max_memory'))
     self.batch_size = ini.get('batch_size')
 
   def append(self, transition):
@@ -21,3 +24,6 @@ class ReplayMemory():
       return random.sample(self.memory, self.batch_size)
     else:
       return self.memory
+    
+  def pop(self):
+    return self.memory.pop()

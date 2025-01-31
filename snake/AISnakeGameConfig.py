@@ -38,6 +38,7 @@ class AISnakeGameConfig():
     parser.add_argument('-nbg', '--nu_bad_games', type=int, default=0, help='The number of games with no new high score.')
     parser.add_argument('-nps', '--nu_print_stats', type=bool, default=0, help="Print NuAlgo status information in the console.")
     parser.add_argument('-nud', '--nu_disable', type=bool, default=0, help="Disable NuAlgo, useful when restarting simulations.")
+    parser.add_argument('-nds', '--nu_disable-games', type=int, default=0, help='Disable the nu algorithm when this many games have been played.')
     parser.add_argument('-nus', '--nu_score', type=int, default=0, help='The nu algorithm is triggered when the score exceeds nu_score.')
     parser.add_argument('-nuv', '--nu_value', type=int, default=0, help='The initial amount of randomness the nu algorithm injects.')
     parser.add_argument('-r', '--random_seed', type=int, default=0, help='Random seed used by random and torch.')
@@ -96,6 +97,8 @@ class AISnakeGameConfig():
       default['max_score'] = str(args.max_score)
     if args.nu_bad_games:
       default['nu_bad_games'] = str(args.nu_bad_games)
+    if args.nu_disable_games:
+      default['nu_disable_games'] = str(args.nu_disable_games)
     if args.nu_disable:
       default['nu_enable'] = 'False'
     if args.nu_score:
@@ -152,20 +155,26 @@ class AISnakeGameConfig():
     function with the appropriate key names.
     """
     # Key/value pairs where the value is an integer
-    integer_values = ['ai_version', 'b1_nodes', 'b1_layers', 'b1_score', 'b2_nodes', 
-                      'b2_layers', 'b2_score', 'b3_nodes', 'b3_layers', 'b3_score', 
+    integer_values = ['ai_version', 
+                      'b1_nodes', 'b1_layers', 'b1_score', 'b2_nodes', 
+                      'b2_layers', 'b2_score', 'b3_nodes', 'b3_layers', 
                       'batch_size', 'board_border', 'board_height', 'board_width', 
                       'dropout_max','dropout_min', 'epsilon_value', 'game_speed', 
                       'headless', 'in_features', 
-                      'level_score',
+                      'level_score', 'lose_game_reward'
                       'max_iter', 'max_memory', 'max_moves', 'max_games', 'max_score', 
                       'max_score_num', 
-                      'nu_pool', 'nu_score', 'nu_bad_games', 'nu_high_grace', 'nu_max_zero_scores', 'nu_max_moves', 
+                      'nu_pool', 'nu_score', 'nu_bad_games', 'nu_disable_games', 
+                      'nu_high_grace', 'nu_max_zero_scores', 'nu_max_moves', 
                       'out_features', 'random_seed', 'restart', 'score_height', 
+                      'reward_food', 'reward_excessive_move', 'reward_wall_collision',
+                      'reward_snake_collision',
                       'sim_save_checkpoint_freq', 'status_iter', 'top_margin',
                       'new_layer_score']
     # Key/value pairs where the value is a float
-    float_values = ['discount', 'dropout_p', 'dropout_static', 'learning_rate']
+    float_values = ['discount', 'dropout_p', 'dropout_static', 'learning_rate',
+                    'reward_food', 'reward_excessive_move', 'reward_wall_collision',
+                      'reward_snake_collision',]
     # Key/value pairs where the value is a boolean
     boolean_values = ['epsilon_enabled', 'epsilon_print_stats', 'print_stats', 'new_simulation',
                       'nu_enable', 'nu_print_stats', 'nu_verbose',

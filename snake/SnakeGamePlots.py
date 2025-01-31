@@ -28,7 +28,7 @@ class MyPlot():
     plt.title('Snake AI Training (v' + str(self.ini.get('ai_version')) + ')')
     plt.xlabel('Number of games')
     plt.ylabel('Score')
-
+    #plt.style.use('dark_background')
     # Create a games array for the x-axis
     games = []
     game_num = 1

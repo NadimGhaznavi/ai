@@ -1,0 +1,319 @@
+====== Level 1 Neural Network Architecture ==========
+Layers           Input        Output
+---------------------------------------------
+Linear layer        43           200
+Activation (ReLU) layer
+Linear layer       200           200
+Activation (ReLU) layer
+Linear layer       200           200
+Linear layer       200             3
+
+NuAlgo: NuAlgo is disabled
+====== Level 2 Neural Network Architecture ==========
+Layers           Input        Output
+---------------------------------------------
+Linear layer        43           200
+Activation (ReLU) layer
+Linear layer       200           200
+Activation (ReLU) layer
+Linear layer       200           200
+Linear layer       200             3
+
+====== Level 3 Neural Network Architecture ==========
+Layers           Input        Output
+---------------------------------------------
+Linear layer        43           200
+Activation (ReLU) layer
+Linear layer       200           200
+Activation (ReLU) layer
+Linear layer       200           200
+Linear layer       200             3
+
+====== Level 4 Neural Network Architecture ==========
+Layers           Input        Output
+---------------------------------------------
+Linear layer        43           200
+Activation (ReLU) layer
+Linear layer       200           200
+Activation (ReLU) layer
+Linear layer       200           200
+Linear layer       200             3
+
+====== Level 5 Neural Network Architecture ==========
+Layers           Input        Output
+---------------------------------------------
+Linear layer        43           200
+Activation (ReLU) layer
+Linear layer       200           200
+Activation (ReLU) layer
+Linear layer       200           200
+Linear layer       200             3
+
+====== Level 6 Neural Network Architecture ==========
+Layers           Input        Output
+---------------------------------------------
+Linear layer        43           200
+Activation (ReLU) layer
+Linear layer       200           200
+Activation (ReLU) layer
+Linear layer       200           200
+Linear layer       200             3
+
+AI Snake Game simulation number is 1921
+Configuration file being used is sim_data/1618.ini
+Snake AI (v1921) Game    1, Score  45, Highscore  45, Time  18.58s - Hit the snake
+Game#     1, L1 model steps#  3729, L1 trainer steps#  1864, L1 total model steps#      3729, L1 trainer total steps#      1864
+Game#     1, L2 model steps#  2966, L2 trainer steps#  1286, L2 total model steps#      2966, L2 trainer total steps#      1286
+Game#     1, L3 model steps#  2094, L3 trainer steps#   891, L3 total model steps#      2094, L3 trainer total steps#       891
+Game#     1, L4 model steps#  1460, L4 trainer steps#   578, L4 total model steps#      1460, L4 trainer total steps#       578
+Game#     1, L5 model steps#   817, L5 trainer steps#   273, L5 total model steps#       817, L5 trainer total steps#       273
+Game#     1, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game    2, Score  41, Highscore  45, Time  17.84s - Hit the snake
+Game#     2, L1 model steps#  4404, L1 trainer steps#  2346, L1 total model steps#      8133, L1 trainer total steps#      4210
+Game#     2, L2 model steps#  2906, L2 trainer steps#  1247, L2 total model steps#      5872, L2 trainer total steps#      2533
+Game#     2, L3 model steps#  2090, L3 trainer steps#   834, L3 total model steps#      4184, L3 trainer total steps#      1725
+Game#     2, L4 model steps#  1206, L4 trainer steps#   411, L4 total model steps#      2666, L4 trainer total steps#       989
+Game#     2, L5 model steps#    76, L5 trainer steps#    26, L5 total model steps#       893, L5 trainer total steps#       299
+Game#     2, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game    3, Score  10, Highscore  45, Time   2.01s - Hit the wall
+Game#     3, L1 model steps#  1759, L1 trainer steps#  1226, L1 total model steps#      9892, L1 trainer total steps#      5436
+Game#     3, L2 model steps#   112, L2 trainer steps#    38, L2 total model steps#      5984, L2 trainer total steps#      2571
+Game#     3, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#      4184, L3 trainer total steps#      1725
+Game#     3, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#      2666, L4 trainer total steps#       989
+Game#     3, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#       893, L5 trainer total steps#       299
+Game#     3, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game    4, Score  44, Highscore  45, Time   17.3s - Hit the snake
+Game#     4, L1 model steps#  4263, L1 trainer steps#  2471, L1 total model steps#     14155, L1 trainer total steps#      7907
+Game#     4, L2 model steps#  2600, L2 trainer steps#  1151, L2 total model steps#      8584, L2 trainer total steps#      3722
+Game#     4, L3 model steps#  2027, L3 trainer steps#   852, L3 total model steps#      6211, L3 trainer total steps#      2577
+Game#     4, L4 model steps#  1440, L4 trainer steps#   528, L4 total model steps#      4106, L4 trainer total steps#      1517
+Game#     4, L5 model steps#   427, L5 trainer steps#   143, L5 total model steps#      1320, L5 trainer total steps#       442
+Game#     4, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game    5, Score  31, Highscore  45, Time  12.45s - Hit the snake
+Game#     5, L1 model steps#  3508, L1 trainer steps#  2086, L1 total model steps#     17663, L1 trainer total steps#      9993
+Game#     5, L2 model steps#  1808, L2 trainer steps#   751, L2 total model steps#     10392, L2 trainer total steps#      4473
+Game#     5, L3 model steps#  1295, L3 trainer steps#   444, L3 total model steps#      7506, L3 trainer total steps#      3021
+Game#     5, L4 model steps#   106, L4 trainer steps#    36, L4 total model steps#      4212, L4 trainer total steps#      1553
+Game#     5, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      1320, L5 trainer total steps#       442
+Game#     5, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game    6, Score  30, Highscore  45, Time  11.37s - Hit the snake
+Game#     6, L1 model steps#  3580, L1 trainer steps#  2117, L1 total model steps#     21243, L1 trainer total steps#     12110
+Game#     6, L2 model steps#  1870, L2 trainer steps#   772, L2 total model steps#     12262, L2 trainer total steps#      5245
+Game#     6, L3 model steps#  1330, L3 trainer steps#   445, L3 total model steps#      8836, L3 trainer total steps#      3466
+Game#     6, L4 model steps#    10, L4 trainer steps#     4, L4 total model steps#      4222, L4 trainer total steps#      1557
+Game#     6, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      1320, L5 trainer total steps#       442
+Game#     6, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game    7, Score  49, Highscore  49, Time  23.73s - Hit the snake
+Game#     7, L1 model steps#  4958, L1 trainer steps#  2828, L1 total model steps#     26201, L1 trainer total steps#     14938
+Game#     7, L2 model steps#  3382, L2 trainer steps#  1527, L2 total model steps#     15644, L2 trainer total steps#      6772
+Game#     7, L3 model steps#  2763, L3 trainer steps#  1198, L3 total model steps#     11599, L3 trainer total steps#      4664
+Game#     7, L4 model steps#  2056, L4 trainer steps#   830, L4 total model steps#      6278, L4 trainer total steps#      2387
+Game#     7, L5 model steps#  1297, L5 trainer steps#   433, L5 total model steps#      2617, L5 trainer total steps#       875
+Game#     7, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game    8, Score   4, Highscore  49, Time   1.66s - Hit the wall
+Game#     8, L1 model steps#  1582, L1 trainer steps#  1194, L1 total model steps#     27783, L1 trainer total steps#     16132
+Game#     8, L2 model steps#     0, L2 trainer steps#     0, L2 total model steps#     15644, L2 trainer total steps#      6772
+Game#     8, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#     11599, L3 trainer total steps#      4664
+Game#     8, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#      6278, L4 trainer total steps#      2387
+Game#     8, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      2617, L5 trainer total steps#       875
+Game#     8, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game    9, Score  39, Highscore  49, Time  14.41s - Hit the wall
+Game#     9, L1 model steps#  3925, L1 trainer steps#  2301, L1 total model steps#     31708, L1 trainer total steps#     18433
+Game#     9, L2 model steps#  2215, L2 trainer steps#   978, L2 total model steps#     17859, L2 trainer total steps#      7750
+Game#     9, L3 model steps#  1840, L3 trainer steps#   718, L3 total model steps#     13439, L3 trainer total steps#      5382
+Game#     9, L4 model steps#   937, L4 trainer steps#   313, L4 total model steps#      7215, L4 trainer total steps#      2700
+Game#     9, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      2617, L5 trainer total steps#       875
+Game#     9, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   10, Score  15, Highscore  49, Time   3.84s - Hit the wall
+Game#    10, L1 model steps#  2501, L1 trainer steps#  1541, L1 total model steps#     34209, L1 trainer total steps#     19974
+Game#    10, L2 model steps#   364, L2 trainer steps#   122, L2 total model steps#     18223, L2 trainer total steps#      7872
+Game#    10, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#     13439, L3 trainer total steps#      5382
+Game#    10, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#      7215, L4 trainer total steps#      2700
+Game#    10, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      2617, L5 trainer total steps#       875
+Game#    10, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   11, Score  10, Highscore  49, Time   2.54s - Hit the wall
+Game#    11, L1 model steps#  2170, L1 trainer steps#  1400, L1 total model steps#     36379, L1 trainer total steps#     21374
+Game#    11, L2 model steps#    91, L2 trainer steps#    31, L2 total model steps#     18314, L2 trainer total steps#      7903
+Game#    11, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#     13439, L3 trainer total steps#      5382
+Game#    11, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#      7215, L4 trainer total steps#      2700
+Game#    11, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      2617, L5 trainer total steps#       875
+Game#    11, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   12, Score   1, Highscore  49, Time   0.73s - Hit the wall
+Game#    12, L1 model steps#  1098, L1 trainer steps#  1033, L1 total model steps#     37477, L1 trainer total steps#     22407
+Game#    12, L2 model steps#     0, L2 trainer steps#     0, L2 total model steps#     18314, L2 trainer total steps#      7903
+Game#    12, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#     13439, L3 trainer total steps#      5382
+Game#    12, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#      7215, L4 trainer total steps#      2700
+Game#    12, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      2617, L5 trainer total steps#       875
+Game#    12, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   13, Score  39, Highscore  49, Time  14.49s - Hit the snake
+Game#    13, L1 model steps#  4223, L1 trainer steps#  2427, L1 total model steps#     41700, L1 trainer total steps#     24834
+Game#    13, L2 model steps#  2482, L2 trainer steps#  1058, L2 total model steps#     20796, L2 trainer total steps#      8961
+Game#    13, L3 model steps#  1757, L3 trainer steps#   691, L3 total model steps#     15196, L3 trainer total steps#      6073
+Game#    13, L4 model steps#   943, L4 trainer steps#   315, L4 total model steps#      8158, L4 trainer total steps#      3015
+Game#    13, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      2617, L5 trainer total steps#       875
+Game#    13, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   14, Score  40, Highscore  49, Time   14.2s - Hit the wall
+Game#    14, L1 model steps#  4535, L1 trainer steps#  2587, L1 total model steps#     46235, L1 trainer total steps#     27421
+Game#    14, L2 model steps#  2837, L2 trainer steps#  1227, L2 total model steps#     23633, L2 trainer total steps#     10188
+Game#    14, L3 model steps#  2111, L3 trainer steps#   843, L3 total model steps#     17307, L3 trainer total steps#      6916
+Game#    14, L4 model steps#  1239, L4 trainer steps#   417, L4 total model steps#      9397, L4 trainer total steps#      3432
+Game#    14, L5 model steps#    31, L5 trainer steps#    11, L5 total model steps#      2648, L5 trainer total steps#       886
+Game#    14, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   15, Score  19, Highscore  49, Time    5.8s - Hit the wall
+Game#    15, L1 model steps#  3092, L1 trainer steps#  1833, L1 total model steps#     49327, L1 trainer total steps#     29254
+Game#    15, L2 model steps#  1222, L2 trainer steps#   408, L2 total model steps#     24855, L2 trainer total steps#     10596
+Game#    15, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#     17307, L3 trainer total steps#      6916
+Game#    15, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#      9397, L4 trainer total steps#      3432
+Game#    15, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      2648, L5 trainer total steps#       886
+Game#    15, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   16, Score  40, Highscore  49, Time   13.4s - Hit the snake
+Game#    16, L1 model steps#  4157, L1 trainer steps#  2416, L1 total model steps#     53484, L1 trainer total steps#     31670
+Game#    16, L2 model steps#  2543, L2 trainer steps#  1092, L2 total model steps#     27398, L2 trainer total steps#     11688
+Game#    16, L3 model steps#  1832, L3 trainer steps#   732, L3 total model steps#     19139, L3 trainer total steps#      7648
+Game#    16, L4 model steps#  1063, L4 trainer steps#   363, L4 total model steps#     10460, L4 trainer total steps#      3795
+Game#    16, L5 model steps#    73, L5 trainer steps#    25, L5 total model steps#      2721, L5 trainer total steps#       911
+Game#    16, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   17, Score  45, Highscore  49, Time  15.83s - Hit the snake
+Game#    17, L1 model steps#  4821, L1 trainer steps#  2721, L1 total model steps#     58305, L1 trainer total steps#     34391
+Game#    17, L2 model steps#  3087, L2 trainer steps#  1342, L2 total model steps#     30485, L2 trainer total steps#     13030
+Game#    17, L3 model steps#  2298, L3 trainer steps#   938, L3 total model steps#     21437, L3 trainer total steps#      8586
+Game#    17, L4 model steps#  1336, L4 trainer steps#   515, L4 total model steps#     11796, L4 trainer total steps#      4310
+Game#    17, L5 model steps#   622, L5 trainer steps#   208, L5 total model steps#      3343, L5 trainer total steps#      1119
+Game#    17, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   18, Score  18, Highscore  49, Time   3.61s - Hit the wall
+Game#    18, L1 model steps#  2493, L1 trainer steps#  1570, L1 total model steps#     60798, L1 trainer total steps#     35961
+Game#    18, L2 model steps#   652, L2 trainer steps#   218, L2 total model steps#     31137, L2 trainer total steps#     13248
+Game#    18, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#     21437, L3 trainer total steps#      8586
+Game#    18, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#     11796, L4 trainer total steps#      4310
+Game#    18, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      3343, L5 trainer total steps#      1119
+Game#    18, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   19, Score  43, Highscore  49, Time  13.66s - Hit the snake
+Game#    19, L1 model steps#  4190, L1 trainer steps#  2418, L1 total model steps#     64988, L1 trainer total steps#     38379
+Game#    19, L2 model steps#  2464, L2 trainer steps#  1065, L2 total model steps#     33601, L2 trainer total steps#     14313
+Game#    19, L3 model steps#  1779, L3 trainer steps#   730, L3 total model steps#     23216, L3 trainer total steps#      9316
+Game#    19, L4 model steps#  1191, L4 trainer steps#   410, L4 total model steps#     12987, L4 trainer total steps#      4720
+Game#    19, L5 model steps#   112, L5 trainer steps#    38, L5 total model steps#      3455, L5 trainer total steps#      1157
+Game#    19, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   20, Score  41, Highscore  49, Time  13.53s - Hit the snake
+Game#    20, L1 model steps#  4139, L1 trainer steps#  2428, L1 total model steps#     69127, L1 trainer total steps#     40807
+Game#    20, L2 model steps#  2663, L2 trainer steps#  1146, L2 total model steps#     36264, L2 trainer total steps#     15459
+Game#    20, L3 model steps#  1886, L3 trainer steps#   774, L3 total model steps#     25102, L3 trainer total steps#     10090
+Game#    20, L4 model steps#  1260, L4 trainer steps#   435, L4 total model steps#     14247, L4 trainer total steps#      5155
+Game#    20, L5 model steps#   130, L5 trainer steps#    44, L5 total model steps#      3585, L5 trainer total steps#      1201
+Game#    20, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   21, Score  16, Highscore  49, Time   3.04s - Hit the snake
+Game#    21, L1 model steps#  2252, L1 trainer steps#  1480, L1 total model steps#     71379, L1 trainer total steps#     42287
+Game#    21, L2 model steps#   565, L2 trainer steps#   189, L2 total model steps#     36829, L2 trainer total steps#     15648
+Game#    21, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#     25102, L3 trainer total steps#     10090
+Game#    21, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#     14247, L4 trainer total steps#      5155
+Game#    21, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      3585, L5 trainer total steps#      1201
+Game#    21, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   22, Score  41, Highscore  49, Time  16.53s - Hit the snake
+Game#    22, L1 model steps#  4786, L1 trainer steps#  2718, L1 total model steps#     76165, L1 trainer total steps#     45005
+Game#    22, L2 model steps#  3140, L2 trainer steps#  1369, L2 total model steps#     39969, L2 trainer total steps#     17017
+Game#    22, L3 model steps#  2324, L3 trainer steps#   966, L3 total model steps#     27426, L3 trainer total steps#     11056
+Game#    22, L4 model steps#  1597, L4 trainer steps#   573, L4 total model steps#     15844, L4 trainer total steps#      5728
+Game#    22, L5 model steps#   361, L5 trainer steps#   121, L5 total model steps#      3946, L5 trainer total steps#      1322
+Game#    22, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   23, Score  41, Highscore  49, Time  15.21s - Hit the snake
+Game#    23, L1 model steps#  4525, L1 trainer steps#  2571, L1 total model steps#     80690, L1 trainer total steps#     47576
+Game#    23, L2 model steps#  2612, L2 trainer steps#  1188, L2 total model steps#     42581, L2 trainer total steps#     18205
+Game#    23, L3 model steps#  2334, L3 trainer steps#   951, L3 total model steps#     29760, L3 trainer total steps#     12007
+Game#    23, L4 model steps#  1486, L4 trainer steps#   518, L4 total model steps#     17330, L4 trainer total steps#      6246
+Game#    23, L5 model steps#   199, L5 trainer steps#    67, L5 total model steps#      4145, L5 trainer total steps#      1389
+Game#    23, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   24, Score  17, Highscore  49, Time   3.67s - Hit the wall
+Game#    24, L1 model steps#  2634, L1 trainer steps#  1615, L1 total model steps#     83324, L1 trainer total steps#     49191
+Game#    24, L2 model steps#   634, L2 trainer steps#   212, L2 total model steps#     43215, L2 trainer total steps#     18417
+Game#    24, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#     29760, L3 trainer total steps#     12007
+Game#    24, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#     17330, L4 trainer total steps#      6246
+Game#    24, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      4145, L5 trainer total steps#      1389
+Game#    24, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   25, Score  21, Highscore  49, Time   5.39s - Hit the wall
+Game#    25, L1 model steps#  3033, L1 trainer steps#  1819, L1 total model steps#     86357, L1 trainer total steps#     51010
+Game#    25, L2 model steps#  1229, L2 trainer steps#   425, L2 total model steps#     44444, L2 trainer total steps#     18842
+Game#    25, L3 model steps#   133, L3 trainer steps#    45, L3 total model steps#     29893, L3 trainer total steps#     12052
+Game#    25, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#     17330, L4 trainer total steps#      6246
+Game#    25, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      4145, L5 trainer total steps#      1389
+Game#    25, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   26, Score  16, Highscore  49, Time    4.0s - Hit the wall
+Game#    26, L1 model steps#  2805, L1 trainer steps#  1688, L1 total model steps#     89162, L1 trainer total steps#     52698
+Game#    26, L2 model steps#   778, L2 trainer steps#   260, L2 total model steps#     45222, L2 trainer total steps#     19102
+Game#    26, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#     29893, L3 trainer total steps#     12052
+Game#    26, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#     17330, L4 trainer total steps#      6246
+Game#    26, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      4145, L5 trainer total steps#      1389
+Game#    26, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   27, Score  40, Highscore  49, Time  13.27s - Hit the snake
+Game#    27, L1 model steps#  4289, L1 trainer steps#  2491, L1 total model steps#     93451, L1 trainer total steps#     55189
+Game#    27, L2 model steps#  2753, L2 trainer steps#  1185, L2 total model steps#     47975, L2 trainer total steps#     20287
+Game#    27, L3 model steps#  2022, L3 trainer steps#   801, L3 total model steps#     31915, L3 trainer total steps#     12853
+Game#    27, L4 model steps#  1128, L4 trainer steps#   380, L4 total model steps#     18458, L4 trainer total steps#      6626
+Game#    27, L5 model steps#    31, L5 trainer steps#    11, L5 total model steps#      4176, L5 trainer total steps#      1400
+Game#    27, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   28, Score  42, Highscore  49, Time  13.49s - Hit the snake
+Game#    28, L1 model steps#  4182, L1 trainer steps#  2443, L1 total model steps#     97633, L1 trainer total steps#     57632
+Game#    28, L2 model steps#  2633, L2 trainer steps#  1148, L2 total model steps#     50608, L2 trainer total steps#     21435
+Game#    28, L3 model steps#  1950, L3 trainer steps#   810, L3 total model steps#     33865, L3 trainer total steps#     13663
+Game#    28, L4 model steps#  1371, L4 trainer steps#   479, L4 total model steps#     19829, L4 trainer total steps#      7105
+Game#    28, L5 model steps#   193, L5 trainer steps#    65, L5 total model steps#      4369, L5 trainer total steps#      1465
+Game#    28, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   29, Score  42, Highscore  49, Time  16.02s - Hit the snake
+Game#    29, L1 model steps#  4723, L1 trainer steps#  2707, L1 total model steps#    102356, L1 trainer total steps#     60339
+Game#    29, L2 model steps#  3279, L2 trainer steps#  1399, L2 total model steps#     53887, L2 trainer total steps#     22834
+Game#    29, L3 model steps#  2242, L3 trainer steps#   917, L3 total model steps#     36107, L3 trainer total steps#     14580
+Game#    29, L4 model steps#  1445, L4 trainer steps#   508, L4 total model steps#     21274, L4 trainer total steps#      7613
+Game#    29, L5 model steps#   232, L5 trainer steps#    78, L5 total model steps#      4601, L5 trainer total steps#      1543
+Game#    29, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   30, Score  46, Highscore  49, Time  15.89s - Hit the snake
+Game#    30, L1 model steps#  4788, L1 trainer steps#  2702, L1 total model steps#    107144, L1 trainer total steps#     63041
+Game#    30, L2 model steps#  3052, L2 trainer steps#  1318, L2 total model steps#     56939, L2 trainer total steps#     24152
+Game#    30, L3 model steps#  2173, L3 trainer steps#   901, L3 total model steps#     38280, L3 trainer total steps#     15481
+Game#    30, L4 model steps#  1339, L4 trainer steps#   529, L4 total model steps#     22613, L4 trainer total steps#      8142
+Game#    30, L5 model steps#   739, L5 trainer steps#   247, L5 total model steps#      5340, L5 trainer total steps#      1790
+Game#    30, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   31, Score  40, Highscore  49, Time  14.25s - Hit the snake
+Game#    31, L1 model steps#  4416, L1 trainer steps#  2516, L1 total model steps#    111560, L1 trainer total steps#     65557
+Game#    31, L2 model steps#  2672, L2 trainer steps#  1133, L2 total model steps#     59611, L2 trainer total steps#     25285
+Game#    31, L3 model steps#  1838, L3 trainer steps#   726, L3 total model steps#     40118, L3 trainer total steps#     16207
+Game#    31, L4 model steps#  1009, L4 trainer steps#   339, L4 total model steps#     23622, L4 trainer total steps#      8481
+Game#    31, L5 model steps#    19, L5 trainer steps#     7, L5 total model steps#      5359, L5 trainer total steps#      1797
+Game#    31, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+
+Snake AI (v1921) Game   32, Score  14, Highscore  49, Time    4.0s - Hit the wall
+Game#    32, L1 model steps#  2879, L1 trainer steps#  1688, L1 total model steps#    114439, L1 trainer total steps#     67245
+Game#    32, L2 model steps#   556, L2 trainer steps#   186, L2 total model steps#     60167, L2 trainer total steps#     25471
+Game#    32, L3 model steps#     0, L3 trainer steps#     0, L3 total model steps#     40118, L3 trainer total steps#     16207
+Game#    32, L4 model steps#     0, L4 trainer steps#     0, L4 total model steps#     23622, L4 trainer total steps#      8481
+Game#    32, L5 model steps#     0, L5 trainer steps#     0, L5 total model steps#      5359, L5 trainer total steps#      1797
+Game#    32, L6 model steps#     0, L6 trainer steps#     0, L6 total model steps#         0, L6 trainer total steps#         0
+

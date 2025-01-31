@@ -94,6 +94,9 @@ class NuAlgo():
 
     return self.get_random_move()
   
+  def get_pool(self):
+    return self.cur_pool
+
   def get_random_move(self):
     self.injected_flag = True
     self.injected += 1 # Increment the number of injected move counter

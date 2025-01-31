@@ -105,13 +105,13 @@ class LinearQNet(nn.Module):
     # The basic main model framework
     main_block = nn.Sequential()
 
-    main_block.append(nn.Sequential()) # input block
-    main_block.append(nn.Sequential()) # B1 block
+    main_block.append(nn.Sequential())   # Input  main_block[0]
+    main_block.append(nn.Sequential())   #     B1 main_block[1]
     if self.b2_layers > 0:
-      main_block.append(nn.Sequential()) # B2 block
+      main_block.append(nn.Sequential()) #     B2 main_block[2]
     if self.b3_layers > 0:
-      main_block.append(nn.Sequential()) # B3 block
-    main_block.append(nn.Sequential()) # output block
+      main_block.append(nn.Sequential()) #     B3 main_block[3]
+    main_block.append(nn.Sequential())   # Output main_block[4]
 
     # Input layer
     main_block[0].append(nn.Linear(in_features=self.in_features, out_features=self.b1_nodes))
@@ -186,10 +186,11 @@ class LinearQNet(nn.Module):
       
     self.main_block = main_block
     self.ascii_print()
+    
 
   def ascii_print(self):
     ###  An ASCII depiction of the neural network
-    self.log.log(f"====== Level {self.level // 10} Neural Network Architecture ==========")
+    self.log.log(f"====== Level {self.level} Neural Network Architecture ==========")
     self.log.log("Layers           Input        Output")
     self.log.log("---------------------------------------------")
     log_msg = ''
@@ -221,13 +222,13 @@ class LinearQNet(nn.Module):
     """
     Returns the number of steps the AI agent has taken.
     """
-    return 'L{} model steps# {:>5}'.format(self.level // 10, self.steps)
+    return 'L{:>2} model steps# {:>5}'.format(self.level, self.steps)
   
   def get_total_steps(self):
     """
     Returns the total number of steps the AI agent has taken.
     """
-    return 'L{} total model steps# {:>9}'.format(self.level // 10, self.total_steps)
+    return 'L{:>2} total model steps# {:>9}'.format(self.level, self.total_steps)
 
   def has_dynamic_dropout(self):
     """
@@ -318,4 +319,7 @@ class LinearQNet(nn.Module):
         if isinstance(block, nn.Dropout):
           self.log.log(f"LinearQNet: Setting P value for dropout layer(s) to {p_value}")
           block.p = p_value
+
+  def set_level(self, level):
+    self.level = level
 

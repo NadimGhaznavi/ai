@@ -14,7 +14,8 @@ sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 from AISnakeGame import AISnakeGame
 from LinearQNet import LinearQNet
-from AIAgent import AIAgent
+#from AIAgent import AIAgent
+from AIAgentN import AIAgent
 from SnakeGamePlots import MyPlot
 from AILogger import AILogger
 from ReplayMemory import ReplayMemory
@@ -24,7 +25,7 @@ def print_game_summary(ini, log, agent, score, record, game):
   ai_version = ini.get('ai_version')
   # Standard game summary metrics
   summary = 'Snake AI (v' + str(ai_version) + ') ' + \
-    'Game' + '{:>5}'.format(agent.n_games) + ', ' + \
+    'Game' + '{:>5}'.format(game.get_game_num()) + ', ' + \
     'Score' + '{:>4}'.format(score) + ', ' + \
     'Highscore' + '{:>4}'.format(record) + ', ' + \
     'Time ' + '{:>6}'.format(game.elapsed_time) + 's'
@@ -68,22 +69,18 @@ def restart_simulation(agent, ini, log):
   """
   data_dir = ini.get('sim_data_dir')
   checkpoint_basename = ini.get('sim_checkpoint_basename')
-  levels = [ 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 ]
-  for level in levels:
+  for level in range(0, 99):
     checkpoint_file = os.path.join(lib_dir, os.path.join(data_dir, str(ini.get('restart')) + '_L' + str(level) + checkpoint_basename))
     print("Checking for checkpoint file (" + checkpoint_file, end='')
     if os.path.isfile(checkpoint_file):
       print(") [OK]")
-      # Level 10 was initialized in the AIAgent constructor
-      if level != 10:
-        # Get the new level 10 elements
-        model = LinearQNet(ini, log, level)
-        trainer = QTrainer(ini, model, level)
-        optimizer = trainer.optimizer
-        agent.level[level] = {}
-        agent.level[level]['model'] = model
-        agent.level[level]['memory'] = ReplayMemory(ini)
-        agent.level[level]['trainer'] = trainer
+      model = LinearQNet(ini, log, level)
+      trainer = QTrainer(ini, model, level)
+      optimizer = trainer.optimizer
+      agent.level[level] = {}
+      agent.level[level]['model'] = model
+      agent.level[level]['memory'] = ReplayMemory(ini)
+      agent.level[level]['trainer'] = trainer
       # Do the actual load
       print(f"Loading L{level} checkpoint file: " + checkpoint_file)
       checkpoint = torch.load(checkpoint_file, weights_only=False)
@@ -115,7 +112,7 @@ def train():
   agent = AIAgent(ini, log, game) # Get a new instance of the AI Agent
 
   # Check if we are restarting a simulation
-  if ini.get('restart') > 0:
+  if ini.get('restart'):
     restart_simulation(agent, ini, log)
 
   # Pass the agent to the game, we have to do this after instantiating
@@ -169,14 +166,12 @@ def train():
     # If the game is over
     if done:
       # Disable the NuAlgo after game number 600
-      if game.get_num_games() > 500:
+      nu_disable_games = ini.get('nu_disable_games')
+      if nu_disable_games and game.get_num_games() > nu_disable_games:
         agent.nu_algo.disable()
 
       # Update the Agent with the new score (used by epsilon and NuAlgo)
       agent.played_game(score)
-
-      # Copy the model's weights and bias' to the L2 model when the L2 score is reached
-      agent.save_checkpoint()
 
       # Perform a checkpoint every 100 games
       if game.get_num_games() % 100 == 0:
@@ -225,10 +220,11 @@ def train():
       print_game_summary(ini, log, agent, score, record, game)
       plot_scores.append(score)
       total_score += score
-      mean_score = round(total_score / agent.n_games, 2)
+      num_games = game.get_game_num()
+      mean_score = round(total_score / num_games, 2)
       plot_mean_scores.append(mean_score)
       plot_times.append(game.elapsed_time)
-      mean_time = round(game.sim_time / agent.n_games, 1)
+      mean_time = round(game.sim_time / num_games, 1)
       plot_mean_times.append(mean_time)
       my_plot.plot(plot_scores, plot_mean_scores, plot_times, plot_mean_times)
 

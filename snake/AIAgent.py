@@ -108,7 +108,6 @@ class AIAgent:
       all_steps = all_steps + self.level[model_num]['trainer'].get_steps() + ', '
       all_steps = all_steps + self.level[model_num]['model'].get_total_steps() + ', '
       all_steps = all_steps + self.level[model_num]['trainer'].get_total_steps() + '\n'
-    all_steps = all_steps + '\n'
     return all_steps
   def get_model_steps(self, score):
     model_num = score // 10 * 10 + 10
@@ -293,6 +292,4 @@ class AIAgent:
     if model_num not in self.level:
       self.add_level(game_score)
     count = 0
-    while count != model_num:
-      count += 10
-      self.level[count]['trainer'].train_step(state, action, reward, next_state, done)
+    self.level[count]['trainer'].train_step(state, action, reward, next_state, done)

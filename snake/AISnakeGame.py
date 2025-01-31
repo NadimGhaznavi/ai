@@ -47,6 +47,9 @@ class AISnakeGame():
   from the AISnakeGame.ini file using the StartConfig class.
   """
   def __init__(self, ini, log, plot):
+    # Configuration object
+    self.ini = ini
+    
     # Logging object
     self.log = log
 
@@ -116,6 +119,10 @@ class AISnakeGame():
     Return the current number of games.
     """
     return self.num_games
+  
+  def get_game_num(self):
+    return self.num_games
+  
   
   def get_score(self):
     """
@@ -259,10 +266,14 @@ class AISnakeGame():
 
     # 3. check if game over, track the reward and the reason the game ended
     reward = 0
+    reward_food = self.ini.get('reward_food')
+    reward_excesssive_move = self.ini.get('reward_excessive_move')
+    reward_snake_collision = self.ini.get('reward_snake_collision')
+    reward_wall_collision = self.ini.get('reward_wall_collision')
     game_over = False
     if self.is_wall_collision():
       game_over = True
-      reward = -10
+      reward = reward_wall_collision
       lose_reason = 'Hit the wall'
       self.lose_reason = lose_reason
       self.agent.ini.set_value('lose_reason', lose_reason)
@@ -271,7 +282,7 @@ class AISnakeGame():
       return reward, game_over, self.score
     elif self.is_snake_collision():
       game_over = True
-      reward = -10
+      reward = reward_snake_collision
       lose_reason = 'Hit the snake'
       self.lose_reason = lose_reason
       self.agent.ini.set_value('lose_reason', lose_reason)
@@ -280,7 +291,7 @@ class AISnakeGame():
       return reward, game_over, self.score
     if self.game_moves > self.max_moves*len(self.snake):
       game_over = True
-      reward = -10
+      reward = reward_excesssive_move
       lose_reason = 'Excessive moves (' + str(self.max_moves*len(self.snake)) + ')'
       self.lose_reason = lose_reason
       self.agent.ini.set_value('lose_reason', lose_reason)
@@ -291,7 +302,7 @@ class AISnakeGame():
     # 4. place new food or just move
     if self.head == self.food:
       self.score += 1
-      reward = 10
+      reward = reward_food
       self.place_food()
     else:
       self.snake.pop()
@@ -317,17 +328,18 @@ class AISnakeGame():
     Print simulation metrics.
     """
     if self.print_stats:
-      self.log(f"Total simulation time    : {self.total_sim_time}")
-      self.log(f"Total number of games    : {self.num_games}")
-      self.log(f"High score               : {self.sim_high_score}")
-      self.log(f"Total simulation score   : {self.sim_score}")
-      self.log(f"Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
-      self.log(f"Wall collision count     : {self.sim_wall_collision_count}")
-      self.log(f"Snake collision count    : {self.sim_snake_collision_count}")
-      if self.agent.nu_algo.print_stats:
-        self.log(f"Nu algorithm score       : {self.agent.nu_algo.get_nu_score()}")
-      self.log(f"Average game score       : {self.avg_game_score}")
-      self.log(f"Average game time        : {self.avg_game_time} sec")
+      self.log.log(f"Stats: Total simulation time    : {self.total_sim_time}")
+      self.log.log(f"Stats: Total number of games    : {self.num_games}")
+      self.log.log(f"Stats: High score               : {self.sim_high_score}")
+      self.log.log(f"Stats: Total simulation score   : {self.sim_score}")
+      self.log.log(f"Stats: Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
+      self.log.log(f"Stats: Wall collision count     : {self.sim_wall_collision_count}")
+      self.log.log(f"Stats: Snake collision count    : {self.sim_snake_collision_count}")
+      if self.ini.get("nu_enable"):
+        self.log.log(f"Stats: Nu algorithm score       : {self.agent.nu_algo.get_pool()}")
+      self.log.log(f"Stats: Average game score       : {self.avg_game_score}")
+      self.log.log(f"Stats: Average game time        : {self.avg_game_time} sec")
+      self.log.log('Stats:')
 
   def quit_game(self):
     self.sim_score += self.score
