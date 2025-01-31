@@ -155,14 +155,9 @@ class AIAgent:
       all_steps = all_steps + '{:>2}'.format(self.level[model_num]['model'].get_steps()) + ', '
       all_steps = all_steps + self.level[model_num]['trainer'].get_steps() + ', '
       all_steps = all_steps + self.level[model_num]['model'].get_total_steps() + ', '
-      all_steps = all_steps + self.level[model_num]['trainer'].get_total_steps() + '\n'
+      all_steps = all_steps + self.level[model_num]['trainer'].get_total_steps() + ', '
+      all_steps = all_steps + self.get_num_games(model_num) + '\n'
     return all_steps
-  
-  def get_model_steps(self, score):
-    return self.level[score]['model'].get_steps()
-
-  def get_nu_algo(self):
-    return self.nu_algo
   
   def get_binary(self, num):
     # Get the length of the snake in binary.
@@ -176,6 +171,12 @@ class AIAgent:
     for x in range(7):
       out_list[x] = int(out_list[x])
     return out_list
+  
+  def get_model_steps(self, score):
+    return self.level[score]['model'].get_steps()
+
+  def get_nu_algo(self):
+    return self.nu_algo
   
   def get_num_games(self, level):
     return 'L{:>2} games# {:>4}'.format(level, self.level[level]['num_games'])
