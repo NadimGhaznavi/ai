@@ -281,6 +281,8 @@ class AIAgent:
     # if the memory exceeds MAX_MEMORY
     score = self.game.get_score()
     self.level[score]['memory'].append((state, action, reward, next_state, done))   
+    if score == 1:
+      self.level[0]['memory'].append((state, action, reward, next_state, done))   
     # Reward lower levels if the reward was 10, indicating that we got some food.
     if reward == self.ini.get('reward_food'):
       self.reward_lower_levels()
@@ -312,7 +314,7 @@ class AIAgent:
       prev_memory = self.level[cur_score - 1]['memory'].pop()
       # The get_last memory returns a list in the form
       # [state, action, reward, next_state, done]. 
-      food_reward = float(self.ini.get('reward_food')) / 10
+      food_reward = float(self.ini.get('reward_food')) * 1.1
       #print(f"prev_memory: ", prev_memory)
       #print(f"prev_memory[2] {prev_memory[2]}")
       #print(f"type(prev_memory[2]) {type(prev_memory[2])}")
@@ -369,6 +371,11 @@ class AIAgent:
     mini_sample = self.level[score]['memory'].get_memory()
     states, actions, rewards, next_states, dones = zip(*mini_sample)
     self.level[score]['trainer'].train_step(states, actions, rewards, next_states, dones)
+    if score == 1:
+      mini_sample = self.level[0]['memory'].get_memory()
+      states, actions, rewards, next_states, dones = zip(*mini_sample)
+      self.level[0]['trainer'].train_step(states, actions, rewards, next_states, dones)
+
 
   def train_lower_level(self, state, action, reward, next_state, done):
     # Lower levels are regularly promoted to higher levels. So we'll
@@ -386,6 +393,8 @@ class AIAgent:
       self.add_level(score)
     # Execute the training step
     self.level[score]['trainer'].train_step(state, action, reward, next_state, done)
+    if score == 1:
+      self.level[0]['trainer'].train_step(state, action, reward, next_state, done)
 
     
 
