@@ -74,8 +74,8 @@ class AIAgent:
     self.nu_algo = NuAlgo(ini, log)
     self.epsilon_algo = EpsilonAlgo(ini, log)
 
-    self.game_num = 0 # Current game number
-    self.prev_game_num = self.game_num - 1 # Previous game num
+    self.num_games = 0 # Current game number
+    self.prev_game_num = self.num_games - 1 # Previous game num
     self.save_highscore(0) # Initialize the highscore file
 
     # Used in the state map, this initializes it to some random direction
@@ -114,6 +114,7 @@ class AIAgent:
     # Preserve the total steps taken, as these were restored
     trainer.total_steps = prev_trainer.total_steps
     model.reset_steps()
+    self.last_memory = self.level[score -1]['last_memory'].copy()
     os.remove(tmp_file)
 
       
@@ -127,7 +128,7 @@ class AIAgent:
 
     if random_move:
       # Random move was returned
-      self.prev_game_num = self.game_num
+      self.prev_game_num = self.num_games
       return random_move
     
     # AI agent based action
@@ -142,16 +143,10 @@ class AIAgent:
     self.last_move = final_move
     return final_move
 
-  def get_epsilon(self):
-    return self.epsilon_algo
-  
-  def get_epsilon_value(self):
-    return self.epsilon_algo.get_epsilon_value()
-
   def get_all_steps(self):
     all_steps = ''
     for model_num in self.level:
-      all_steps = all_steps + 'Game# {:>5}, '.format(self.game_num)
+      all_steps = all_steps + 'Game# {:>5}, '.format(self.level[model_num]['num_games'])
       all_steps = all_steps + '{:>2}'.format(self.level[model_num]['model'].get_steps()) + ', '
       all_steps = all_steps + self.level[model_num]['trainer'].get_steps() + ', '
       all_steps = all_steps + self.level[model_num]['model'].get_total_steps() + ', '
@@ -159,6 +154,12 @@ class AIAgent:
       all_steps = all_steps + self.get_num_games(model_num) + '\n'
     return all_steps
   
+  def get_epsilon(self):
+    return self.epsilon_algo
+  
+  def get_epsilon_value(self):
+    return self.epsilon_algo.get_epsilon_value()
+
   def get_binary(self, num):
     # Get the length of the snake in binary.
     # This is used in the state map, the get_state() function.
@@ -261,14 +262,17 @@ class AIAgent:
     return self.level[score]['trainer'].get_steps()
 
   def increment_games(self):
-    self.game_num += 1
+    self.num_games += 1
 
   def played_game(self, score):
-    self.level[score]['num_games'] += 1
     self.epsilon_algo.played_game()
     self.nu_algo.played_game(score)
     if score and score >= self.cur_score:
       self.copy_previous_level(score)
+    if 'num_games' in self.level[score]:
+      self.level[score]['num_games'] += 1
+    else:
+      self.level[score]['num_games'] = 0
     self.cur_score = score
 
   def print_model(self):
@@ -281,14 +285,15 @@ class AIAgent:
     # if the memory exceeds MAX_MEMORY
     score = self.game.get_score()
     self.level[score]['memory'].append((state, action, reward, next_state, done))   
-    if score == 1:
-      self.level[0]['memory'].append((state, action, reward, next_state, done))   
+    #if score == 1:
+    #  self.level[0]['memory'].append((state, action, reward, next_state, done))   
     # Reward lower levels if the reward was 10, indicating that we got some food.
     if reward == self.ini.get('reward_food'):
       self.reward_lower_levels()
     # Train the level below us at the same time
-    if score > 0:      
-      self.train_lower_level(state, action, reward, next_state, done)
+    if score != 0:      
+      self.level[score - 1]['memory'].append((state, action, reward, next_state, done))   
+    
 
   def reset_epsilon_injected(self):
     self.epsilon_algo.reset_injected()
@@ -311,7 +316,8 @@ class AIAgent:
     cur_score = self.cur_score
     while cur_score != 0:
       # Get the previous level's last memory, [state, action, reward, next_state, done]
-      prev_memory = self.level[cur_score - 1]['memory'].pop()
+      prev_memory = self.level[cur_score - 1]['memory'].pop() # Pop off the latest memory, make a copy
+      self.level[cur_score - 1]['memory'].append(prev_memory) # Put it back
       # The get_last memory returns a list in the form
       # [state, action, reward, next_state, done]. 
       food_reward = float(self.ini.get('reward_food')) * 1.1
@@ -350,7 +356,7 @@ class AIAgent:
     else:
       # Append the current game number and score to the highscore file
       with open(highscore_file, 'a') as file_handle:
-        file_handle.write(str(self.game_num) + ',' + str(highscore) + "\n")
+        file_handle.write(str(self.num_games) + ',' + str(highscore) + "\n")
 
   def set_highscore(self, score):
     # We achieved a new highscore. 
@@ -371,10 +377,10 @@ class AIAgent:
     mini_sample = self.level[score]['memory'].get_memory()
     states, actions, rewards, next_states, dones = zip(*mini_sample)
     self.level[score]['trainer'].train_step(states, actions, rewards, next_states, dones)
-    if score == 1:
-      mini_sample = self.level[0]['memory'].get_memory()
+    if score != 0:
+      mini_sample = self.level[score - 1]['memory'].get_memory()
       states, actions, rewards, next_states, dones = zip(*mini_sample)
-      self.level[0]['trainer'].train_step(states, actions, rewards, next_states, dones)
+      self.level[score - 1]['trainer'].train_step(states, actions, rewards, next_states, dones)
 
 
   def train_lower_level(self, state, action, reward, next_state, done):
@@ -382,7 +388,7 @@ class AIAgent:
     # Save this experience into the lower level, so when it's promoted
     # it will have the added benefit of this training experience.
     if self.cur_score > 0:
-      self.level[self.cur_score - 1]['memory'].pop()
+      self.level[self.cur_score - 1]['memory']
       self.level[self.cur_score - 1]['trainer'].train_step(state, action, reward, next_state, done)
       self.level[self.cur_score - 1]['memory'].append((state, action, reward, next_state, done))
 
@@ -393,8 +399,9 @@ class AIAgent:
       self.add_level(score)
     # Execute the training step
     self.level[score]['trainer'].train_step(state, action, reward, next_state, done)
-    if score == 1:
-      self.level[0]['trainer'].train_step(state, action, reward, next_state, done)
+    # Also execute for the level below us
+    if score != 0:
+      self.level[score - 1]['trainer'].train_step(state, action, reward, next_state, done)
 
     
 

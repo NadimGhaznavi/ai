@@ -213,6 +213,7 @@ def train():
           game.set_lose_reason(lose_reason)
           ini.set_value('lose_reason', lose_reason) 
           agent.ini.save_sim_desc()
+          
           print_game_summary(ini, agent, score, record, game)
           my_plot.save()
           game.quit_game()
