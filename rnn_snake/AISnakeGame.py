@@ -103,7 +103,6 @@ class AISnakeGame():
         self.move(action) # update the head
         self.snake.insert(0, self.head)
         self.board.update_snake(self.snake, self.direction)
-       
 
         # 3. check if game over, track the reward and the reason the game ended
         reward = 0
@@ -129,6 +128,7 @@ class AISnakeGame():
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'exceeded_max_moves_count')
             return reward, game_over, self.stats.get('game', 'score')
+
         # 4. Place new food or just move
         if self.head == self.food:
             self.stats.incr('game', 'score')
@@ -144,7 +144,6 @@ class AISnakeGame():
         self.board.update_food(self.food)
         self.board.update_score(self.stats.get('game', 'score'))
         self.board.refresh()
-
         # 6. return game over, reward and the reason
         return reward, game_over, self.stats.get('game', 'score')
 

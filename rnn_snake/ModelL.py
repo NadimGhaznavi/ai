@@ -13,18 +13,18 @@ class ModelL(nn.Module):
         input_size = ini.get('linear_input_size')
         hidden_size = ini.get('hidden_size')
         output_size = ini.get('output_size')
-        self.m_in = nn.Linear(input_size, hidden_size)
-        self.m_hid = nn.Linear(hidden_size, hidden_size)
-        self.m_out = nn.Linear(hidden_size, output_size)
+        main_block = nn.Sequential()
+        main_block.append(nn.Linear(input_size, hidden_size))
+        main_block.append(nn.ReLU())
+        main_block.append(nn.Linear(hidden_size, hidden_size))
+        main_block.append(nn.Linear(hidden_size, output_size))
+        self.main_block = main_block
         self.stats.set('model', 'steps', 0)
         self.log.log("ModelL initialization:      [OK]")
 
     def forward(self, x):
         self.stats.incr('model', 'steps')
-        x = self.m_in(x)
-        x = F.relu(self.m_hid(x))
-        x = self.m_out(x)
-        
+        x = self.main_block(x)
         return x
     
     def get_steps(self):

@@ -3,6 +3,7 @@ AIAgent.py
 """
 
 import torch
+import time
 from ModelL import ModelL
 from ModelRNN import ModelRNN
 from ReplayMemory import ReplayMemory
@@ -47,6 +48,8 @@ class AIAgent:
         self.epsilon_algo.played_game()
         if self.ini.get('model') == 'rnn':
             self.model.reset_x()
+        self.trainer.reset_steps()
+        self.stats.set('agent', 'score', score)
  
     def remember(self, state, action, reward, next_state, done):
         # Store the state, action, reward, next_state, and done in memory
@@ -59,6 +62,7 @@ class AIAgent:
 
     def train_long_memory(self):
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
+
         mini_sample = self.memory.get_memory()
         states, actions, rewards, next_states, dones = zip(*mini_sample)
         self.trainer.train_step(states, actions, rewards, next_states, dones)

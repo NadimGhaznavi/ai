@@ -2,6 +2,7 @@ import torch.optim as optim
 import torch.nn as nn
 import torch
 import numpy as np
+import time
 
 class AITrainer():
 
@@ -19,9 +20,11 @@ class AITrainer():
         self.steps = 0
         self.total_steps = 0
         self.cur_loss = 0.0
-        torch.autograd.set_detect_anomaly(True)
+        #torch.autograd.set_detect_anomaly(True)
         torch.manual_seed(ini.get('random_seed'))
 
+    def reset_steps(self):
+        self.steps = 0
 
     def train_step(self, state, action, reward, next_state, game_over):
         state = torch.tensor(np.array(state), dtype=torch.float)
@@ -40,7 +43,6 @@ class AITrainer():
             game_over = (game_over, )
         #print("DEBUG: game_over: ", game_over)
         #print("DEBUG: type(game_over): ", type(game_over))
-
         # 1. predicted Q values with current state
         pred = self.model(state)
 
@@ -67,12 +69,11 @@ class AITrainer():
                 Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
                 #print("DEBUG Q_new: ", Q_new)
             target[idx][torch.argmax(action).item()] = Q_new
-            
 
         self.optimizer.zero_grad() # Reset the gradients to zero
         loss = self.criterion(target, pred) # Calculate the loss
-        loss.backward(retain_graph=True) # Backpropagate the loss
-        #loss.backward()
+        #loss.backward(retain_graph=True) # Backpropagate the loss
+        loss.backward()
         self.optimizer.step() # Adjust the weights
 
             

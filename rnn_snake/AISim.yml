@@ -1,6 +1,6 @@
 default:
   ai_version_file: next_ai_version.txt
-  batch_size: 128
+  batch_size: 1000
   board_height: 20
   board_width: 20
   board_square: 20
@@ -8,13 +8,13 @@ default:
   discount: 0.83
   epsilon_enabled: 1
   epsilon_print_stats: 1
-  epsilon_value: 120
+  epsilon_value: 60
   game_speed: 500
   headless: 0
-  hidden_size: 400
+  hidden_size: 150
   input_size: 400
-  linear_input_size: 45
   learning_rate: 0.001
+  linear_input_size: 45
   log_basename: _log.txt
   matplot_max_x: 1000
   max_epochs: 0

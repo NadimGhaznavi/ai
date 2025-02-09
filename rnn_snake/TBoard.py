@@ -42,6 +42,11 @@ class TBoard():
         self.init_pygame()
         self.log.log('TBoard initialization:      [OK]')
 
+    def decr_speed(self):
+        speed = self.ini.get('game_speed')
+        print("Decreasing game speed to " + str(speed - 10))
+        self.ini.set('game_speed',speed - 10)
+
     def delete_food(self, food):
         if food:
             x = int(food.x)
@@ -179,7 +184,7 @@ class TBoard():
 
     def quit_game(self):
         self.pygame.quit()
-        quit()
+        #quit()
 
     def refresh(self):
         self.clock.tick(self.ini.get('game_speed'))
@@ -190,11 +195,6 @@ class TBoard():
         speed = self.ini.get('game_speed')
         print("Increasing game speed to " + str(speed + 10))
         self.ini.set('game_speed',speed + 10)
-
-    def decr_speed(self):
-        speed = self.ini.get('game_speed')
-        print("Decreasing game speed to " + str(speed - 10))
-        self.ini.set('game_speed',speed - 10)
 
     def update_score(self, score):
         text = self.font.render("Score: " + str(score - 1), True, BLACK)

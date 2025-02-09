@@ -32,13 +32,8 @@ class ReplayMemory():
     return False
 
   def get_memory(self):
-    if len(self.memory) > self.batch_size:
-      short_memory = deque([], maxlen=self.batch_size)
-      count = 0
-      while count < self.batch_size:
-        short_memory.append(self.memory[count])
-        count += 1  
-      return short_memory
+    if len(self.memory) >= self.batch_size:
+      return random.sample(self.memory, self.batch_size)
     else:
       return self.memory
     

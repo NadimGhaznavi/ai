@@ -35,7 +35,7 @@ class EpsilonAlgo():
     if not self.enabled:
       self.ini.set_value('epsilon_print_stats', 'False')
     else:
-      self.stats.set('epsilon', 'status', f'New instance with epsilon value of {self.epsilon_value}')
+      self.stats.set('epsilon', 'status', f'Epsilon greedy initialized with value of {self.epsilon_value}')
 
   def __str__(self):
     str_val = ''

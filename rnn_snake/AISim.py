@@ -4,6 +4,7 @@ from SimPlot import SimPlot
 from SimStats import SimStats
 from AIAgent import AIAgent
 from AISnakeGame import AISnakeGame
+import time
 
 def cleanup(agent, plot):
     agent.cleanup()
@@ -32,7 +33,6 @@ def train():
     agent = AIAgent(config, log, stats)
     game = AISnakeGame(config, log, stats)
     plot = SimPlot(config, log, stats)
-    
     game.reset() # Reset the game
     in_progress = True
     while in_progress:
@@ -43,22 +43,18 @@ def train():
         new_state = game.board.get_state() # Get the new state
         agent.train_short_memory(old_state, move, reward, new_state, game_over) # Train short memory
         agent.remember(old_state, move, reward, new_state, game_over) # Remember
-
         if game_over:
             if config.get('max_epochs') and config.get('max_epochs') == stats.get('game', 'num_games'):
                 in_progress = False # Reached max epochs
                 log.log("Reached max epochs (" + str(config.get('max_epochs')) + "), exiting")
-            
             # Track how often a specific score has been reached
             stats.incr('scores', score)
             # Track the scores for each game
             stats.append('scores', 'all', score)
-
             agent.train_long_memory()
             if score > stats.get('game', 'highscore'):
                 # New highscore!!! YAY!
                 stats.set('game', 'highscore', score)
-
             game.reset() # Reset the game
             agent.played_game(score) # Update the agent
             print_stats(log, stats, agent) # Print some stats
