@@ -19,6 +19,8 @@ class AITrainer():
         self.steps = 0
         self.total_steps = 0
         self.cur_loss = 0.0
+        torch.autograd.set_detect_anomaly(True)
+        torch.manual_seed(ini.get('random_seed'))
 
 
     def train_step(self, state, action, reward, next_state, game_over):
@@ -65,8 +67,11 @@ class AITrainer():
             target[idx][torch.argmax(action).item()] = Q_new
             
 
-            self.optimizer.zero_grad() # Reset the gradients to zero
-            loss = self.criterion(target, pred) # Calculate the loss
-            self.cur_loss = loss.item()
-            loss.backward(retain_graph=True) # Backpropagate the loss
-            self.optimizer.step() # Adjust the weights
+        self.optimizer.zero_grad() # Reset the gradients to zero
+        loss = self.criterion(target, pred) # Calculate the loss
+        loss.backward() # Backpropagate the loss
+        #loss.backward()
+        self.optimizer.step() # Adjust the weights
+
+            
+            

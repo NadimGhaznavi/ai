@@ -4,6 +4,7 @@ AIAgent.py
 
 import torch
 from ModelL import ModelL
+from ModelRNN import ModelRNN
 from ReplayMemory import ReplayMemory
 from EpsilonAlgo import EpsilonAlgo
 from AITrainer import AITrainer
@@ -13,12 +14,21 @@ class AIAgent:
         self.ini = ini
         self.log = log
         self.stats = stats
-        self.model = ModelL(ini, log, stats)
+        if ini.get('model') == 'linear':
+            self.model = ModelL(ini, log, stats)
+        elif ini.get('model') == 'rnn':
+            self.model = ModelRNN(ini, log, stats)
+        else:
+            raise Exception(f"Unknown model type {ini.get('model')}")
         self.epsilon_algo = EpsilonAlgo(ini, log, stats)
         self.memory = ReplayMemory(ini)
         self.trainer = AITrainer(ini, log, stats, self.model)
         self.log.log('AIAgent initialization:     [OK]')
         self.last_dirs = [ 0, 0, 1, 0 ]
+
+    def cleanup(self):
+        self.stats.save()
+        self.ini.save()
 
     def get_move(self, state):
         random_move = self.epsilon_algo.get_move()
@@ -48,6 +58,7 @@ class AIAgent:
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
         mini_sample = self.memory.get_memory()
         states, actions, rewards, next_states, dones = zip(*mini_sample)
+        self.trainer.train_step(states, actions, rewards, next_states, dones)
 
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)

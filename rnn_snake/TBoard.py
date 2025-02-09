@@ -104,7 +104,9 @@ class TBoard():
         y = int(food.y)
         block_size = self.block_size
         self.board[x][y] = FOOD_VALUE
-        self.pygame.draw.rect(self.display, RED, [x * block_size, y * block_size, block_size, block_size])
+        self.pygame.draw.rect(self.display, GREEN, [x * block_size, y * block_size, block_size, block_size])
+        self.pygame.draw.rect(self.display, RED, [(x * block_size) + 2, (y * block_size) + 2, block_size - 4, block_size - 4])
+    
     
     def update_snake(self, snake):
         # Remove the old snake
@@ -119,7 +121,7 @@ class TBoard():
             if x >= 0 and x < self.width and y >= 0 and y < self.height:
                 self.board[x][y] = SNAKE_VALUE
                 self.pygame.draw.rect(self.display, GREEN, [x * block_size, y * block_size, block_size, block_size])
-                self.pygame.draw.rect(self.display, BLUE, [(x * block_size) + 2, (y * block_size + 2), block_size - 4, block_size - 4])
+                self.pygame.draw.rect(self.display, BLUE, [(x * block_size) + 2, (y * block_size) + 2, block_size - 4, block_size - 4])
 
     def reset(self):
         self.display.fill(BLACK)

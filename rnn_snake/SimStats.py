@@ -1,7 +1,9 @@
 """
 SimStats.py
 """
+import os
 import sys
+import yaml
 
 class SimStats:
     def __init__(self, ini, log):
@@ -9,6 +11,9 @@ class SimStats:
         self.log = log
         self.stats = {}
         self.log.log('SimStats initialization:    [OK]')
+
+    def __del__(self):
+        self.save()
 
     def incr(self, category, key):
         if category not in self.stats:
@@ -26,4 +31,14 @@ class SimStats:
 
     def get(self, category, key):
         return self.stats[category][key]
+    
+    def save(self):
+        # Generate simulation specific file
+        DATA_DIR = self.ini.get('sim_data_dir')
+        SIM_NUM = str(self.ini.get('sim_num'))
+        STATS_BASENAME = self.ini.get('stats_basename')
+        STATS_FILE = os.path.join(DATA_DIR, SIM_NUM + STATS_BASENAME)
+        print("DEBUG self.stats", self.stats)
+        with open(STATS_FILE, 'w') as file:
+            yaml.dump(self.stats, file)
     

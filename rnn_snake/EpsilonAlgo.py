@@ -31,8 +31,7 @@ class EpsilonAlgo():
     self.num_games = 0
     self.injected = 0
     self.depleted = False
-    self.stats.set('epsilon', 'status', self)
-
+    
     if not self.enabled:
       self.ini.set_value('epsilon_print_stats', 'False')
     else:
@@ -57,7 +56,8 @@ class EpsilonAlgo():
       rand_move[rand_idx] = 1
       self.injected += 1
       return rand_move
-    self.stats.set('epsilon', 'status', self)
+    str_val = 'injected# {:>3}, units# {:>3}'.format(self.injected, self.epsilon)
+    self.stats.set('epsilon', 'status', str_val)
     return False
   
   def played_game(self):

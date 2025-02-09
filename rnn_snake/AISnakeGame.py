@@ -28,8 +28,6 @@ class AISnakeGame():
         self.stats.set('game', 'snake_collision_count', 0)
         self.stats.set('game', 'exceeded_max_moves_count', 0)
         self.stats.set('game', 'lose_reason', '')
-
-
                        
     def move(self, action):
         self.stats.incr('game', 'game_moves')
@@ -131,6 +129,7 @@ class AISnakeGame():
     def reset(self):
         self.board.reset()
         self.stats.set('game', 'game_time', round(time() - self.stats.get('game', 'start_time'), 2))
+        self.stats.set('game', 'last_score', self.stats.get('game', 'score'))
         self.stats.set('game', 'score', 0)
         self.stats.set('game', 'game_moves', 0)
         self.stats.set('game', 'start_time', time())
