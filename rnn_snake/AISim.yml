@@ -1,0 +1,32 @@
+default:
+  ai_version_file: next_ai_version.txt
+  batch_size: 64
+  board_height: 20
+  board_width: 20
+  board_square: 40
+  data_dir: sim_data
+  discount: 0.83
+  epsilon_enabled: 1
+  epsilon_print_stats: 1
+  epsilon_value: 400
+  game_speed: 500
+  headless: 0
+  hidden_size: 400
+  input_size: 400
+  learning_rate: 0.001
+  log_basename: _log.txt
+  matplot_max_x: 1000
+  max_moves: 100
+  max_memory: 100000
+  next_num_file: next_num.txt
+  output_size: 3
+  random_seed: 1970
+  reward_food: 20
+  reward_excessive_move: -20
+  reward_wall_collision: -20
+  reward_snake_collision: -20
+  sim_highscore_basename: _highscore.csv
+  sim_num: 1000
+  sim_plot_basename: _plot.png
+  status_iter: 50
+  game_title: AI Snake Game
