@@ -8,8 +8,8 @@ import pygame
 # Colors
 WHITE = (255, 255, 255)
 RED = (200,0,0)
-BLUE = (0,0,255)
-GREEN = (0,255,0)
+BLUE = (0,0,200)
+GREEN = (0,200,0)
 YELLOW = (255,0,255)
 BLACK = (0,0,0)
 GREY = (25,25,25)
@@ -21,6 +21,7 @@ SNAKE_VALUE = 0.99
 
 class TBoard():
     def __init__(self, ini, log, stats, pygame):
+        torch.manual_seed(ini.get('random_seed'))
         self.ini = ini
         self.log = log
         self.stats = stats
@@ -66,7 +67,7 @@ class TBoard():
         # The pygame display screen
         self.display = self.pygame.display.set_mode((self.width * self.block_size, self.height * self.block_size))
         # Set the title of the window
-        self.pygame.display.set_caption(self.ini.get('game_title'))
+        self.pygame.display.set_caption(self.ini.get('game_title') + ' (v' + str(self.ini.get('sim_num')) + ')')
         
     def is_snake_collision(self):
         if self.head in self.snake[1:]:

@@ -6,6 +6,7 @@ import torch.nn.functional as F
 class ModelL(nn.Module):
     def __init__(self, ini, log, stats):
         super(ModelL, self).__init__()
+        torch.manual_seed(ini.get('random_seed'))
         self.ini = ini
         self.log = log
         self.stats = stats
@@ -23,6 +24,7 @@ class ModelL(nn.Module):
         x = self.m_in(x)
         x = F.relu(self.m_hid(x))
         x = self.m_out(x)
+        
         return x
     
     def get_steps(self):

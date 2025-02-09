@@ -58,6 +58,21 @@ class AISnakeGame():
             y -= 1
         return Point(x, y)  
         
+    def pause_game(self):
+        is_paused = True
+        print("Game paused...")
+        print(" - SPACE bar to resume")
+        print(" - q to quit")
+        while is_paused:
+            for event in self.pygame.event.get():
+                if event.type == self.pygame.QUIT:
+                    self.quit_game()
+                if event.type == self.pygame.KEYDOWN:
+                    if event.key == self.pygame.K_SPACE:
+                        is_paused = False
+                    if event.key == self.pygame.K_q:
+                        self.quit_game()
+
     def place_food(self):
         x = random.randint(0, self.ini.get('board_width') - 1) 
         y = random.randint(0, self.ini.get('board_height') - 1)
@@ -71,6 +86,9 @@ class AISnakeGame():
         for event in self.pygame.event.get():
             if event.type == self.pygame.QUIT:
                 self.quit_game()
+            if event.type == self.pygame.KEYDOWN:
+                if event.key == self.pygame.K_p:
+                    self.pause_game()
 
         # 2. move
         self.move(action) # update the head

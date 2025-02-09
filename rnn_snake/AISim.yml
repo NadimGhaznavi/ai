@@ -22,12 +22,14 @@ default:
   model: linear
   next_num_file: next_num.txt
   output_size: 3
+  plot_basename: _plot.png
+  plot_dir: sim_plots
   random_seed: 1970
   reward_food: 20
   reward_excessive_move: -20
   reward_wall_collision: -20
   reward_snake_collision: -20
-  rnn_layers: 10
+  rnn_layers: 5
   sim_highscore_basename: _highscore.csv
   sim_num: 1000
   sim_plot_basename: _plot.png

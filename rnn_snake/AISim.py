@@ -1,11 +1,14 @@
 from SimConfig import SimConfig
 from SimLogger import SimLogger
+from SimPlot import SimPlot
 from SimStats import SimStats
 from AIAgent import AIAgent
 from AISnakeGame import AISnakeGame
 
-def cleanup(agent):
+def cleanup(agent, plot):
     agent.cleanup()
+    plot.save()
+    print('Simulation complete. Results in ' + agent.ini.get('sim_data_dir') + '.')
 
 def train():
     """
@@ -28,6 +31,7 @@ def train():
     stats = SimStats(config, log)
     agent = AIAgent(config, log, stats)
     game = AISnakeGame(config, log, stats)
+    plot = SimPlot(config, log, stats)
     
     game.reset() # Reset the game
     in_progress = True
@@ -42,22 +46,29 @@ def train():
 
         if game_over:
             if config.get('max_epochs') and config.get('max_epochs') == stats.get('game', 'num_games'):
-                in_progress = False
+                in_progress = False # Reached max epochs
                 log.log("Reached max epochs (" + str(config.get('max_epochs')) + "), exiting")
-            game.reset() # Reset the game
+            
+            # Track how often a specific score has been reached
+            stats.incr('scores', score)
+            # Track the scores for each game
+            stats.append('scores', 'all', score)
 
             agent.train_long_memory()
             if score > stats.get('game', 'highscore'):
                 # New highscore!!! YAY!
                 stats.set('game', 'highscore', score)
 
-            agent.played_game(score)
-            print_stats(log, stats, agent)
-    cleanup(agent)
+            game.reset() # Reset the game
+            agent.played_game(score) # Update the agent
+            print_stats(log, stats, agent) # Print some stats
+            plot.plot() # Plot some stats
+
+    cleanup(agent, plot)
 
 def print_stats(log, stats, agent):
     summary = ''
-    summary += 'AISim: Game {:<4}'.format(stats.get('game', 'num_games'))
+    summary += 'AISim (v' + str(agent.ini.get('sim_num')) + '): Game {:<4}'.format(stats.get('game', 'num_games'))
     summary += ' Score: {:<2}'.format(stats.get('game', 'last_score'))
     summary += ' Time(s): {:5.2f}'.format(stats.get('game', 'game_time'))
     summary += ' Highscore: {:<3}'.format(stats.get('game', 'highscore'))

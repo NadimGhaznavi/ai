@@ -6,6 +6,7 @@ import torch.nn.functional as F
 class ModelRNN(nn.Module):
     def __init__(self, ini, log, stats):
         super(ModelRNN, self).__init__()
+        torch.manual_seed(ini.get('random_seed'))
         self.ini = ini
         self.log = log
         self.stats = stats
