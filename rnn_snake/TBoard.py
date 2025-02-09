@@ -4,6 +4,7 @@ TBoard.py
 import torch
 import numpy as np
 import pygame
+from GameElements import Direction, Point
 
 # Colors
 WHITE = (255, 255, 255)
@@ -31,8 +32,11 @@ class TBoard():
         self.width = ini.get('board_width') # Board width in squares
         self.height = ini.get('board_height') # Board height in squares
         self.board = torch.from_numpy(np.zeros((self.width, self.height), dtype=np.float32))
-        self.food = None # Initialize food
+        self.food = Point(3,3) # Initialize food to a random location
         self.snake = None # Initialize snake
+        self.head = Point(self.width/2, self.height/2) # Initialize head
+        self.direction = Direction.RIGHT
+        self.last_dirs = [ 0, 0, 1, 0 ]
         # Setup pygme
         self.clock = None # Pygame clock
         self.init_pygame()
@@ -56,8 +60,91 @@ class TBoard():
                     self.board[x][y] = EMPTY_VALUE
                     self.pygame.draw.rect(self.display, BLACK, [x * block_size, y * block_size, block_size, block_size])
 
+    def get_binary(self, num):
+        # This is used in the state map, the get_state() function.
+        bin_str = format(num, 'b')
+        out_list = []
+        for bit in range(len(bin_str)):
+            out_list.append(bin_str[bit])
+        for zero in range(7 - len(out_list)):
+            out_list.insert(0, '0')
+        for x in range(7):
+            out_list[x] = int(out_list[x])
+        return out_list
+
     def get_state(self):
-        return self.board.reshape(1, -1)[0]
+        if self.ini.get('model') == 'rnn':
+            return self.board.reshape(1, -1)[0]
+        else:
+            head = self.head
+            direction = self.direction
+            point_l = Point(head.x - 20, head.y)
+            point_r = Point(head.x + 20, head.y)
+            point_u = Point(head.x, head.y - 20)
+            point_d = Point(head.x, head.y + 20)
+            dir_l = direction == Direction.LEFT
+            dir_r = direction == Direction.RIGHT
+            dir_u = direction == Direction.UP
+            dir_d = direction == Direction.DOWN
+            slb = self.get_binary(len(self.snake))
+
+            state = [
+                # Wall collision straight ahead
+                (dir_r and self.is_wall_collision(point_r)),
+                (dir_l and self.is_wall_collision(point_l)),
+                (dir_u and self.is_wall_collision(point_u)),
+                (dir_d and self.is_wall_collision(point_d)),
+
+                # Wall collision to the right
+                (dir_u and self.is_wall_collision(point_r)),
+                (dir_d and self.is_wall_collision(point_l)),
+                (dir_l and self.is_wall_collision(point_u)),
+                (dir_r and self.is_wall_collision(point_d)),
+
+                # Wall collision to the left
+                (dir_d and self.is_wall_collision(point_r)),
+                (dir_u and self.is_wall_collision(point_l)),
+                (dir_r and self.is_wall_collision(point_u)),
+                (dir_l and self.is_wall_collision(point_d)),
+
+                # Snake collision straight ahead
+                (dir_r and self.is_snake_collision(point_r)),
+                (dir_l and self.is_snake_collision(point_l)),
+                (dir_u and self.is_snake_collision(point_u)),
+                (dir_d and self.is_snake_collision(point_d)),
+
+                # Snake collision to the right
+                (dir_u and self.is_snake_collision(point_r)),
+                (dir_d and self.is_snake_collision(point_l)),
+                (dir_l and self.is_snake_collision(point_u)),
+                (dir_r and self.is_snake_collision(point_d)),
+
+                # Snake collision to the left
+                (dir_d and self.is_snake_collision(point_r)),
+                (dir_u and self.is_snake_collision(point_l)),
+                (dir_r and self.is_snake_collision(point_u)),
+                (dir_l and self.is_snake_collision(point_d)),
+
+                # Move direction
+                dir_l, dir_r, dir_u, dir_d,
+
+                # Food location
+                self.food.x < self.head.x, # Food left
+                self.food.x > self.head.x, # Food right
+                self.food.y < self.head.y, # Food up
+                self.food.y > self.head.y, # Food down
+                self.food.x == self.head.x, # Food ahead or behind
+                self.food.y == self.head.y, # Food above or below
+
+                # Snake length in binary using 7 bits
+                slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6],
+            ]
+            # Previous direction of the snake
+            for aDir in self.last_dirs:
+                state.append(aDir)
+            self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
+            return torch.from_numpy(np.array(state, dtype=np.float32))
+
 
     def init_pygame(self):
         # Setup the clock
@@ -69,15 +156,23 @@ class TBoard():
         # Set the title of the window
         self.pygame.display.set_caption(self.ini.get('game_title') + ' (v' + str(self.ini.get('sim_num')) + ')')
         
-    def is_snake_collision(self):
-        if self.head in self.snake[1:]:
+    def is_snake_collision(self, pt=None):
+        if not pt:
+            pt = self.head
+        if pt in self.snake[1:]:
             self.stats.incr('game', 'snake_collision_count')
             return True
         return False
 
-    def is_wall_collision(self):
-        if self.head.x > self.width or self.head.x < 0 or \
-            self.head.y > self.height or self.head.y < 0:
+    def is_wall_collision(self, pt=None):
+        if not pt:
+            x = self.head.x
+            y = self.head.y
+        else:
+            x = pt.x
+            y = pt.y
+        if x > self.width or x < 0 or \
+            y > self.height or y < 0:
             self.stats.incr('game', 'wall_collision_count')
             return True
         return False
@@ -90,6 +185,16 @@ class TBoard():
         self.clock.tick(self.ini.get('game_speed'))
         self.pygame.display.flip()
         self.pygame.display.update()
+
+    def incr_speed(self):
+        speed = self.ini.get('game_speed')
+        print("Increasing game speed to " + str(speed + 10))
+        self.ini.set('game_speed',speed + 10)
+
+    def decr_speed(self):
+        speed = self.ini.get('game_speed')
+        print("Decreasing game speed to " + str(speed - 10))
+        self.ini.set('game_speed',speed - 10)
 
     def update_score(self, score):
         text = self.font.render("Score: " + str(score - 1), True, BLACK)
@@ -108,8 +213,8 @@ class TBoard():
         self.pygame.draw.rect(self.display, GREEN, [x * block_size, y * block_size, block_size, block_size])
         self.pygame.draw.rect(self.display, RED, [(x * block_size) + 2, (y * block_size) + 2, block_size - 4, block_size - 4])
     
-    
-    def update_snake(self, snake):
+    def update_snake(self, snake, direction):
+        self.direction = direction
         # Remove the old snake
         self.delete_snake(snake)
         # Add the new snake

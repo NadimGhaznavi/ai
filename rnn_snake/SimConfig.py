@@ -34,6 +34,8 @@ class SimConfig():
             self.set('epsilon_value', args.epsilon)
         if args.max_epochs:
             self.set('max_epochs', args.max_epochs)
+        if args.model:
+            self.set('model', args.model)
         if args.speed:
             self.set('game_speed', args.speed)
 

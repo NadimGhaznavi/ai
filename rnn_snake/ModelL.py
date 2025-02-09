@@ -10,7 +10,7 @@ class ModelL(nn.Module):
         self.ini = ini
         self.log = log
         self.stats = stats
-        input_size = ini.get('input_size')
+        input_size = ini.get('linear_input_size')
         hidden_size = ini.get('hidden_size')
         output_size = ini.get('output_size')
         self.m_in = nn.Linear(input_size, hidden_size)

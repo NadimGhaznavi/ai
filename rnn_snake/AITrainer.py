@@ -57,19 +57,21 @@ class AITrainer():
             Q_new = reward[idx]
             #print("DEBUG target[idx]: ", target[idx])
             #print("DEBUG Q_new: ", Q_new)
-            if not game_over[idx]:
-                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
-                #print("DEBUG Q_new: ", Q_new)
             #print("DEBUG action: ", action)
+            #print("DEBUG target: ", target)
             #print("DEBUG target[idx]: ", target[idx])
             #print("DEBUG torch.argmax(action).item(): ", torch.argmax(action).item())
             #print("DEBUG target[idx][torch.argmax(action).item()]: ", target[idx][torch.argmax(action).item()])
+            
+            if not game_over[idx]:
+                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
+                #print("DEBUG Q_new: ", Q_new)
             target[idx][torch.argmax(action).item()] = Q_new
             
 
         self.optimizer.zero_grad() # Reset the gradients to zero
         loss = self.criterion(target, pred) # Calculate the loss
-        loss.backward() # Backpropagate the loss
+        loss.backward(retain_graph=True) # Backpropagate the loss
         #loss.backward()
         self.optimizer.step() # Adjust the weights
 

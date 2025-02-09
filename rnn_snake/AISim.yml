@@ -8,11 +8,12 @@ default:
   discount: 0.83
   epsilon_enabled: 1
   epsilon_print_stats: 1
-  epsilon_value: 80
+  epsilon_value: 120
   game_speed: 500
   headless: 0
   hidden_size: 400
   input_size: 400
+  linear_input_size: 45
   learning_rate: 0.001
   log_basename: _log.txt
   matplot_max_x: 1000

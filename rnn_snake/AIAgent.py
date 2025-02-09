@@ -11,6 +11,7 @@ from AITrainer import AITrainer
 
 class AIAgent:
     def __init__(self, ini, log, stats):
+        torch.manual_seed(ini.get('random_seed'))
         self.ini = ini
         self.log = log
         self.stats = stats
@@ -41,9 +42,11 @@ class AIAgent:
         move = torch.argmax(prediction).item() # Get the move
         final_move[move] = 1 # Set the move
         return final_move # Return
-    
+        
     def played_game(self, score):
         self.epsilon_algo.played_game()
+        if self.ini.get('model') == 'rnn':
+            self.model.reset_x()
  
     def remember(self, state, action, reward, next_state, done):
         # Store the state, action, reward, next_state, and done in memory

@@ -18,6 +18,9 @@ class AISnakeGame():
         self.init_stats()
         random.seed(ini.get('random_seed'))
 
+    def get_direction(self):
+        return self.direction
+    
     def init_stats(self):
         self.stats.set('game', 'score', 0)
         self.stats.set('game', 'num_games', 0)
@@ -63,6 +66,8 @@ class AISnakeGame():
         print("Game paused...")
         print(" - SPACE bar to resume")
         print(" - q to quit")
+        print(" - a to increase speed")
+        print(" - z to decrease speed")
         while is_paused:
             for event in self.pygame.event.get():
                 if event.type == self.pygame.QUIT:
@@ -72,6 +77,10 @@ class AISnakeGame():
                         is_paused = False
                     if event.key == self.pygame.K_q:
                         self.quit_game()
+                    if event.key == self.pygame.K_a:
+                        self.board.incr_speed()
+                    if event.key == self.pygame.K_z:
+                        self.board.decr_speed()
 
     def place_food(self):
         x = random.randint(0, self.ini.get('board_width') - 1) 
@@ -93,7 +102,7 @@ class AISnakeGame():
         # 2. move
         self.move(action) # update the head
         self.snake.insert(0, self.head)
-        self.board.update_snake(self.snake)
+        self.board.update_snake(self.snake, self.direction)
        
 
         # 3. check if game over, track the reward and the reason the game ended
@@ -131,7 +140,7 @@ class AISnakeGame():
         
         # 5. update the ui and clock
         self.board.reset()
-        self.board.update_snake(self.snake)
+        self.board.update_snake(self.snake, self.direction)
         self.board.update_food(self.food)
         self.board.update_score(self.stats.get('game', 'score'))
         self.board.refresh()
@@ -156,7 +165,7 @@ class AISnakeGame():
         self.direction = Direction.RIGHT
         self.head = Point(self.board.width/2, self.board.height/2)
         self.snake = [self.head, Point(self.head.x - 1, self.head.y), Point(self.head.x - 2, self.head.y)]
-        self.board.update_snake(self.snake)
+        self.board.update_snake(self.snake, self.direction)
         self.place_food()
         self.board.update_food(self.food)
 
