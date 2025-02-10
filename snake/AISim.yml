@@ -37,7 +37,7 @@ default:
   reward_excessive_move: -20
   reward_wall_collision: -20
   reward_snake_collision: -20
-  rnn_layers: 5
+  rnn_layers: 1
   sim_highscore_basename: _highscore.csv
   sim_num: 1000
   sim_plot_basename: _plot.png

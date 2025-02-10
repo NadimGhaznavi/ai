@@ -10,7 +10,7 @@ class ModelRNN(nn.Module):
         self.ini = ini
         self.log = log
         self.stats = stats
-        input_size = ini.get('input_size')
+        input_size = ini.get('linear_input_size')
         hidden_size = ini.get('hidden_size')
         output_size = ini.get('output_size')
         rnn_layers = ini.get('rnn_layers')
@@ -20,9 +20,22 @@ class ModelRNN(nn.Module):
         self.stats.set('model', 'steps', 0)
         self.x = None
         self.x_count = 0
-        self.log.log("ModelL initialization:      [OK]")
+        self.log.log("ModelRNN initialization:    [OK]")
 
     def forward(self, x):
+        #print("DEBUG self.x_count: ", self.x_count)
+        x = F.relu(self.m_in(x))
+        # Parameters are: x.view(batch_size, sequence_length, input_size)
+        #inputs = x.view(1, -1, self.ini.get('hidden_size'))
+        inputs = x.view(1, -1, self.ini.get('hidden_size'))
+        #print("DEBUG inputs.shape: ", inputs.shape)
+        x, h_n = self.m_rnn(inputs)
+        x = self.m_out(x)
+        #print("DEBUG x.shape: ", x.shape)
+        #return x[len(x) - 1]
+        return x[0]
+
+    def forward2(self, x):
         self.stats.incr('model', 'steps')
         print("DEBUG self.x_count: ", self.x_count)
         x = F.relu(self.m_in(x))
@@ -37,7 +50,7 @@ class ModelRNN(nn.Module):
             print("DEBUG after       x.size(): ", x.size())
             print("DEBUG before self.x.size(): ", self.x.size())
             for row in x:
-                self.x = torch.cat((self.x, row.unsqueeze(0)), 0)
+                self.x = torch.cat((self.x, row), 0)
                 self.x_count += 1
         
             print("DEBUG after  self.x.size(): ", self.x.size())

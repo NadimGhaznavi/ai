@@ -78,7 +78,7 @@ class TBoard():
         return out_list
 
     def get_state(self):
-        if self.ini.get('model') == 'rnn' or self.ini.get('model') == 't':
+        if self.ini.get('model') == 't':
             return self.board.reshape(1, -1)[0]
 
         head = self.head
@@ -181,8 +181,8 @@ class TBoard():
         else:
             x = pt.x
             y = pt.y
-        if x > self.width or x < 0 or \
-            y > self.height or y < 0:
+        if x >= self.width or x < 0 or \
+            y >= self.height or y < 0:
             self.stats.incr('game', 'wall_collision_count')
             return True
         return False
