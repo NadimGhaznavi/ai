@@ -33,15 +33,20 @@ class SimPlot():
     # Only plot the horizontal lines if there is a score that is equal to or greater than 10
     for y in range(10, 100, 10):
       if max(self.scores) >= y:
-        plt.axhline(y=y, color='r', linestyle=':')
+        self.axs[0].axhline(y=y, color='r', linestyle='solid')
+
+    for y in range(10, 1000, 10):
+      if max(self.bar_count) >= y:
+        self.axs[1].axhline(y=y, color='r', linestyle='solid')
+
     # Plot the scores and the mean scores
     #self.axs[0].set_ylim(ymin=0)
     self.axs[0].set_ylabel('Score')
-    self.axs[0].set_xlabel('Number of games')
+    self.axs[0].set_xlabel('Number of Games')
     self.axs[0].plot(self.games, self.scores, color='blue')
     self.axs[0].plot(self.games, self.mean_scores, color='green')
     # Create a bar chart of the scores
-    self.axs[1].set_ylabel('Number of Times')
+    self.axs[1].set_ylabel('Score Count')
     self.axs[1].set_xlabel('Score')
     self.axs[1].bar(self.bar_scores, self.bar_count, color='green')
 
