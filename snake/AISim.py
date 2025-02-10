@@ -1,239 +1,86 @@
-"""
-AISim.py
-
-The frontend to the AI Snake Game.
-
-"""
-import os, sys
-import matplotlib.pyplot as plt
-import torch.nn as nn
-import torch
-
-lib_dir = os.path.dirname(__file__)
-sys.path.append(lib_dir)
-from AISnakeGameConfig import AISnakeGameConfig
-from AISnakeGame import AISnakeGame
-from LinearQNet import LinearQNet
+from SimConfig import SimConfig
+from SimLogger import SimLogger
+from SimPlot import SimPlot
+from SimStats import SimStats
 from AIAgent import AIAgent
-#from AIAgentN import AIAgent
-from SnakeGamePlots import MyPlot
-from AILogger import AILogger
-from ReplayMemory import ReplayMemory
-from QTrainer import QTrainer
+from AISnakeGame import AISnakeGame
+import time
 
-def print_game_summary(ini, log, agent, score, record, game):
-  ai_version = ini.get('ai_version')
-  # Standard game summary metrics
-  summary = 'Snake AI (v' + str(ai_version) + ') ' + \
-    'Game' + '{:>5}'.format(game.get_game_num()) + ', ' + \
-    'Score' + '{:>4}'.format(score) + ', ' + \
-    'Highscore' + '{:>4}'.format(record) + ', ' + \
-    'Time ' + '{:>6}'.format(game.elapsed_time) + 's'
-
-  # Print the epsilon values
-  if ini.get('epsilon_print_stats') and agent.get_epsilon_value():
-    summary = summary + ', {}'.format(agent.get_epsilon())
-    agent.reset_epsilon_injected()
-
-  # Print the nu values
-  if ini.get('nu_print_stats') and agent.nu_algo.is_enabled():
-    summary = summary + ', {}'.format(agent.get_nu_algo())
-    agent.reset_nu_algo_injected()
-
-  # Model and trainer steps
-  if ini.get('steps_stats'):
-    summary = summary + ', ' + agent.get_model_steps(score)
-    summary = summary + ', ' + agent.get_trainer_steps(score)
-  if ini.get('steps_stats') or ini.get('steps_verbose'):
-    agent.reset_model_steps()
-    agent.reset_trainer_steps()
-
-  if ini.get('steps_stats_all'):
-    # All model and trainer steps and lose reason
-    summary = summary + ' - ' + game.lose_reason + '\n'
-    summary = summary + agent.get_all_steps()
-  else:
-    # Lose reason
-    summary = summary + ' - ' + game.lose_reason
-
-  agent.reset_model_steps()
-  agent.reset_trainer_steps()
-
-  log.log(summary)
-  agent.log_scores()
-
-def restart_simulation(agent, ini, log):
-  """
-  Restart a simulation. This involves checking for checkpoint files and
-  loading them if they exist.
-  """
-  data_dir = ini.get('sim_data_dir')
-  checkpoint_basename = ini.get('sim_checkpoint_basename')
-  for level in range(0, 99):
-    checkpoint_file = os.path.join(lib_dir, os.path.join(data_dir, str(ini.get('restart')) + '_L' + str(level) + checkpoint_basename))
-    print("Checking for checkpoint file (" + checkpoint_file, end='')
-    if os.path.isfile(checkpoint_file):
-      print(") [OK]")
-      model = LinearQNet(ini, log, level)
-      trainer = QTrainer(ini, model, level)
-      optimizer = trainer.optimizer
-      agent.level[level] = {}
-      agent.level[level]['model'] = model
-      agent.level[level]['memory'] = ReplayMemory(ini)
-      agent.level[level]['trainer'] = trainer
-      # Do the actual load
-      print(f"Loading L{level} checkpoint file: " + checkpoint_file)
-      checkpoint = torch.load(checkpoint_file, weights_only=False)
-      state_dict = checkpoint['model_state_dict']
-      model = agent.level[level]['model']
-      model.load_state_dict(state_dict)
-      optimizer = agent.level[level]['trainer'].optimizer
-      optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    else:
-      print(") [NOT FOUND]")
+def cleanup(agent, plot):
+    agent.cleanup()
+    plot.save()
+    print('Simulation complete. Results in ' + agent.ini.get('sim_data_dir') + '.')
 
 def train():
-  """
-  This is the AI Snake Game main training loop.
-  """
-  # Get the AI Snake Game configuration
-  ini = AISnakeGameConfig()
+    """
+    Train the AI agent to play the snake game using reinforcement learning.
 
-  # Get a logger object
-  log = AILogger(ini)
+    Initializes configuration, logging, statistics, AI agent, and the game.
+    Runs a training loop where the agent interacts with the game environment,
+    makes decisions based on the current state, learns from the feedback, and
+    stores experiences. Updates are made to the agent's short and long-term
+    memory. The game resets when a game-over condition is met. Training
+    stops when the maximum number of epochs is reached.
 
-  # Get our Matplotlib object
-  my_plot = MyPlot(ini)
+    Updates the high score if a new one is achieved and logs game statistics
+    after each game.
+    """
 
-  # Get a mew instance of the AI Snake Game
-  game = AISnakeGame(ini, log, my_plot)
+    config = SimConfig()
+    log = SimLogger(config)
+    log.log("AISim initialization:       [OK]")
+    stats = SimStats(config, log)
+    agent = AIAgent(config, log, stats)
+    model = agent.get_model()
+    game = AISnakeGame(config, log, stats)
+    game.set_model(model)
+    plot = SimPlot(config, log, stats)
+    game.reset() # Reset the game
+    in_progress = True
+    while in_progress:
+        # The actual training loop
+        old_state = game.board.get_state() # Get the current state
+        move = agent.get_move(old_state) # Get the next move
+        reward, game_over, score = game.play_step(move) # Play the game step
+        new_state = game.board.get_state() # Get the new state
+        agent.train_short_memory(old_state, move, reward, new_state, game_over) # Train short memory
+        agent.remember(old_state, move, reward, new_state, game_over) # Remember
+        if game_over:
+            if config.get('max_epochs') and config.get('max_epochs') == stats.get('game', 'num_games'):
+                in_progress = False # Reached max epochs
+                log.log("Reached max epochs (" + str(config.get('max_epochs')) + "), exiting")
+            if config.get('nu_max_epochs') and config.get('nu_max_epochs') == stats.get('game', 'num_games'):
+                log.log("Reached Nu max epochs (" + str(config.get('nu_max_epochs')) + ")")
+                config.set('nu_enabled', False)
+            # Track how often a specific score has been reached
+            stats.incr('scores', score)
+            # Track the scores for each game
+            stats.append('scores', 'all', score)
+            agent.train_long_memory()
+            if score > stats.get('game', 'highscore'):
+                # New highscore!!! YAY!
+                stats.set('game', 'highscore', score)
+            game.reset() # Reset the game
+            agent.played_game(score) # Update the agent
+            print_stats(log, stats, agent, config) # Print some stats
+            plot.plot() # Plot some stats
 
-  # Get a new instance of the AI Agent
-  agent = AIAgent(ini, log, game) # Get a new instance of the AI Agent
+    cleanup(agent, plot)
 
-  # Check if we are restarting a simulation
-  if ini.get('restart'):
-    restart_simulation(agent, ini, log)
+def print_stats(log, stats, agent, config):
+    summary = ''
+    summary += 'AISim (v' + str(agent.ini.get('sim_num')) + '): Game {:<4}'.format(stats.get('game', 'num_games'))
+    summary += ' Score: {:<2}'.format(stats.get('game', 'last_score'))
+    summary += ' Time(s): {:5.2f}'.format(stats.get('game', 'game_time'))
+    summary += ' Highscore: {:<3}'.format(stats.get('game', 'highscore'))
+    if config.get('epsilon_enabled'):
+        summary += ' Epsilon: {}'.format(stats.get('epsilon', 'status'))
+        agent.reset_epsilon_injected()
+    if config.get('nu_enabled'):
+        summary += ' Nu: {}'.format(stats.get('nu', 'status'))
+        agent.reset_nu_injected()
+    summary += ' - {}'.format(stats.get('game', 'lose_reason'))
+    log.log(summary)
 
-  # Pass the agent to the game, we have to do this after instantiating
-  # the game and the agent so that we avoid a circular reference
-  game.set_agent(agent) # Pass the agent to the game
-
-  # Initalize the highscore file
-  agent.set_highscore(0)
-
-  # Save the simulation configuration
-  agent.ini.save_sim_desc()
-
-  # Reset the AI Snake Game
-  game.reset()
-
-  # Initialize game metrics
-  total_score = 0 # Score for the current game
-  record = 0 # Best score
-
-  # Initialize the matplotlib metrics
-  plot_scores = [] # Scores for each game
-  plot_mean_scores = [] # Average scores over a rolling window
-  plot_times = [] # Times for each game
-  plot_mean_times = [] # Average times over a rolling window
-
-  log.log(f"AI Snake Game simulation number is {ini.get('ai_version')}")
-  log.log(f"Configuration file being used is {ini.get('ini_file')}")
-
-  # Flag, indicating whether the L2 model was updated from L1
-  L2_updated = False
-
-  ## The actual training loop
-  while True:
-
-    # Get old state
-    state_old = agent.get_state()
-    # Get move
-    final_move = agent.get_action(state_old)
-    # Perform move and get new state
-    reward, done, score = game.play_step(final_move)
-    state_new = agent.get_state()
-    # Train short memory
-    agent.train_short_memory(state_old, final_move, reward, state_new, done)
-    # Remember
-    agent.remember(state_old, final_move, reward, state_new, done)
-
-    # Print verbose step stats
-    if ini.get('steps_verbose'):
-      print(agent.get_all_steps())
-
-    # If the game is over
-    if done:
-      # Disable the NuAlgo after game number 600
-      nu_disable_games = ini.get('nu_disable_games')
-      if nu_disable_games and game.get_num_games() > nu_disable_games:
-        agent.nu_algo.disable()
-
-      # Update the Agent with the new score (used by epsilon and NuAlgo)
-      agent.played_game(score)
-
-      # Perform a checkpoint every 100 games
-      if game.get_num_games() % 100 == 0:
-        agent.save_checkpoint()
-      
-      # Train long memory
-      game.reset()
-      # Number of games the agent has played
-      agent.increment_games()
-      # Implement the max_games feature where the simulation ends when the number 
-      # of games reaches the max_games threashold
-      if ini.get('max_games') != 0 and agent.n_games == ini.get('max_games'):
-        lose_reason = "Executed max_games value of " + str(ini.get('max_games'))
-        game.set_lose_reason(lose_reason)
-        ini.set_value('lose_reason', lose_reason)
-        agent.ini.save_sim_desc()
-        print_game_summary(ini, agent, score, record, game)
-        my_plot.save()
-        game.quit_game()
-
-      agent.train_long_memory()
-      if score > record:
-        # New highscore!!! YAY!
-        record = score
-
-        # NuAlgo
-        if ini.get('nu_enable'):
-          agent.set_nu_algo_highscore(score)
-
-        ## Save a checkpoint of the current AI model
-        agent.save_checkpoint()
-            
-        game.set_highscore(record)
-        agent.set_highscore(record)
-        
-        if ini.get('max_score') != 0 and score >= ini.get('max_score'):
-          # Exit the simulation if a score of max_score is achieved
-          lose_reason = "Achieved max_score value of " + str(ini.get('max_score'))
-          game.set_lose_reason(lose_reason)
-          ini.set_value('lose_reason', lose_reason) 
-          agent.ini.save_sim_desc()
-          
-          print_game_summary(ini, agent, score, record, game)
-          my_plot.save()
-          game.quit_game()
-
-      print_game_summary(ini, log, agent, score, record, game)
-      plot_scores.append(score)
-      total_score += score
-      num_games = game.get_game_num()
-      mean_score = round(total_score / num_games, 2)
-      plot_mean_scores.append(mean_score)
-      plot_times.append(game.elapsed_time)
-      mean_time = round(game.sim_time / num_games, 1)
-      plot_mean_times.append(mean_time)
-      my_plot.plot(plot_scores, plot_mean_scores, plot_times, plot_mean_times)
-
-if __name__ == '__main__':
-  train()
-  
-
-
-
-
-    
+if __name__ == "__main__":
+    train()

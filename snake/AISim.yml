@@ -1,71 +1,47 @@
 default:
-  agent_x_enable_promo: True
-  agent_x_min_score: 2
-  ai_version: 0
   ai_version_file: next_ai_version.txt
-  b1_nodes: 270
-  b1_layers: 1
-  b2_nodes: 0
-  b2_layers: 0
-  b3_nodes: 0
-  b3_layers: 0
   batch_size: 1000
-  board_border: 5
-  board_height: 400
-  board_width: 400
-  custom_data_dir:
+  board_height: 20
+  board_width: 20
+  board_square: 20
+  data_dir: sim_data
   discount: 0.83
-  dropout_p: 0
-  dropout_min: 0
-  dropout_max: 0
-  dropout_static: 0
   epsilon_enabled: False
-  epsilon_value: 0
-  epsilon_print_stats: True
+  epsilon_print_stats: 1
+  epsilon_value: 38
   game_speed: 500
   headless: 0
-  in_features: 45
-  ini_file: 1-Layer.ini
+  hidden_size: 270
+  input_size: 400
   learning_rate: 0.001
-  level_score: 10
+  linear_input_size: 27
   log_basename: _log.txt
   matplot_max_x: 1000
-  max_iter: 100
-  max_memory: 100000
+  max_epochs: 0
   max_moves: 100
-  max_games: 0
-  max_score: 0
-  max_score_num: 0
+  max_memory: 100000
+  model: linear
+  next_num_file: next_num.txt
   nu_pool: 5
+  nu_bad_games: 5
+  nu_high_grace: 3
+  nu_enabled: True
+  nu_max_epochs: 40
   nu_score: 0
-  nu_bad_games: 7
-  nu_disable_games: 150
-  nu_enable: True
-  nu_high_grace: 4
-  nu_max_zero_scores: 30
-  nu_print_stats: True
   nu_verbose: False
-  out_features: 3
-  print_stats: True 
-  random_seed: 29
-  restart: 0
+  output_size: 3
+  plot_basename: _plot.png
+  plot_dir: sim_plots
+  random_seed: 1970
   reward_food: 20
   reward_excessive_move: -20
   reward_wall_collision: -20
   reward_snake_collision: -20
-  screen_height: 400
-  screen_width: 400
-  sim_data_dir: sim_data
-  sim_desc_basename: _desc.txt
-  sim_desc_verbose: False
-  sim_checkpoint_basename: _checkpoint.ptc
-  sim_checkpoint_verbose: False
-  sim_checkpoint_enable: True
+  rnn_layers: 5
   sim_highscore_basename: _highscore.csv
-  sim_model_basename: _model.ptm
+  sim_num: 1000
   sim_plot_basename: _plot.png
+  stats_basename: _stats.yml
   status_iter: 50
-  steps_verbose: False
-  steps_stats: False
-  steps_stats_all: False
-  steps_stats_verbose: False
+  t_hidden_size: 800
+  game_title: AI Snake Game

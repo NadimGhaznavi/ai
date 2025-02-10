@@ -54,8 +54,8 @@ class AITrainer():
         for idx in range(len(game_over)):
             #print("DEBUG idx: ", idx)
             # Track the number of steps executed by this instance
-            self.steps += 1
-            self.total_steps += 1
+            self.stats.incr('trainer', 'steps')
+            self.stats.incr('trainer', 'total_steps')
             Q_new = reward[idx]
             #print("DEBUG target[idx]: ", target[idx])
             #print("DEBUG Q_new: ", Q_new)
@@ -72,6 +72,7 @@ class AITrainer():
 
         self.optimizer.zero_grad() # Reset the gradients to zero
         loss = self.criterion(target, pred) # Calculate the loss
+        self.stats.set('trainer', 'loss', loss.item())
         #loss.backward(retain_graph=True) # Backpropagate the loss
         loss.backward()
         self.optimizer.step() # Adjust the weights

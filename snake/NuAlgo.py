@@ -8,30 +8,23 @@ the epsilon algorithm. Unlike the epsilon algorithm, the nu algorithm is
 dynamic and continues to inject random moves based on the AI agent's 
 performance..
 """
-import sys, os
 import random
 from random import randint
 
-lib_dir = os.path.dirname(__file__)
-sys.path.append(lib_dir)
-from AISnakeGameConfig import AISnakeGameConfig
-from collections import deque
-
 class NuAlgo():
-  def __init__(self, ini, log):
+  def __init__(self, ini, log, stats):
     # Constructor
     self.ini = ini
     self.log = log
+    self.stats = stats
     # Set this random seed so things are repeatable
     random.seed(ini.get('random_seed')) 
     self.pool = ini.get('nu_pool') # Size of the pool (like epsilon, but dynamic)
     self.bad_games = ini.get('nu_bad_games') # How many games in a row where no high score is reached
     self.new_high_grace = ini.get('nu_high_grace') # Number of games after a high score has been found where no random moves are injected
-    self.enabled = ini.get('nu_enable') # Whether this algorithm is enabled
+    self.enabled = ini.get('nu_enabled') # Whether this algorithm is enabled
     self.score = ini.get('nu_score') # The game score that triggers the nu algorithm
-
-    # Print additional stats in the console
-    self.verbose = ini.get('nu_verbose')
+    self.verbose = ini.get('nu_verbose') # Whether to print additional messages
 
     # Initialization
     self.reset_count = 0 # How many times the pool has been refilled without finding a high score
@@ -45,16 +38,12 @@ class NuAlgo():
 
     if self.enabled == False:
       self.log.log("NuAlgo: NuAlgo is disabled")
-      self.ini.set_value('print_stats', 'False')
+      self.ini.set('print_stats', 'False')
       self.verbose = False
     else:
+      self.stats.set('nu', 'status', 'enabled')
       if self.verbose:
         self.log.log(f"NuAlgo: New instance with pool size ({self.pool}), score ({self.score}) and bad games ({self.bad_games+1})")
-
-  def __str__(self):
-    str_value = 'NuAlgo: score {:>2}, injected {:>3}, pool {:>2}, bad games {:>2}, reset {:>2}'.format(
-      self.score, self.injected, self.cur_pool, self.bad_game_count, self.reset_count)
-    return str_value
 
   def disable(self):
     self.enabled = False
@@ -66,7 +55,7 @@ class NuAlgo():
     """
     Return False or a random move.  
     """  
-    if self.enabled == False:
+    if not self.ini.get('nu_enabled'):
       # NuAlgo is disabled
       return False
     
@@ -103,6 +92,9 @@ class NuAlgo():
     rand_move = [ 0, 0, 0 ]
     rand_idx = randint(0, 2)
     rand_move[rand_idx] = 1
+    status = 'score {:>2}, injected {:>3}, pool {:>2}, bad games {:>2}, reset {:>2}'.format(
+      self.score, self.injected, self.cur_pool, self.bad_game_count, self.reset_count)
+    self.stats.set('nu', 'status', status)
     return rand_move
   
   def new_highscore(self, score):

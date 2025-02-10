@@ -22,23 +22,11 @@ class ReplayMemory():
   def append(self, transition):
     self.memory.append(transition)
 
-  def copy_memory(self):
-    return self.memory.copy()
-
-  def get_good_memory(self):
-    for (state, action, reward, next_state, done) in self.memory:
-      if reward > 0:
-        return (state, action, reward, next_state, done)
-    return False
-
   def get_memory(self):
     if len(self.memory) > self.batch_size:
       return random.sample(self.memory, self.batch_size)
     else:
       return self.memory
     
-  def pop(self):
-    return self.memory.pop()
-  
   def set_memory(self, memory):
     self.memory = memory
