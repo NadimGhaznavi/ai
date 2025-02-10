@@ -184,7 +184,7 @@ class TBoard():
 
     def quit_game(self):
         self.pygame.quit()
-        #quit()
+        quit()
 
     def refresh(self):
         self.clock.tick(self.ini.get('game_speed'))

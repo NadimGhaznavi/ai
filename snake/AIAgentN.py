@@ -288,11 +288,11 @@ class AIAgent:
     #if score == 1:
     #  self.level[0]['memory'].append((state, action, reward, next_state, done))   
     # Reward lower levels if the reward was 10, indicating that we got some food.
-    if reward == self.ini.get('reward_food'):
-      self.reward_lower_levels()
+    #if reward == self.ini.get('reward_food'):
+    #  self.reward_lower_levels()
     # Train the level below us at the same time
-    if score != 0:      
-      self.level[score - 1]['memory'].append((state, action, reward, next_state, done))   
+    #if score != 0:      
+    #  self.level[score - 1]['memory'].append((state, action, reward, next_state, done))   
     
 
   def reset_epsilon_injected(self):
@@ -320,7 +320,7 @@ class AIAgent:
       self.level[cur_score - 1]['memory'].append(prev_memory) # Put it back
       # The get_last memory returns a list in the form
       # [state, action, reward, next_state, done]. 
-      food_reward = float(self.ini.get('reward_food')) * 1.1
+      food_reward = float(self.ini.get('reward_food')) * 1.5
       #print(f"prev_memory: ", prev_memory)
       #print(f"prev_memory[2] {prev_memory[2]}")
       #print(f"type(prev_memory[2]) {type(prev_memory[2])}")
@@ -365,7 +365,7 @@ class AIAgent:
     self.save_highscore(score)
     # Reward all the previous neural networks for their last move that got
     # us here
-    self.reward_lower_levels()
+    #self.reward_lower_levels()
 
   def set_nu_algo_highscore(self, score):
     # We need to let *all* of the NuAlgo instances know about the new high score
@@ -377,20 +377,21 @@ class AIAgent:
     mini_sample = self.level[score]['memory'].get_memory()
     states, actions, rewards, next_states, dones = zip(*mini_sample)
     self.level[score]['trainer'].train_step(states, actions, rewards, next_states, dones)
-    if score != 0:
-      mini_sample = self.level[score - 1]['memory'].get_memory()
-      states, actions, rewards, next_states, dones = zip(*mini_sample)
-      self.level[score - 1]['trainer'].train_step(states, actions, rewards, next_states, dones)
+    #if score != 0:
+    #  mini_sample = self.level[score - 1]['memory'].get_memory()
+    #  states, actions, rewards, next_states, dones = zip(*mini_sample)
+    #  self.level[score - 1]['trainer'].train_step(states, actions, rewards, next_states, dones)
 
 
   def train_lower_level(self, state, action, reward, next_state, done):
     # Lower levels are regularly promoted to higher levels. So we'll
     # Save this experience into the lower level, so when it's promoted
     # it will have the added benefit of this training experience.
-    if self.cur_score > 0:
-      self.level[self.cur_score - 1]['memory']
-      self.level[self.cur_score - 1]['trainer'].train_step(state, action, reward, next_state, done)
-      self.level[self.cur_score - 1]['memory'].append((state, action, reward, next_state, done))
+    pass
+    #if self.cur_score > 0:
+    #  self.level[self.cur_score - 1]['memory']
+    #  self.level[self.cur_score - 1]['trainer'].train_step(state, action, reward, next_state, done)
+    #  self.level[self.cur_score - 1]['memory'].append((state, action, reward, next_state, done))
 
   def train_short_memory(self, state, action, reward, next_state, done):
     score = self.game.get_score()
@@ -400,8 +401,10 @@ class AIAgent:
     # Execute the training step
     self.level[score]['trainer'].train_step(state, action, reward, next_state, done)
     # Also execute for the level below us
-    if score != 0:
-      self.level[score - 1]['trainer'].train_step(state, action, reward, next_state, done)
+    if reward == self.ini.get('reward_food'):
+      self.reward_lower_levels()
+    #if score != 0:
+    #  self.level[score - 1]['trainer'].train_step(state, action, reward, next_state, done)
 
     
 

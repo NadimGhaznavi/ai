@@ -1,5 +1,5 @@
 """
-AISnakeGame.py
+AISnakeGameT.py
 
 This contains the Snake Game, modified to have the Trainer class run it
 with an AI Agent player. It also uses the StartConfig class to externalize
@@ -18,7 +18,7 @@ sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 from SnakeGameElement import Direction
 from SnakeGameElement import Point
-from NpBoard import NpBoard
+from TBoard import TBoard
 
 pygame.init()
 
@@ -35,12 +35,16 @@ GREY = (25,25,25)
 BLOCK_SIZE = 20
 
 # Game Caption / Title
-GAME_TITLE = 'AI Snake Game '
+GAME_TITLE = 'AI Snake Game'
+GAME_TITLE_T = 'AI Snake Game T'
 
 # The font file used to render the writing on the game screen
 FONT = pygame.font.Font('arial.ttf', 25)
 
-class AISnakeGame():
+# Legacy Display, the new display uses the TBoard
+LEGACY_DISPLAY = False
+
+class AISnakeGameT():
   """
   The AI Snake Game class. This class implements a version of the Snake
   Game that has been modified to have it run by the Trainer class which
@@ -48,6 +52,9 @@ class AISnakeGame():
   from the AISnakeGame.ini file using the StartConfig class.
   """
   def __init__(self, ini, log, plot):
+    # Configuration object
+    self.ini = ini
+    
     # Logging object
     self.log = log
 
@@ -62,9 +69,6 @@ class AISnakeGame():
     self.board_width = ini.get('board_width')
     self.board_height = ini.get('board_height')
 
-    # Numpy board
-    self.np_board = NpBoard(self.board_width, self.board_height, BLOCK_SIZE)
-
     # Game speed
     self.game_speed = ini.get('game_speed')
 
@@ -74,8 +78,21 @@ class AISnakeGame():
     # Initialize the display
     self.screen_width = self.board_width
     self.screen_height = self.board_height
+
+    # Initialize the display
     self.display = pygame.display.set_mode((self.board_width, self.board_height))
-    pygame.display.set_caption(GAME_TITLE + ' (v' + str(ini.get('ai_version')) + ')')
+
+    # Legacy Display
+    if LEGACY_DISPLAY:
+      pygame.display.set_caption(GAME_TITLE + ' (v' + str(ini.get('ai_version')) + ')')
+    else:
+      # T Board Display
+      pygame.display.set_caption(GAME_TITLE + ' (v' + str(ini.get('ai_version')) + ')')
+      # T board
+      self.t_board = TBoard(self.board_width, self.board_height, BLOCK_SIZE)
+      self.t_board.set_display(self.display)
+      self.t_board.set_pygame(pygame)
+
     self.clock = pygame.time.Clock()
 
     # Display periodic status message
@@ -115,6 +132,9 @@ class AISnakeGame():
         self.log(f"AiSnakeGame: Increasing game speed to {self.game_speed}")
         self.num_games_cur += 1
 
+  def get_game_num(self):
+    return self.num_games
+  
   def get_num_games(self):
     """
     Return the current number of games.
@@ -127,6 +147,12 @@ class AISnakeGame():
     """
     return self.score
 
+  def get_state(self):
+    """
+    Return the current state of the game.
+    """
+    return self.t_board.get_state()
+  
   def is_snake_collision(self, pt=None):
     """
     Check for collisions with the snake.
@@ -158,7 +184,6 @@ class AISnakeGame():
     self.direction = self.move_helper(action)
     aPoint = self.move_helper2(self.head.x, self.head.y, self.direction)
     self.head = aPoint
-    self.np_board.update_snake(self.snake)
 
   def move_helper(self, action):
     """
@@ -225,14 +250,11 @@ class AISnakeGame():
 
 
   def place_food(self):
-    food_in_snake = True
-    while food_in_snake:
-      x = random.randint(0, (self.board_width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
-      y = random.randint(0, (self.board_height-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
-      self.food = Point(x, y)
-      if self.food not in self.snake:
-        self.np_board.update_food(self.food)
-        food_in_snake = False
+    x = random.randint(0, (self.board_width-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE 
+    y = random.randint(0, (self.board_height-BLOCK_SIZE )//BLOCK_SIZE )*BLOCK_SIZE
+    self.food = Point(x, y)
+    if self.food in self.snake:
+      self.place_food()
 
   def play_step(self, action):
     # Track the frame iteration or number of game moves
@@ -267,10 +289,14 @@ class AISnakeGame():
 
     # 3. check if game over, track the reward and the reason the game ended
     reward = 0
+    reward_food = self.ini.get('reward_food')
+    reward_excesssive_move = self.ini.get('reward_excessive_move')
+    reward_snake_collision = self.ini.get('reward_snake_collision')
+    reward_wall_collision = self.ini.get('reward_wall_collision')
     game_over = False
     if self.is_wall_collision():
       game_over = True
-      reward = -10
+      reward = reward_wall_collision
       lose_reason = 'Hit the wall'
       self.lose_reason = lose_reason
       self.agent.ini.set_value('lose_reason', lose_reason)
@@ -279,7 +305,7 @@ class AISnakeGame():
       return reward, game_over, self.score
     elif self.is_snake_collision():
       game_over = True
-      reward = -10
+      reward = reward_snake_collision
       lose_reason = 'Hit the snake'
       self.lose_reason = lose_reason
       self.agent.ini.set_value('lose_reason', lose_reason)
@@ -288,7 +314,7 @@ class AISnakeGame():
       return reward, game_over, self.score
     if self.game_moves > self.max_moves*len(self.snake):
       game_over = True
-      reward = -10
+      reward = reward_excesssive_move
       lose_reason = 'Excessive moves (' + str(self.max_moves*len(self.snake)) + ')'
       self.lose_reason = lose_reason
       self.agent.ini.set_value('lose_reason', lose_reason)
@@ -299,7 +325,7 @@ class AISnakeGame():
     # 4. place new food or just move
     if self.head == self.food:
       self.score += 1
-      reward = 10
+      reward = reward_food
       self.place_food()
     else:
       self.snake.pop()
@@ -325,17 +351,18 @@ class AISnakeGame():
     Print simulation metrics.
     """
     if self.print_stats:
-      self.log(f"Total simulation time    : {self.total_sim_time}")
-      self.log(f"Total number of games    : {self.num_games}")
-      self.log(f"High score               : {self.sim_high_score}")
-      self.log(f"Total simulation score   : {self.sim_score}")
-      self.log(f"Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
-      self.log(f"Wall collision count     : {self.sim_wall_collision_count}")
-      self.log(f"Snake collision count    : {self.sim_snake_collision_count}")
-      if self.agent.nu_algo.print_stats:
-        self.log(f"Nu algorithm score       : {self.agent.nu_algo.get_nu_score()}")
-      self.log(f"Average game score       : {self.avg_game_score}")
-      self.log(f"Average game time        : {self.avg_game_time} sec")
+      self.log.log(f"Stats: Total simulation time    : {self.total_sim_time}")
+      self.log.log(f"Stats: Total number of games    : {self.num_games}")
+      self.log.log(f"Stats: High score               : {self.sim_high_score}")
+      self.log.log(f"Stats: Total simulation score   : {self.sim_score}")
+      self.log.log(f"Stats: Exceeded max moves count : {self.sim_exceeded_max_moves_count}")
+      self.log.log(f"Stats: Wall collision count     : {self.sim_wall_collision_count}")
+      self.log.log(f"Stats: Snake collision count    : {self.sim_snake_collision_count}")
+      if self.ini.get("nu_enable"):
+        self.log.log(f"Stats: Nu algorithm score       : {self.agent.nu_algo.get_pool()}")
+      self.log.log(f"Stats: Average game score       : {self.avg_game_score}")
+      self.log.log(f"Stats: Average game time        : {self.avg_game_time} sec")
+      self.log.log('Stats:')
 
   def quit_game(self):
     self.sim_score += self.score
@@ -393,9 +420,11 @@ class AISnakeGame():
     self.snake = [self.head,
       Point(self.head.x-BLOCK_SIZE, self.head.y),
       Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
-    
     self.place_food()
-
+    
+    self.t_board.update_snake(self.snake)
+    self.t_board.update_food(self.food)
+    
   def set_agent(self, agent):
     """
     The Trainer uses this to pass in the current instance of the AI agent.
@@ -411,22 +440,26 @@ class AISnakeGame():
   def update_ui(self):
     self.elapsed_time = round(float((time.time() - self.start_time)), 2)
     if not self.headless:
-      # Paint the background black
-      self.display.fill(BLACK)
-      
-      # Draw the snake
-      for pt in self.snake:
-        pygame.draw.rect(self.display, GREEN, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-        pygame.draw.rect(self.display, BLUE, pygame.Rect(pt.x+1, pt.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
 
-      # Draw the food            
-      pygame.draw.rect(self.display, GREEN, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
-      pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x+1, self.food.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
+      if LEGACY_DISPLAY:
+        # Clear the display
+        self.display.fill(BLACK)
+        # Draw the food
+        pygame.draw.rect(self.display, GREEN, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+        pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x+1, self.food.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
+        # Draw the snake
+        for pt in self.snake:
+          pygame.draw.rect(self.display, GREEN, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+          pygame.draw.rect(self.display, BLUE, pygame.Rect(pt.x+1, pt.y+1, BLOCK_SIZE-2, BLOCK_SIZE-2))
+      else:
+        self.t_board.reset() # Blank the Screen
+        self.t_board.update_snake(self.snake) # Draw the snake
+        self.t_board.update_food(self.food) # Draw the food
 
       # Render the score, number of moves and the game time
       score_string = "Score: " + str(self.score)
       text = FONT.render(score_string + ', Time ' + str(self.elapsed_time) + 's', True, WHITE)
-      self.display.blit(text, [0, 0])    
+      self.display.blit(text, [0, 0])
       pygame.display.flip()        
     
     

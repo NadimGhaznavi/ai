@@ -23,12 +23,28 @@ nadim@mypc:~$ . ai_ale/bin/activate
 (ai_ale) nadim@mypc:~$ pip install torch --index-url https://download.pytorch.org/whl/cpu
 (ai_ale) nadim@mypc:~$ pip install pyyaml
 (ai_ale) nadim@mypc:~$ pip install ale-py
+(ai_ale) nadim@mypc:~$ pip install gymnasium
+(ai_ale) nadim@mypc:~$ pip install matplotlib
+(ai_ale) nadim@mypc:~$ pip install swig
+(ai_ale) nadim@mypc:~$ pip install gymnasium[box2d]
 ```
+
+# Disabling Random Insertions
+
+To avoid having random actions (previous action is executed instead of specified
+action being executed) inserted be sure to use **v4** when setting up the environment.
+
+Version | frameskip= | repeat_action_probability= | full_action_space=
+--------|------------|----------------------------|-------------------
+v0      | (2, 5,)    | 0.25                       | False
+v4      | (2, 5,)    | 0.0                        | False
+v5      | 4          | 0.25                       | False
 
 # Links
 
 * [Gymnasium Basic Usage](https://gymnasium.farama.org/introduction/basic_usage/)
 * [ALE Installation](https://ale.farama.org/getting-started/)
+* [AtariAge Game Manuals](https://atariage.com/system_items.php?SystemID=2600&itemTypeID=MANUAL)
 
 ## ALE Citations
 In using the ALE, I'd like to cite the following two reference articles which were used to development the ALE framework that I'm using.

@@ -12,7 +12,7 @@ lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 
-class LinearQNet(nn.Module):
+class ModelX(nn.Module):
   #def __init__(self, in_features, 
   #             b1_nodes, b1_layers, 
   #             b2_nodes, b2_layers,
@@ -183,7 +183,7 @@ class LinearQNet(nn.Module):
     else:
       # B1, B2 and B3 layers
       main_block[3].append(nn.Linear(in_features=self.b3_nodes, out_features=self.out_features))
-      
+    
     self.main_block = main_block
     self.ascii_print()
     
@@ -216,9 +216,7 @@ class LinearQNet(nn.Module):
     """
     self.steps += 1
     self.total_steps += 1
-    out = self.main_block(x)
-    #print("DEBUG out: ", out)
-    return out
+    return self.main_block(x)
   
   def get_steps(self):
     """
@@ -298,18 +296,6 @@ class LinearQNet(nn.Module):
         'model_state_dict': self.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'weights_only': False
-    }, save_path)
-
-  def save_model(self, optimizer, save_path):
-    """
-    Saves only the model i.e. not including the weights.
-    Save the epoch value as zero.
-    """
-    torch.save({
-        'model_state_dict': self.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
-        'weights_only': True,
-        'num_games': 0
     }, save_path)
 
   def set_p_value(self, p_value):

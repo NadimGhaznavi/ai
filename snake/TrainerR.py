@@ -1,7 +1,7 @@
 """
-QTrainer.py
+TrainerR.py
 
-This file contains a fork of the QTrainer class.
+This file contains the TrainerR class which is based on the QTrainer class.
 """
 import torch
 import torch.nn as nn
@@ -15,7 +15,7 @@ sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 
 
-class QTrainer:
+class TrainerR():
   def __init__(self, ini, model, level):
     """
     The constructor accepts the following parameters:
@@ -34,8 +34,6 @@ class QTrainer:
     # Keep track of the number of steps executed by this instance for 1 game
     self.steps = 0
     self.total_steps = 0 # Keep track of the total number of steps for all games
-    self.total_loss = 1.0
-    self.cur_loss = 1.0
   
   def get_cur_loss(self):
     return self.cur_loss
@@ -43,9 +41,6 @@ class QTrainer:
   def get_steps(self):
     return 'L{:>2} trainer steps# {:>5}'.format(self.level, self.steps)
   
-  def get_total_loss(self):
-    return self.total_loss
-
   def get_total_steps(self):
     return 'L{:>2} trainer total steps# {:>9}'.format(self.level, self.total_steps)
 
@@ -72,34 +67,45 @@ class QTrainer:
     next_state = torch.tensor(np.array(next_state), dtype=torch.float)
     action = torch.tensor(action, dtype=torch.long)
     reward = torch.tensor(reward, dtype=torch.float)
-    
-    print("state.shape: ", state.shape)
+    print("DEBUG state.shape: ", state.shape)
     if len(state.shape) == 1:
       # Add a batch dimension
       state = torch.unsqueeze(state, 0)
       next_state = torch.unsqueeze(next_state, 0)
       action = torch.unsqueeze(action, 0)
       reward = torch.unsqueeze(reward, 0)
-      game_over = (game_over, )
+      game_over = (game_over,
+    
+    print("DEBUG game_over: ", game_over)
       
     # 1. predicted Q values with current state
     pred = self.model(state)
 
     # 2. Q_new = r + y * max(next_predicted Q value) -> only do this if not done
     target = pred.clone()
-    for idx in range(len(game_over)):
-      # Track the number of steps executed by this instance
-      self.steps += 1
-      self.total_steps += 1
-      Q_new = reward[idx]
-      if not game_over[idx]:
-        Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
-      target[idx][torch.argmax(action).item()] = Q_new
+    ### DEBUG TODO: Had to add '-1' below with the addition of the RNN??!?
+    #print("DEBUG len(game_over): ", len(game_over))
+    #print("DEBUG target: ", target)
+    #for idx in range(len(game_over)):
+    #print("DEBUG idx: ", idx)
+    # Track the number of steps executed by this instance
+    self.steps += 1
+    self.total_steps += 1
+    
+    print("DEBUG target[idx]: ", target[idx])
+    print("DEBUG Q_new: ", Q_new)
+    if not game_over[idx]:
+    Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
+    print("DEBUG Q_new: ", Q_new)
+    print("DEBUG action: ", action)
+    print("DEBUG target[idx]: ", target[idx])
+    print("DEBUG torch.argmax(action).item(): ", torch.argmax(action).item())
+    #print("DEBUG target[idx][torch.argmax(action).item()]: ", target[idx][torch.argmax(action).item()])
+    target[idx][torch.argmax(action).item()] = Q_new
+    
 
     self.optimizer.zero_grad() # Reset the gradients to zero
     loss = self.criterion(target, pred) # Calculate the loss
-    #print("Loss: ", loss.item())
-    loss.backward() # Backpropagate the loss
-    self.optimizer.step() # Adjust the weights
     self.cur_loss = loss.item()
-    self.total_loss += loss.item()
+    loss.backward(retain_graph=True) # Backpropagate the loss
+    self.optimizer.step() # Adjust the weights

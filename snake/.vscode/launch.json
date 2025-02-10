@@ -15,6 +15,30 @@
                 "-he", "1",
                 "-i", "configs/1-Layer.ini"
             ]
+        },
+        {
+            "name": "AISnakeGame: AgentX: 1 Layer",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "AISimX.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-he", "1",
+                "-i", "configs/1-Layer.ini"
+            ]
+        },
+        {
+            "name": "AISnakeGame: AgentT: 1 Layer",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "AISimT.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-he", "1",
+                "-i", "configs/1-Layer.ini"
+            ]
         }
+
+
     ]
 }

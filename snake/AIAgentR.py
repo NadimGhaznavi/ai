@@ -1,8 +1,8 @@
 """
-AIAgent.py
+AIAgentR.py
 
 This class contains the AIAgent class. An instance of this class acts as
-the player to the AISnakeGame.
+the player to the AISnakeGame. It's based on the AIAgent code.
 """
 import os, sys
 from collections import deque
@@ -12,15 +12,15 @@ import torch
 
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
-from QTrainer import QTrainer
-from LinearQNet import LinearQNet
+from TrainerR import TrainerR
+from ModelR import ModelR
 from SnakeGameElement import Direction
 from SnakeGameElement import Point
 from EpsilonAlgo import EpsilonAlgo
 from ReplayMemory import ReplayMemory
 from NuAlgo import NuAlgo
 
-class AIAgent:
+class AIAgentR:
   def __init__(self, ini, log, game):
     self.ini = ini
     self.log = log
@@ -30,8 +30,8 @@ class AIAgent:
 
     # Level 1 initialization
     self.memory = ReplayMemory(ini)
-    self.model = LinearQNet(ini, log, level_score)
-    self.trainer = QTrainer(ini, self.model, level_score)
+    self.model = ModelR(ini, log, level_score)
+    self.trainer = TrainerR(ini, self.model, level_score)
 
     self.nu_algo = NuAlgo(ini, log)
     self.epsilon_algo = EpsilonAlgo(ini, log)
@@ -72,11 +72,13 @@ class AIAgent:
     state0 = torch.tensor(state, dtype=torch.float)
 
     # Get the prediction
+    print("DEBUG state0: ", state0)
     prediction = self.model(state0)
     print(f"DEBUG prediction: {prediction}")
     print(f"DEBUG prediction.shape: {prediction.shape}")
  
     move = torch.argmax(prediction).item()
+    print(f"DEBUG: move: {move}")
     final_move[move] = 1 
     return final_move
 
@@ -123,6 +125,8 @@ class AIAgent:
   
   def get_state(self):
     # Returns the current state of the game.
+    return self.game.get_state()
+  
     game = self.game
     head = game.snake[0]
     point_l = Point(head.x - 20, head.y)
@@ -200,7 +204,6 @@ class AIAgent:
 
   def increment_games(self):
     self.n_games += 1
-
 
   def log_loss(self):
     loss_str = 'AIAgent          Loss : '

@@ -1,0 +1,6 @@
+default:
+  next_num_file: next_num.txt
+  data_dir: sim_data
+  max_epochs: 5
+  random_seed: 1970
+  

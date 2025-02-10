@@ -14,14 +14,17 @@ sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
 from AISnakeGame import AISnakeGame
 from LinearQNet import LinearQNet
-from AIAgent import AIAgent
+from AIAgentX import AIAgent
 #from AIAgentN import AIAgent
 from SnakeGamePlots import MyPlot
 from AILogger import AILogger
 from ReplayMemory import ReplayMemory
 from QTrainer import QTrainer
+from collections import deque
 
-def print_game_summary(ini, log, agent, score, record, game):
+MIN_SCORE = 2
+MAX_DATA_POINTS = 1000
+def print_game_summary(ini, log, agent, score, record, game, stats):
   ai_version = ini.get('ai_version')
   # Standard game summary metrics
   summary = 'Snake AI (v' + str(ai_version) + ') ' + \
@@ -61,6 +64,8 @@ def print_game_summary(ini, log, agent, score, record, game):
 
   log.log(summary)
   agent.log_scores()
+  agent.log_upgrades(stats)
+  agent.log_loss()
 
 def restart_simulation(agent, ini, log):
   """
@@ -133,10 +138,10 @@ def train():
   record = 0 # Best score
 
   # Initialize the matplotlib metrics
-  plot_scores = [] # Scores for each game
-  plot_mean_scores = [] # Average scores over a rolling window
-  plot_times = [] # Times for each game
-  plot_mean_times = [] # Average times over a rolling window
+  plot_scores = deque(maxlen=MAX_DATA_POINTS) # Scores for each game
+  plot_mean_scores = deque(maxlen=MAX_DATA_POINTS) # Average scores over a rolling window
+  plot_times = deque(maxlen=MAX_DATA_POINTS) # Times for each game
+  plot_mean_times = deque(maxlen=MAX_DATA_POINTS) # Average times over a rolling window
 
   log.log(f"AI Snake Game simulation number is {ini.get('ai_version')}")
   log.log(f"Configuration file being used is {ini.get('ini_file')}")
@@ -144,6 +149,8 @@ def train():
   # Flag, indicating whether the L2 model was updated from L1
   L2_updated = False
 
+
+  stats = {}
   ## The actual training loop
   while True:
 
@@ -158,13 +165,31 @@ def train():
     agent.train_short_memory(state_old, final_move, reward, state_new, done)
     # Remember
     agent.remember(state_old, final_move, reward, state_new, done)
-
+    if reward > 0:
+      # It's a good reward, food!
+      agent.share_dream(score)
     # Print verbose step stats
     if ini.get('steps_verbose'):
       print(agent.get_all_steps())
 
     # If the game is over
     if done:
+      if score not in stats:
+        stats[score] = { 
+          'bad_games': 1, 
+          'upgrades': 0 
+          }
+      else:
+        stats[score]['bad_games'] += 1
+
+      # Only upgrade these and higher
+      if ini.get('agent_x_enable_promo'):
+        if score > ini.get('agent_x_min_score') and stats[score]['bad_games'] >= 9:
+          stats[score]['bad_games'] = 0
+          stats[score]['upgrades'] += 1
+          agent.set_stats(stats)
+          agent.upgrade(score, stats[score]['upgrades'])
+
       # Disable the NuAlgo after game number 600
       nu_disable_games = ini.get('nu_disable_games')
       if nu_disable_games and game.get_num_games() > nu_disable_games:
@@ -218,7 +243,7 @@ def train():
           my_plot.save()
           game.quit_game()
 
-      print_game_summary(ini, log, agent, score, record, game)
+      print_game_summary(ini, log, agent, score, record, game, stats)
       plot_scores.append(score)
       total_score += score
       num_games = game.get_game_num()

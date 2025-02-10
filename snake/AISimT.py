@@ -1,5 +1,5 @@
 """
-AISim.py
+AISimT.py
 
 The frontend to the AI Snake Game.
 
@@ -12,7 +12,7 @@ import torch
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
 from AISnakeGameConfig import AISnakeGameConfig
-from AISnakeGame import AISnakeGame
+from AISnakeGameT import AISnakeGameT
 from LinearQNet import LinearQNet
 from AIAgent import AIAgent
 #from AIAgentN import AIAgent
@@ -61,6 +61,7 @@ def print_game_summary(ini, log, agent, score, record, game):
 
   log.log(summary)
   agent.log_scores()
+  agent.log_loss()
 
 def restart_simulation(agent, ini, log):
   """
@@ -106,7 +107,7 @@ def train():
   my_plot = MyPlot(ini)
 
   # Get a mew instance of the AI Snake Game
-  game = AISnakeGame(ini, log, my_plot)
+  game = AISnakeGameT(ini, log, my_plot)
 
   # Get a new instance of the AI Agent
   agent = AIAgent(ini, log, game) # Get a new instance of the AI Agent
