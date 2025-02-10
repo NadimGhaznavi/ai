@@ -46,11 +46,14 @@ def train():
         agent.train_short_memory(old_state, move, reward, new_state, game_over) # Train short memory
         agent.remember(old_state, move, reward, new_state, game_over) # Remember
         if game_over:
-            if config.get('max_epochs') and config.get('max_epochs') == stats.get('game', 'num_games'):
+            max_epochs = int(config.get('max_epochs'))
+            nu_max_epochs = int(config.get('nu_max_epochs'))
+            num_games = int(stats.get('game', 'num_games'))
+            if max_epochs > 0 and max_epochs == num_games:
                 in_progress = False # Reached max epochs
-                log.log("Reached max epochs (" + str(config.get('max_epochs')) + "), exiting")
-            if config.get('nu_max_epochs') and config.get('nu_max_epochs') == stats.get('game', 'num_games'):
-                log.log("Reached Nu max epochs (" + str(config.get('nu_max_epochs')) + ")")
+                log.log("Reached max epochs (" + str(max_epochs) + "), exiting")
+            if nu_max_epochs > 0 and nu_max_epochs == num_games:
+                log.log("Reached Nu max epochs (" + str(nu_max_epochs) + "), disabling Nu")
                 config.set('nu_enabled', False)
             # Track how often a specific score has been reached
             stats.incr('scores', score)
