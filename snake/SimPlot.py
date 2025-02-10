@@ -15,14 +15,71 @@ class SimPlot():
     self.ini = ini
     self.log = log
     self.stats = stats
-    self.plt = plt
-    self.display = display
-    self.plt.ion()
-    self.plt.figure(figsize=(12,4), layout="tight")
-    self.plt.title('AI Sim (v' + str(self.ini.get('sim_num')) + ')')
+    plt.ion()
+    self.fig, self.axs = plt.subplots(2, 1, figsize=(12,8), layout="tight")
+    self.fig.suptitle('AI Sim (v' + str(self.ini.get('sim_num')) + ')')
     self.log.log('SimPlot initialization:     [OK]')
-        
+
+  def __del__(self):
+    self.save()
+    plt.close()
+
   def plot(self):
+    self.update()
+    
+    with io.capture_output() as captured:
+      display.display(plt.gcf())
+    # Plot horizontal lines to differentiate the ranges of scores into groups of 10
+    # Only plot the horizontal lines if there is a score that is equal to or greater than 10
+    for y in range(10, 100, 10):
+      if max(self.scores) >= y:
+        plt.axhline(y=y, color='r', linestyle=':')
+    # Plot the scores and the mean scores
+    #self.axs[0].set_ylim(ymin=0)
+    self.axs[0].set_ylabel('Score')
+    self.axs[0].set_xlabel('Number of games')
+    self.axs[0].plot(self.games, self.scores, color='blue')
+    self.axs[0].plot(self.games, self.mean_scores, color='green')
+    # Create a bar chart of the scores
+    self.axs[1].set_ylabel('Number of Times')
+    self.axs[1].set_xlabel('Score')
+    self.axs[1].bar(self.bar_scores, self.bar_count, color='green')
+
+    plt.show()
+    plt.pause(0.1)
+    display.clear_output(wait=True)
+    
+    
+
+  def update(self):
+    games = []
+    scores = []
+    mean_scores = []
+    count = 0
+    for x in self.stats.get('scores', 'all'):
+      games.append(count)
+      scores.append(x)
+      if count == 0:
+        mean_scores.append(x)
+      else:
+        mean_scores.append(round((mean_scores[count - 1] * count + x) / (count + 1), 2))
+      count += 1
+    self.games = games
+    self.scores = scores
+    self.mean_scores = mean_scores
+
+    bar_scores = []
+    bar_count = []
+    for x in range(0,max(self.scores) + 1):
+      bar_scores.append(str(x))
+      if self.stats.exists('scores', x):
+        bar_count.append(self.stats.get('scores', x))
+      else:
+        bar_count.append(0)
+    self.bar_scores = bar_scores
+    self.bar_count = bar_count
+
+  def plot2(self):
     display.clear_output(wait=True)
     with io.capture_output() as captured:
       display.display(plt.gcf())
@@ -30,7 +87,6 @@ class SimPlot():
     plt.title('AI Sim (v' + str(self.ini.get('sim_num')) + ')')
     plt.xlabel('Number of games')
     plt.ylabel('Score')
-
     games = []
     scores = []
     mean_scores = []
