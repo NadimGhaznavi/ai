@@ -80,6 +80,9 @@ class TBoard():
     def get_state(self):
         if self.ini.get('model') == 't':
             return self.board.reshape(1, -1)[0]
+        elif self.ini.get('model') == 'rnnt':
+            return self.board.reshape(-1, self.width, self.height)
+            #return self.board.reshape(1, -1)[0]
 
         head = self.head
         direction = self.direction

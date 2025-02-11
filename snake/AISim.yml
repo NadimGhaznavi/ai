@@ -38,10 +38,14 @@ default:
   reward_wall_collision: -20
   reward_snake_collision: -20
   rnn_layers: 1
+  rnnt_layers: 2
+  rnnt_input_size: 20
+  rnnt_sequence_length: 1
+  rnnt_hidden_size: 128
   sim_highscore_basename: _highscore.csv
   sim_num: 1000
   sim_plot_basename: _plot.png
   stats_basename: _stats.yml
   status_iter: 50
-  t_hidden_size: 800
+  t_hidden_size: 270
   game_title: AI Snake Game

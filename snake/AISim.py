@@ -40,6 +40,7 @@ def train():
     while in_progress:
         # The actual training loop
         old_state = game.board.get_state() # Get the current state
+        #print("DEBUG old_state.size(): ", old_state.size())
         move = agent.get_move(old_state) # Get the next move
         reward, game_over, score = game.play_step(move) # Play the game step
         new_state = game.board.get_state() # Get the new state

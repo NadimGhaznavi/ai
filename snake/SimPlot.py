@@ -14,8 +14,8 @@ class SimPlot():
     self.log = log
     self.stats = stats
     plt.ion()
-    self.fig, self.axs = plt.subplots(2, 1, figsize=(12,8), layout="tight")
-    self.fig.suptitle('AI Sim (v' + str(self.ini.get('sim_num')) + ')')
+    self.fig, self.axs = plt.subplots(2, 1, figsize=(12,6), layout="tight", facecolor="#000000")
+    self.fig.suptitle('AI Sim (v' + str(self.ini.get('sim_num')) + ')', color="#00FF00")
     self.log.log('SimPlot initialization:     [OK]')
 
   def __del__(self):
@@ -33,15 +33,20 @@ class SimPlot():
       if max(self.scores) >= y:
         self.axs[0].axhline(y=y, color='r', linestyle=(0, (1, 10)), linewidth=1)
 
+    self.axs[0].set_facecolor('#202020')
+    self.axs[1].set_facecolor('#202020')
+    self.axs[0].tick_params(labelcolor='#00FF00')
+    self.axs[1].tick_params(labelcolor='#00FF00')
+
     # Plot the scores and the mean scores
     #self.axs[0].set_ylim(ymin=0)
-    self.axs[0].set_ylabel('Score')
-    self.axs[0].set_xlabel('Number of Games')
+    self.axs[0].set_ylabel('Score', color='#00FF00')
+    self.axs[0].set_xlabel('Number of Games', color='#00FF00')
     self.axs[0].plot(self.games, self.scores, color='blue', linewidth=1)
     self.axs[0].plot(self.games, self.mean_scores, color='green', linewidth=1)
     # Create a bar chart of the scores
-    self.axs[1].set_ylabel('Score Count')
-    self.axs[1].set_xlabel('Score')
+    self.axs[1].set_ylabel('Score Count', color='#00FF00')
+    self.axs[1].set_xlabel('Score', color='#00FF00')
     self.axs[1].bar(self.bar_scores, self.bar_count, color='green')
     plt.show()
     plt.pause(0.1)

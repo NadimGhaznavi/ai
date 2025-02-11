@@ -6,6 +6,7 @@ import torch
 import time
 from ModelL import ModelL
 from ModelRNN import ModelRNN
+from ModelRNNT import ModelRNNT
 from ModelT import ModelT
 from ReplayMemory import ReplayMemory
 from EpsilonAlgo import EpsilonAlgo
@@ -24,6 +25,8 @@ class AIAgent:
             self.model = ModelRNN(ini, log, stats)
         elif ini.get('model') == 't':
             self.model = ModelT(ini, log, stats)
+        elif ini.get('model') == 'rnnt':
+            self.model = ModelRNNT(ini, log, stats)
         else:
             raise Exception(f"Unknown model type {ini.get('model')}")
         self.epsilon_algo = EpsilonAlgo(ini, log, stats)
@@ -48,10 +51,14 @@ class AIAgent:
         if random_move:
             return random_move # Random move was returned
         
+
         # AI agent based action
         final_move = [0, 0, 0]
-        state = torch.tensor(state, dtype=torch.float) # Convert to a tensor
+        if type(state) != torch.Tensor:
+            state = torch.tensor(state, dtype=torch.float) # Convert to a tensor
         prediction = self.model(state) # Get the prediction
+        if self.ini.get('model') == 'rnnt':
+            prediction = prediction.squeeze()
         move = torch.argmax(prediction).item() # Get the move
         final_move[move] = 1 # Set the move
         return final_move # Return
@@ -59,8 +66,6 @@ class AIAgent:
     def played_game(self, score):
         self.epsilon_algo.played_game()
         self.nu_algo.played_game(score)
-        if self.ini.get('model') == 'rnn':
-            self.model.reset_x()
         self.trainer.reset_steps()
         self.stats.set('agent', 'score', score)
  
