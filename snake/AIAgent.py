@@ -8,6 +8,7 @@ from ModelL import ModelL
 from ModelRNN import ModelRNN
 from ModelRNNT import ModelRNNT
 from ModelT import ModelT
+from ModelCNN import ModelCNN
 from ReplayMemory import ReplayMemory
 from EpsilonAlgo import EpsilonAlgo
 from AITrainer import AITrainer
@@ -27,6 +28,8 @@ class AIAgent:
             self.model = ModelT(ini, log, stats)
         elif ini.get('model') == 'rnnt':
             self.model = ModelRNNT(ini, log, stats)
+        elif ini.get('model') == 'cnn':
+            self.model = ModelCNN(ini, log, stats)
         else:
             raise Exception(f"Unknown model type {ini.get('model')}")
         self.epsilon_algo = EpsilonAlgo(ini, log, stats)

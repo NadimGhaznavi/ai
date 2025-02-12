@@ -82,7 +82,10 @@ class TBoard():
             return self.board.reshape(1, -1)[0]
         elif self.ini.get('model') == 'rnnt':
             return self.board.reshape(-1, self.width, self.height)
+            #return self.board.reshape(self.width, self.height)
             #return self.board.reshape(1, -1)[0]
+        elif self.ini.get('model') == 'cnn':
+            return self.board.reshape(1, 1, self.width, self.height)
 
         head = self.head
         direction = self.direction

@@ -40,7 +40,7 @@ default:
   rnn_layers: 1
   rnnt_layers: 2
   rnnt_input_size: 20
-  rnnt_sequence_length: 1
+  rnnt_sequence_length: 20
   rnnt_hidden_size: 128
   sim_highscore_basename: _highscore.csv
   sim_num: 1000
