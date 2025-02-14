@@ -53,7 +53,7 @@ class AITrainer():
         pred = self.model(state)
         target = pred.clone()
 
-        if self.ini.get('model') == 'cnn':
+        if self.ini.get('model') == 'cnn' or self.ini.get('model') == 'cnnr':
             #print("DEBUG len(state.shape): ", len(state.shape))
             pred = self.model(state)
             target = pred.clone()

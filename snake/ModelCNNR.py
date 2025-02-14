@@ -4,9 +4,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ModelCNN(nn.Module):
+class ModelCNNR(nn.Module):
     def __init__(self, ini, log, stats):
-        super(ModelCNN, self).__init__()
+        super(ModelCNNR, self).__init__()
         torch.manual_seed(ini.get('random_seed'))
         self.ini = ini
         self.log = log
@@ -29,6 +29,7 @@ class ModelCNN(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2, 2))
         )
+        self.rnn = nn.RNN(input_size=100, hidden_size=100, num_layers=1)
         self.out = nn.Sequential(
             nn.Flatten(),
             nn.Linear(in_features=100, out_features=3)
@@ -48,6 +49,10 @@ class ModelCNN(nn.Module):
         #if len(x.size()) == 4:
             # Chop off the batch, just return the last one
         #    x = x[len(x) - 1]
+        inputs = x.view(1, -1, 100)
+        x, h_n = self.rnn(inputs)
+        x = x[0]
+        #print("DEBUG x.shape: ", x.shape)
         x = self.out(x)
         #print("DEBUG 4 x.shape: ", x.shape)
         x = x[0]

@@ -43,7 +43,7 @@ class SimPlot():
     self.axs[0].set_ylabel('Score', color='#00ff00')
     self.axs[0].set_xlabel('Number of Games', color='#00ff00')
     self.axs[0].plot(self.games, self.scores, color='blue', linewidth=1)
-    self.axs[0].plot(self.games, self.mean_scores, color='#ffff00', linewidth=1)
+    self.axs[0].plot(self.games, self.mean_scores, color='#cccc00', linewidth=1)
     # Create a bar chart of the scores
     self.axs[1].set_ylabel('Score Count', color='#00ff00')
     self.axs[1].set_xlabel('Score', color='#00ff00')

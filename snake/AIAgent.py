@@ -4,12 +4,13 @@ AIAgent.py
 
 import torch
 import time
+from ModelCNN import ModelCNN
+from ModelCNNR import ModelCNNR
 from ModelL import ModelL
 from ModelRNN import ModelRNN
 from ModelRNNT import ModelRNNT
 from ModelRNNX import ModelRNNX
 from ModelT import ModelT
-from ModelCNN import ModelCNN
 from ReplayMemory import ReplayMemory
 from EpsilonAlgo import EpsilonAlgo
 from AITrainer import AITrainer
@@ -33,6 +34,8 @@ class AIAgent:
             self.model = ModelRNNX(ini, log, stats)
         elif ini.get('model') == 'cnn':
             self.model = ModelCNN(ini, log, stats)
+        elif ini.get('model') == 'cnnr':
+            self.model = ModelCNNR(ini, log, stats)
         else:
             raise Exception(f"Unknown model type {ini.get('model')}")
         self.epsilon_algo = EpsilonAlgo(ini, log, stats)
@@ -88,7 +91,7 @@ class AIAgent:
 
     def train_long_memory(self):
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
-        if self.ini.get('model') != 'cnn':
+        if self.ini.get('model') != 'cnn' and self.ini.get('model') != 'cnnr':
             mini_sample = self.memory.get_memory()
             states, actions, rewards, next_states, dones = zip(*mini_sample)
             self.trainer.train_step(states, actions, rewards, next_states, dones)

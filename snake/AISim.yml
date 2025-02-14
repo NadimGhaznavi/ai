@@ -39,8 +39,8 @@ default:
   random_seed: 1970
   reward_excessive_move: -20
   reward_food: 20
-  reward_snake_collision: -20
-  reward_wall_collision: -20
+  reward_snake_collision: -15
+  reward_wall_collision: -15
   rnn_layers: 1
   rnnt_hidden_size: 128
   rnnt_input_size: 20
