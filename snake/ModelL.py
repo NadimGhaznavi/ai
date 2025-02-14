@@ -25,9 +25,13 @@ class ModelL(nn.Module):
 
     def forward(self, x):
         self.stats.incr('model', 'steps')
+        #print("DEBUG 3 x.shape: ", x.shape)
         x = self.main_block(x)
         return x
     
     def get_steps(self):
         return self.stats.get('model', 'steps')
+    
+    def reset_steps(self):
+        self.stats.set('model', 'steps', 0)
     

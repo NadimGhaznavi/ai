@@ -3,14 +3,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ModelRNN(nn.Module):
+class ModelRNNX(nn.Module):
     def __init__(self, ini, log, stats):
-        super(ModelRNN, self).__init__()
+        super(ModelRNNX, self).__init__()
         torch.manual_seed(ini.get('random_seed'))
         self.ini = ini
         self.log = log
         self.stats = stats
-        input_size = ini.get('linear_input_size')
+        input_size = ini.get('input_size')
         hidden_size = ini.get('hidden_size')
         output_size = ini.get('output_size')
         rnn_layers = ini.get('rnn_layers')
@@ -18,7 +18,7 @@ class ModelRNN(nn.Module):
         self.m_rnn = nn.RNN(input_size=hidden_size, hidden_size=hidden_size, num_layers=rnn_layers)
         self.m_out = nn.Linear(hidden_size, output_size)
         self.stats.set('model', 'steps', 0)
-        self.log.log("ModelRNN initialization:    [OK]")
+        self.log.log("ModelRNNX initialization:   [OK]")
 
     def forward(self, x):
         #print("DEBUG self.x_count: ", self.x_count)

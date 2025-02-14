@@ -63,15 +63,15 @@ class NuAlgo():
       # Current game score too low to inject random moves
       return False
     
-    if self.new_high or self.cur_high:
+    #if self.new_high or self.cur_high:
       # A new high score has been found, give the AI new_high_grace games to find a new high score
       # before starting to inject random moves
-      self.new_high_grace_count += 1
-      if self.new_high_grace_count == self.new_high_grace:
-        self.new_high = False
-        self.cur_high = False
-        self.new_high_grace_count = 0
-      return False
+    #  self.new_high_grace_count += 1
+    #  if self.new_high_grace_count == self.new_high_grace:
+    #    self.new_high = False
+    #    self.cur_high = False
+    #    self.new_high_grace_count = 0
+    #  return False
     
     if self.bad_game_count % 2 == 0:
       # Only inject random moves after every other bad game
@@ -92,11 +92,8 @@ class NuAlgo():
     rand_move = [ 0, 0, 0 ]
     rand_idx = randint(0, 2)
     rand_move[rand_idx] = 1
-    status = 'score {:>2}, injected {:>3}, pool {:>2}, bad games {:>2}, reset {:>2}'.format(
-      self.score, self.injected, self.cur_pool, self.bad_game_count, self.reset_count)
-    self.stats.set('nu', 'status', status)
     return rand_move
-  
+    
   def new_highscore(self, score):
     self.score = score # Set a new NuAlgo score
     self.cur_pool = self.pool # Refill the pool
@@ -141,6 +138,15 @@ class NuAlgo():
       self.reset_count += 1
       if self.verbose:
         self.log.log(f"NuAlgo: Played ({self.reset_count * self.bad_games}) games without a new high score, incrementing reset count to ({self.reset_count + 1}), decreasing score to ({self.score})")
+        
 
   def reset_injected(self):
     self.injected = 0
+
+  def update_status(self):
+    # Update status
+    status = 'score {:>2}, injected {:>3}, pool {:>2}, bad games {:>2}, reset {:>2}'.format(
+      self.score, self.injected, self.cur_pool, self.bad_game_count, self.reset_count)
+    self.stats.set('nu', 'status', status)
+
+

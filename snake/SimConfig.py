@@ -9,6 +9,7 @@ class SimConfig():
     def __init__(self):
         # Read in the application default settings
         with open(CONFIG_FILE, 'r') as file:
+            self.config_file = CONFIG_FILE
             self.config = yaml.safe_load(file)
             self.config['custom'] = {}
 

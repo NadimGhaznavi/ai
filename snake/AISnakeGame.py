@@ -148,7 +148,8 @@ class AISnakeGame():
         self.board.update_food(self.food)
         self.board.update_score(self.stats.get('game', 'score'))
         self.board.refresh()
-        # 6. return game over, reward and the reason
+
+        # 6. return game over flag, reward and the score for this move
         return reward, game_over, self.stats.get('game', 'score')
 
     def print_model(self):

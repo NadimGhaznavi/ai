@@ -18,11 +18,10 @@ class ModelRNNT(nn.Module):
         self.m_rnn = nn.RNN(input_size=self.input_size, hidden_size=self.hidden_size, num_layers=self.rnn_layers)
         self.m_out = nn.Linear(self.hidden_size, self.output_size)
         self.stats.set('model', 'steps', 0)
-        self.x_count = 0
         self.log.log("ModelRNNT initialization:   [OK]")
 
     def forward(self, x):
-        self.x_count += 1
+        self.stats.incr('model', 'steps')
         if len(x.size()) == 4:
             x = x[:, -1, :, :]
         h0 = torch.zeros(self.rnn_layers, x.size(1), self.hidden_size)
@@ -34,6 +33,5 @@ class ModelRNNT(nn.Module):
     def get_steps(self):
         return self.stats.get('model', 'steps')
     
-    def reset_x(self):
-        self.x = None
-    
+    def reset_steps(self):
+        self.stats.set('model', 'steps', 0)

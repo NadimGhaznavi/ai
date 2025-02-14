@@ -34,53 +34,45 @@ class AITrainer():
         next_state = torch.tensor(np.array(next_state), dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
-        if self.ini.get('model') == 'linear' and len(state.shape) == 1:
+        if len(state.shape) == 1:
             # Add a batch dimension
             state = torch.unsqueeze(state, 0)
             next_state = torch.unsqueeze(next_state, 0)
             action = torch.unsqueeze(action, 0)
             reward = torch.unsqueeze(reward, 0)
             game_over = (game_over, )
-
-        elif self.ini.get('model') == 'rnn' and len(state.shape) == 1:
-            # Add a batch dimension
-            state = torch.unsqueeze(state, 0)
-            next_state = torch.unsqueeze(next_state, 0)
-            action = torch.unsqueeze(action, 0)
-            reward = torch.unsqueeze(reward, 0)
-            game_over = (game_over, )
-
         pred = self.model(state)
+        batch = False
+        if self.ini.get('model') == 'rnnt':
+            state = torch.unsqueeze(state, 0)
+            next_state = torch.unsqueeze(next_state, 0)
+            reward = torch.unsqueeze(reward, 0)
+            action = torch.unsqueeze(action, 0)
+            game_over = (game_over, )
+            if len(pred) > 1:
+                batch = True
+                state = state[len(state) -1 ]
+                pred = pred[len(pred) -1 ].unsqueeze(0)
+                reward = reward[len(reward) -1 ]
+                action = action[len(action) - 1]
+                next_state = next_state[len(next_state) - 1]
+                game_over = (True,)
         target = pred.clone()
-
         if self.ini.get('model') == 'cnn':
-            #print("DEBUG len(state.shape): ", len(state.shape))
-            pred = self.model(state)
-            target = pred.clone()
-            if len(state.shape) == 3:
-                state = torch.unsqueeze(state, 0)
-                next_state = torch.unsqueeze(next_state, 0)
-                action = torch.unsqueeze(action, 0)
-                reward = torch.unsqueeze(reward, 0)
-                game_over = (game_over, )
-            pred = torch.unsqueeze(pred, 0)
-            target = torch.unsqueeze(target, 0)
-
-        #print("DEBUG state.shape: ", state.shape)
-        #print("DEBUG next_state.shape: ", next_state.shape)
-        #print("DEBUG action.shape: ", action.shape)
-        #print("DEBUG reward.shape: ", reward.shape)
-        #print("DEBUG game_over: ", game_over)   
-        #print("DEBUG target.shape: ", target.shape)
-        #print("DEBUG target: ", target)
-        #print("DEBUG target[0]: ", target[0])
-
+            game_over = (game_over,)
+            reward = torch.unsqueeze(reward, 0)
+            next_state = torch.unsqueeze(next_state, 0)
+            #target = torch.unsqueeze(target, 0)
+            print('DEBUG pred.shape: ', pred.shape)
+            print('DEBUG target.shape: ', target.shape)
+        if batch:
+            reward = reward[len(reward) - 1].unsqueeze(0)
+            action = action[len(action) - 1].unsqueeze(0)
 
         for idx in range(len(game_over)):
-            #print("DEBUG idx: ", idx)
             Q_new = reward[idx]
             if not game_over[idx]:
-                #print('DEBUG next_state[idx].shape: ', next_state[idx].shape)
+                print('DEBUG next_state[idx].shape: ', next_state[idx].shape)
                 Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
             target[idx][torch.argmax(action).item()] = Q_new
 
