@@ -8,10 +8,7 @@ class SimConfig():
 
     def __init__(self):
         # Read in the application default settings
-        with open(CONFIG_FILE, 'r') as file:
-            self.config_file = CONFIG_FILE
-            self.config = yaml.safe_load(file)
-            self.config['custom'] = {}
+        self.load(CONFIG_FILE)
 
         # Get the next simulation number
         with open(self.get('next_num_file'), 'r') as file:
@@ -24,12 +21,15 @@ class SimConfig():
         parser = argparse.ArgumentParser(description='AI Simulator')
         parser.add_argument('-bs', '--block_size', default=0, type=int, help='Game board square size.')
         parser.add_argument('-ep', '--epsilon', default=0, type=int, help='Epsilon value.')
+        parser.add_argument('-in', '--ini_file', default=None, type=str, help='Initial configuration file.')
         parser.add_argument('-ma', '--max_epochs', default=0, type=int, help='Number of simulations to run.')
         parser.add_argument('-mo', '--model', default=None, type=str, help='Model to use [linear|rnn|t], default linear.')
         parser.add_argument('-nu', '--nu_epochs', default=None, type=str, help='Number of games before disabling the Nu algorithm.')
         parser.add_argument('-sp', '--speed', default=0, type=int, help='Set the game speed, default is 500.')
 
         args = parser.parse_args()
+        if self.set('ini_file', args.ini_file):
+            self.load(args.ini_file)
         if args.block_size:
             self.set('block_size', args.block_size)
         if args.epsilon:
@@ -43,7 +43,6 @@ class SimConfig():
         if args.speed:
             self.set('game_speed', args.speed)
 
-        self.config_file = None
         self.init()
       
     def __del__(self):
@@ -70,6 +69,12 @@ class SimConfig():
         SIM_FILE_PATH = os.path.join(SIM_DATA_DIR, SIM_FILE)
         self.config_file = SIM_FILE_PATH
         self.save()
+
+    def load(self, config_file):
+        with open(config_file, 'r') as file:
+            self.config_file = config_file
+            self.config = yaml.safe_load(file)
+            self.config['custom'] = {}
 
     def set(self, key, value):
         self.config['custom'][key] = value

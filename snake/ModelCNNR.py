@@ -16,16 +16,16 @@ class ModelCNNR(nn.Module):
         output_size = ini.get('output_size')
 
         self.conv_b1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=5, kernel_size=(3, 3), stride=1, padding=1),
+            nn.Conv2d(in_channels=1, out_channels=40, kernel_size=(3, 3), stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3, 3), stride=1, padding=1),
+            nn.Conv2d(in_channels=40, out_channels=40, kernel_size=(3, 3), stride=1, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2, 2))
         )
         self.conv_b2 = nn.Sequential(
-            nn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3, 3), stride=1, padding=1),
+            nn.Conv2d(in_channels=400, out_channels=400, kernel_size=(3, 3), stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(in_channels=5, out_channels=5, kernel_size=(3, 3), stride=1, padding=1),
+            nn.Conv2d(in_channels=10, out_channels=10, kernel_size=(3, 3), stride=1, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2, 2))
         )
