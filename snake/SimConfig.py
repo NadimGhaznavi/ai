@@ -24,12 +24,15 @@ class SimConfig():
         parser.add_argument('-in', '--ini_file', default=None, type=str, help='Initial configuration file.')
         parser.add_argument('-ma', '--max_epochs', default=0, type=int, help='Number of simulations to run.')
         parser.add_argument('-mo', '--model', default=None, type=str, help='Model to use [linear|rnn|t], default linear.')
-        parser.add_argument('-nu', '--nu_epochs', default=None, type=str, help='Number of games before disabling the Nu algorithm.')
+        parser.add_argument('-ne', '--nu_enabled', default=1, type=int, help='Enable the Nu algorithm.')
+        parser.add_argument('-nu', '--nu_epochs', default=None, type=int, help='Number of games before disabling the Nu algorithm.')
         parser.add_argument('-sp', '--speed', default=0, type=int, help='Set the game speed, default is 500.')
 
         args = parser.parse_args()
         if self.set('ini_file', args.ini_file):
             self.load(args.ini_file)
+        if args.nu_enabled == 0:
+            self.set('nu_enabled', False)
         if args.block_size:
             self.set('block_size', args.block_size)
         if args.epsilon:

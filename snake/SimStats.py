@@ -4,12 +4,15 @@ SimStats.py
 import os
 import sys
 import yaml
+from collections import deque
 
+MAX_LENGTH = 1000
 class SimStats:
     def __init__(self, ini, log):
         self.ini = ini
         self.log = log
         self.stats = {}
+        self.max_len = MAX_LENGTH
         self.log.log('SimStats initialization:    [OK]')
 
     def __del__(self):
@@ -19,7 +22,7 @@ class SimStats:
         if category not in self.stats:
             self.stats[category] = {}
         if key not in self.stats[category]:
-            self.stats[category][key] = []
+            self.stats[category][key] = [] 
         if type(self.stats[category][key]) != list:
             self.log.log("ERROR: Cannot append to non-list value (" + str(key) + ") for category (" + category + ")")
             sys.exit(1)

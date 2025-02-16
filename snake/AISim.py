@@ -28,19 +28,27 @@ def train():
 
     config = SimConfig()
     log = SimLogger(config)
-    log.log("AISim initialization:       [OK]")
     stats = SimStats(config, log)
-    agent = AIAgent(config, log, stats)
-    model = agent.get_model()
-    game = AISnakeGame(config, log, stats)
-    game.set_model(model)
     plot = SimPlot(config, log, stats)
+    agent = AIAgent(config, log, stats)
+    game = AISnakeGame(config, log, stats)
+    
+    model = agent.get_model()
+    # For CNNs we want to render the game state during development
+    if config.get('model') == 'cnnr' or config.get('model') == 'cnn':
+        model.set_plot(plot)
+        game.board.set_plot(plot)
+
+    # So that we can print the model from the game
+    game.set_model(model)
+
     game.reset() # Reset the game
+    
+    log.log("AISim initialization:       [OK]")
     in_progress = True
     while in_progress:
         # The actual training loop
         old_state = game.board.get_state() # Get the current state
-        #print("DEBUG old_state.size(): ", old_state.size())
         move = agent.get_move(old_state) # Get the next move
         reward, game_over, score = game.play_step(move) # Play the game step
         new_state = game.board.get_state() # Get the new state

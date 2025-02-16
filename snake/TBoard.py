@@ -17,8 +17,9 @@ GREY = (25,25,25)
 
 # Representation of the board state
 EMPTY_VALUE = 0.0
-FOOD_VALUE = 0.33
-SNAKE_VALUE = 0.99
+FOOD_VALUE = 0.4
+SNAKE_VALUE = 0.3
+SNAKE_HEAD_VALUE = 0.2
 
 class TBoard():
     def __init__(self, ini, log, stats, pygame):
@@ -27,11 +28,14 @@ class TBoard():
         self.log = log
         self.stats = stats
         self.pygame = pygame
+        self.plot = None
+        self.headless = False # If True, the game will run without updating the display
         # Setup the board
         self.block_size = ini.get('board_square') # Size of each "square" on the board
         self.width = ini.get('board_width') # Board width in squares
         self.height = ini.get('board_height') # Board height in squares
-        self.board = torch.from_numpy(np.zeros((self.width, self.height), dtype=np.float32))
+        self.board = None
+        self.reset_board()
         self.food = Point(3,3) # Initialize food to a random location
         self.snake = None # Initialize snake
         self.head = Point(self.width/2, self.height/2) # Initialize head
@@ -88,11 +92,13 @@ class TBoard():
             return self.board.reshape(-1, 1, self.width, self.height)
         elif self.ini.get('model') == 'cnn':
             # [1, 20, 20]
+            self.plot.set_image_1(self.board)
             return self.board.reshape(1, self.width, self.height)
             #return self.board.reshape(self.width, self.height)
             #return self.board.reshape(1, -1)[0]
         elif self.ini.get('model') == 'cnnr':
             # [1, 20, 20]
+            self.plot.set_image_2(self.board)
             return self.board.reshape(1, self.width, self.height)
 
         head = self.head
@@ -207,17 +213,30 @@ class TBoard():
 
     def refresh(self):
         self.clock.tick(self.ini.get('game_speed'))
-        self.pygame.display.flip()
-        self.pygame.display.update()
+        if not self.headless:
+            self.pygame.display.flip()
+            self.pygame.display.update()
 
     def reset(self):
-        self.display.fill(BLACK)
+        self.reset_board()
+        if not self.headless:
+            self.display.fill(BLACK)
+
+    def reset_board(self):
+        self.board = torch.from_numpy(np.zeros((self.width, self.height), dtype=np.float32))
+
+    def set_headless(self, flag):
+        self.headless = flag
+
+    def set_plot(self, plot):
+        self.plot = plot
 
     def update_score(self, score):
-        text = self.font.render("Score: " + str(score - 1), True, BLACK)
-        self.display.blit(text, [0, 0])
-        text = self.font.render("Score: " + str(score), True, WHITE)
-        self.display.blit(text, [0, 0])
+        if not self.headless:
+            text = self.font.render("Score: " + str(score - 1), True, BLACK)
+            self.display.blit(text, [0, 0])
+            text = self.font.render("Score: " + str(score), True, WHITE)
+            self.display.blit(text, [0, 0])
 
     def update_food(self, food):
         # Remove the old food
@@ -239,11 +258,16 @@ class TBoard():
         self.head = snake[0]
         self.snake = snake
         block_size = self.block_size
+        head_seg = True
         for seg in snake:
             x = int(seg.x)
             y = int(seg.y)
             if x >= 0 and x < self.width and y >= 0 and y < self.height:
-                self.board[x][y] = SNAKE_VALUE
+                if head_seg:
+                    self.board[x][y] = SNAKE_HEAD_VALUE
+                    head_seg = False
+                else:
+                    self.board[x][y] = SNAKE_VALUE
                 self.pygame.draw.rect(self.display, GREEN, [x * block_size, y * block_size, block_size, block_size])
                 self.pygame.draw.rect(self.display, BLUE, [(x * block_size) + 2, (y * block_size) + 2, block_size - 4, block_size - 4])
 

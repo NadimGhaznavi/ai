@@ -91,9 +91,14 @@ class AIAgent:
 
     def train_long_memory(self):
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
-        if self.ini.get('model') != 'cnn' and self.ini.get('model') != 'cnnr':
-            mini_sample = self.memory.get_memory()
-            states, actions, rewards, next_states, dones = zip(*mini_sample)
+        if self.ini.get('model') == 'cnn':
+            memory = self.memory.get_memory()
+            for state, action, reward, next_state, done in memory:
+                pass
+                #self.trainer.train_step(state, action, reward, next_state, done)
+        else:
+            memory = self.memory.get_memory()
+            states, actions, rewards, next_states, dones = zip(*memory)
             self.trainer.train_step(states, actions, rewards, next_states, dones)
 
     def train_short_memory(self, state, action, reward, next_state, done):

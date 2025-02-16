@@ -21,7 +21,9 @@ class ModelRNN(nn.Module):
         self.log.log("ModelRNN initialization:    [OK]")
 
     def forward(self, x):
+        self.stats.incr('model', 'steps')
         #print("DEBUG self.x_count: ", self.x_count)
+        #print("DEBUG x.shape: ", x.shape)
         x = F.relu(self.m_in(x))
         # Parameters are: x.view(batch_size, sequence_length, input_size)
         #inputs = x.view(1, -1, self.ini.get('hidden_size'))

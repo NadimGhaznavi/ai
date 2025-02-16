@@ -16,8 +16,10 @@ class AITrainer():
         self.model = model
         self.log.log('AITrainer initialization:   [OK]')
         if ini.get('model') == 'cnn':
-            self.optimizer = optim.SGD(model.parameters(), lr=self.lr)
+            #self.optimizer = optim.SGD(model.parameters(), lr=self.lr)
+            self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
             self.criterion = nn.CrossEntropyLoss()
+            #self.criterion = nn.CategoricalCrossEntropy()
         else:
             self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
             self.criterion = nn.MSELoss()

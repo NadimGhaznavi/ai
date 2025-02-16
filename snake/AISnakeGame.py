@@ -16,6 +16,7 @@ class AISnakeGame():
         self.log.log('AISnakegame initialization: [OK]')
         self.board = TBoard(ini, log, stats, self.pygame)
         self.model = None # Only used to print out it's structure on demand
+        self.headless = False # If True, the game will run without updating the display
         self.init_stats()
         random.seed(ini.get('random_seed'))
 
@@ -67,6 +68,8 @@ class AISnakeGame():
         print("Game paused...")
         print(" - SPACE bar to resume")
         print(" - q to quit")
+        print(" - d to pause the display, but resume the simulation")
+        print(" - u to unpause the display, and resume the simulation")
         print(" - m to print the model")
         print(" - a to increase speed")
         print(" - z to decrease speed")
@@ -76,6 +79,14 @@ class AISnakeGame():
                     self.quit_game()
                 if event.type == self.pygame.KEYDOWN:
                     if event.key == self.pygame.K_SPACE:
+                        is_paused = False
+                    if event.key == self.pygame.K_d:
+                        self.headless = True
+                        self.board.set_headless(True)
+                        is_paused = False
+                    if event.key == self.pygame.K_u:
+                        self.headless = False
+                        self.board.set_headless(False)
                         is_paused = False
                     if event.key == self.pygame.K_q:
                         self.quit_game()

@@ -1,6 +1,7 @@
 
 
 import matplotlib.pyplot as plt
+import numpy as np
 from IPython import display
 from IPython.utils import io
 import os, sys
@@ -13,8 +14,10 @@ class SimPlot():
     self.ini = ini
     self.log = log
     self.stats = stats
+    self.image_1 = None
+    self.image_2 = None
     plt.ion()
-    self.fig, self.axs = plt.subplots(2, 1, figsize=(12,6), layout="tight", facecolor="#000000")
+    self.fig, self.axs = plt.subplots(2, 2, figsize=(12,6), layout="tight", facecolor="#000000", gridspec_kw={'width_ratios': [3, 1]})
     self.fig.suptitle('AI Sim (v' + str(self.ini.get('sim_num')) + ')', color="#00FF00")
     self.log.log('SimPlot initialization:     [OK]')
 
@@ -31,26 +34,47 @@ class SimPlot():
     # Only plot the horizontal lines if there is a score that is equal to or greater than 10
     for y in range(10, 100, 10):
       if max(self.scores) >= y:
-        self.axs[0].axhline(y=y, color='r', linestyle=(0, (1, 10)), linewidth=1)
+        self.axs[0][0].axhline(y=y, color='r', linestyle=(0, (1, 10)), linewidth=1)
 
-    self.axs[0].set_facecolor('#002000')
-    self.axs[1].set_facecolor('#002000')
-    self.axs[0].tick_params(labelcolor='#00ff00')
-    self.axs[1].tick_params(labelcolor='#00ff00')
+    self.axs[0][0].set_facecolor('#002000')
+    self.axs[1][0].set_facecolor('#002000')
+    self.axs[0][1].set_facecolor('#002000')
+    self.axs[1][1].set_facecolor('#002000')
+    self.axs[0][0].tick_params(labelcolor='#00ff00')
+    self.axs[1][0].tick_params(labelcolor='#00ff00')
 
     # Plot the scores and the mean scores
     #self.axs[0].set_ylim(ymin=0)
-    self.axs[0].set_ylabel('Score', color='#00ff00')
-    self.axs[0].set_xlabel('Number of Games', color='#00ff00')
-    self.axs[0].plot(self.games, self.scores, color='blue', linewidth=1)
-    self.axs[0].plot(self.games, self.mean_scores, color='#cccc00', linewidth=1)
+    self.axs[0][0].set_title('Scores', color='#00ff00')
+    self.axs[0][0].set_ylabel('Score', color='#00ff00')
+    self.axs[0][0].set_xlabel('Number of Games', color='#00ff00')
+    self.axs[0][0].plot(self.games, self.scores, color='#6666ff', linewidth=1)
+    self.axs[0][0].plot(self.games, self.mean_scores, color='#cccc00', linewidth=1)
     # Create a bar chart of the scores
-    self.axs[1].set_ylabel('Score Count', color='#00ff00')
-    self.axs[1].set_xlabel('Score', color='#00ff00')
-    self.axs[1].bar(self.bar_scores, self.bar_count, color='#ff8f00')
+    self.axs[1][0].set_title('Score Count', color='#00ff00')
+    self.axs[1][0].set_ylabel('Score Count', color='#00ff00')
+    self.axs[1][0].set_xlabel('Score', color='#00ff00')
+    self.axs[1][0].bar(self.bar_scores, self.bar_count, color='#ff8f00')
+    # Render an image if it's been set
+    if self.image_1 is not None:
+      self.axs[0][1].set_title('TBoard ' + str(len(self.games)), color='#00ff00')
+      image_1 = self.image_1.detach().numpy()
+      self.axs[0][1].imshow(image_1, cmap='gray')
+    if self.image_2 is not None:
+      self.axs[1][1].set_facecolor('#000000')
+      self.axs[1][1].set_title('After conv_b1 ' + str(len(self.games)), color='#00ff00')
+      image_2 = self.image_2.detach().numpy()
+      self.axs[1][1].imshow(image_2, cmap='gray')
+
     plt.show()
     plt.pause(0.1)
     display.clear_output(wait=True)
+
+  def set_image_1(self, img):
+    self.image_1 = img
+
+  def set_image_2(self, img):
+    self.image_2 = img
 
   def update(self):
     games = []
