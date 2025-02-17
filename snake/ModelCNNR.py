@@ -3,7 +3,6 @@ import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
 
 class ModelCNNR(nn.Module):
     def __init__(self, ini, log, stats):
@@ -18,51 +17,40 @@ class ModelCNNR(nn.Module):
         output_size = ini.get('output_size')
 
         self.conv_b1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=40, kernel_size=(3, 3), stride=1, padding=1),
+            nn.Conv2d(in_channels=1, out_channels=20, kernel_size=2, stride=1, padding=0),
             nn.ReLU(),
-            nn.Conv2d(in_channels=40, out_channels=40, kernel_size=(3, 3), stride=1, padding=1),
+            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=2, stride=1, padding=0),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=(2, 2))
+            nn.MaxPool2d(kernel_size=2)
         )
         self.conv_b2 = nn.Sequential(
-            nn.Conv2d(in_channels=40, out_channels=40, kernel_size=(3, 3), stride=1, padding=1),
+            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=2, stride=1, padding=0),
             nn.ReLU(),
-            nn.Conv2d(in_channels=40, out_channels=40, kernel_size=(3, 3), stride=1, padding=1),
+            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=2, stride=1, padding=0),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=(2, 2))
+            nn.MaxPool2d(kernel_size=2)
         )
-        self.rnn = nn.RNN(input_size=100, hidden_size=100, num_layers=1)
+        self.rnn = nn.RNN(input_size=9, hidden_size=9, num_layers=1)
         self.out = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_features=100, out_features=3)
+            #nn.ReLU(),
+            #nn.Linear(in_features=9, out_features=9),
+            nn.ReLU(),
+            nn.Linear(in_features=9, out_features=3)
         )
         self.stats.set('model', 'steps', 0)
-        self.log.log("ModelCNN initialization:    [OK]")
+        self.log.log("ModelCNNR initialization:   [OK]")
 
     def forward(self, x):
         self.stats.incr('model', 'steps')
-        if len(x.size()) == 2:
-            x = x.unsqueeze(0)
-        self.plot.set_image_1(x[0])
-        #print("DEBUG 1 x.shape: ", x.shape)
         x = self.conv_b1(x)
-        #print("DEBUG 2 x.shape: ", x.shape)
-        self.plot.set_image_2(x[len(x) - 1])
-        #print("DEBUG 33 x.shape:", x[0].shape)
-        x = self.conv_b2(x)
-        #print("DEBUG 3 x.shape: ", x.shape)
-        #if len(x.size()) == 4:
-            # Chop off the batch, just return the last one
-        #    x = x[len(x) - 1]
-        inputs = x.view(1, -1, 100)
+        #x = self.conv_b2(x)
+        pic_1 = x[len(x) - 1]
+        self.plot.set_image_1(pic_1)
+        inputs = x.view(1, -1, 9)
         x, h_n = self.rnn(inputs)
+        x = self.out(x[len(x) - 1])
         x = x[0]
-        #print("DEBUG 4 x.shape: ", x.shape)
-        x = self.out(x)
-        #print("DEBUG 5 x.shape: ", x.shape)
-        x = x[0]
-        #print("DEBUG 6 x.shape: ", x.shape)
-        #print("DEBUG x: ", x)
         return x
     
     def get_steps(self):
@@ -70,7 +58,6 @@ class ModelCNNR(nn.Module):
     
     def reset_steps(self):
         self.stats.set('model', 'steps', 0)
-
+    
     def set_plot(self, plot):
         self.plot = plot
-    

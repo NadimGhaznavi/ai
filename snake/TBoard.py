@@ -87,6 +87,9 @@ class TBoard():
             # [400]
             out = self.board.reshape(1, -1)[0]
             return out
+        elif self.ini.get('model') == 'rnn' or self.ini.get('model') == 'linear':
+            self.plot.set_image_1(self.board)
+            
         elif self.ini.get('model') == 'rnnt':
             # [20,20]??
             return self.board.reshape(-1, 1, self.width, self.height)
@@ -190,7 +193,6 @@ class TBoard():
         if not pt:
             pt = self.head
         if pt in self.snake[1:]:
-            self.stats.incr('game', 'snake_collision_count')
             return True
         return False
 
@@ -203,7 +205,6 @@ class TBoard():
             y = pt.y
         if x >= self.width or x < 0 or \
             y >= self.height or y < 0:
-            self.stats.incr('game', 'wall_collision_count')
             return True
         return False
 

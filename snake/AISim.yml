@@ -1,11 +1,12 @@
 custom:
-  sim_num: 2248
+  sim_num: 2403
 default:
   ai_version_file: next_ai_version.txt
   batch_size: 1000
   board_height: 20
-  board_square: 20
+  board_square: 16
   board_width: 20
+  checkpoint_freq: 50
   data_dir: sim_data
   discount: 0.83
   epsilon_enabled: false
@@ -21,15 +22,17 @@ default:
   log_basename: _log.txt
   matplot_max_x: 1000
   max_epochs: 0
+  max_memories: 50
   max_memory: 100000
   max_moves: 100
   model: linear
+  model_basename: _model.pth
   model_stats: true
   next_num_file: next_num.txt
   nu_bad_games: 6
   nu_enabled: true
   nu_high_grace: 3
-  nu_max_epochs: 0
+  nu_max_epochs: 55
   nu_pool: 5
   nu_score: 0
   nu_verbose: false
@@ -37,10 +40,11 @@ default:
   plot_basename: _plot.png
   plot_dir: sim_plots
   random_seed: 1970
-  reward_excessive_move: -20
-  reward_food: 20
-  reward_snake_collision: -15
-  reward_wall_collision: -15
+  reward_excessive_move: -100
+  reward_food: 100
+  reward_move: -1
+  reward_snake_collision: -100
+  reward_wall_collision: -100
   rnn_layers: 1
   rnnt_hidden_size: 128
   rnnt_input_size: 20

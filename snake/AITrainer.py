@@ -14,24 +14,29 @@ class AITrainer():
         self.lr = ini.get('learning_rate')
         self.gamma = ini.get('discount')
         self.model = model
-        self.log.log('AITrainer initialization:   [OK]')
+        self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
         if ini.get('model') == 'cnn':
             #self.optimizer = optim.SGD(model.parameters(), lr=self.lr)
-            self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
             self.criterion = nn.CrossEntropyLoss()
-            #self.criterion = nn.CategoricalCrossEntropy()
         else:
-            self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
             self.criterion = nn.MSELoss()
         self.stats.set('trainer', 'steps', 0)
         #torch.autograd.set_detect_anomaly(True)
         torch.manual_seed(ini.get('random_seed'))
+        self.log.log('AITrainer initialization:   [OK]')
+
+    def get_optimizer(self):
+        return self.optimizer
 
     def reset_steps(self):
         self.stats.set('trainer', 'steps', 0)
 
+    def set_optimizer(self, optimizer):
+        self.optimizer = optimizer
+
     def train_step(self, state, action, reward, next_state, game_over):
         self.stats.incr('trainer', 'steps')
+        start_time = time.time()
         state = torch.tensor(np.array(state), dtype=torch.float)
         next_state = torch.tensor(np.array(next_state), dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)
@@ -52,6 +57,7 @@ class AITrainer():
             reward = torch.unsqueeze(reward, 0)
             game_over = (game_over, )
 
+
         pred = self.model(state)
         target = pred.clone()
 
@@ -67,6 +73,7 @@ class AITrainer():
                 game_over = (game_over, )
             pred = torch.unsqueeze(pred, 0)
             target = torch.unsqueeze(target, 0)
+
 
         #print("DEBUG state.shape: ", state.shape)
         #print("DEBUG next_state.shape: ", next_state.shape)
@@ -87,6 +94,7 @@ class AITrainer():
             target[idx][torch.argmax(action).item()] = Q_new
 
         self.optimizer.zero_grad() # Reset the gradients to zero
+        # Time these steps
         loss = self.criterion(target, pred) # Calculate the loss
         self.stats.set('trainer', 'loss', loss.item())
         loss.backward()

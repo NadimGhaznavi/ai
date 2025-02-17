@@ -32,8 +32,8 @@ class ModelCNN(nn.Module):
         )
         self.out = nn.Sequential(
             nn.Flatten(),
-            #nn.ReLU(),
-            #nn.Linear(in_features=9, out_features=9),
+            nn.ReLU(),
+            nn.Linear(in_features=9, out_features=9),
             nn.Linear(in_features=9, out_features=3)
         )
         self.stats.set('model', 'steps', 0)
@@ -44,9 +44,9 @@ class ModelCNN(nn.Module):
         #print("DEBUG x: ", x)
         x = self.conv_b1(x)
         x = self.conv_b2(x)
-        image_2 = x[len(x) - 1]
+        #image_2 = x[len(x) - 1]
+        #self.plot.set_image_2(image_2)
         #print("DEBUG image_2: ", image_2)
-        self.plot.set_image_2(image_2)
         x = self.out(x)
         x = x[0]
         return x

@@ -49,6 +49,9 @@ class AIAgent:
         self.stats.save()
         self.ini.save()
 
+    def get_optimizer(self):
+        return self.trainer.get_optimizer()
+
     def get_model(self):
         return self.model
 
@@ -89,13 +92,18 @@ class AIAgent:
     def reset_nu_injected(self):
         self.nu_algo.reset_injected()
 
+    def set_model(self, model):
+        self.model = model
+
+    def set_optimizer(self, optimizer):
+        self.trainer.set_optimizer(optimizer)
+
     def train_long_memory(self):
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
-        if self.ini.get('model') == 'cnn':
+        if self.ini.get('model') == 'cnn' or self.ini.get('model') == 'cnnr':
             memory = self.memory.get_memory()
             for state, action, reward, next_state, done in memory:
-                pass
-                #self.trainer.train_step(state, action, reward, next_state, done)
+                self.trainer.train_step(state, action, reward, next_state, done)
         else:
             memory = self.memory.get_memory()
             states, actions, rewards, next_states, dones = zip(*memory)

@@ -5,11 +5,52 @@ from SimStats import SimStats
 from AIAgent import AIAgent
 from AISnakeGame import AISnakeGame
 import time
+import os
+import torch
+import sys
+
+def checkpoint(config, stats, agent):
+    # Model filename
+    sim_num = config.get('sim_num')
+    sim_data_dir = config.get('sim_data_dir')
+    model_basename = config.get('model_basename')
+    model_file = os.path.join(sim_data_dir, str(sim_num) + model_basename)
+    # Metadata
+    epoch = stats.get('game', 'num_games')
+    model = agent.get_model()
+    optimizer = agent.get_optimizer()
+    torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            
+            }, model_file)
 
 def cleanup(agent, plot):
     agent.cleanup()
     plot.save()
     print('Simulation complete. Results in ' + agent.ini.get('sim_data_dir') + '.')
+
+def restart(config, stats, log, agent, sim_num):
+    # Model filename
+    data_dir = config.get('data_dir')
+    sim_data_dir = os.path.join(data_dir, str(sim_num))
+    model_basename = config.get('model_basename')
+    model_file = os.path.join(sim_data_dir, str(sim_num) + model_basename)
+    if os.path.isfile(model_file):
+        model = agent.get_model()
+        optimizer = agent.get_optimizer()
+        checkpoint = torch.load(model_file, weights_only=True)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        model.eval()
+        agent.set_model(model)
+        agent.set_optimizer(optimizer)
+        stats.set('game', 'num_games', checkpoint['epoch'])
+        log.log('Restored model from ' + model_file)
+    else:
+        log.log('No model file found: ' + model_file)
+        sys.exit(1)
 
 def train():
     """
@@ -33,10 +74,17 @@ def train():
     agent = AIAgent(config, log, stats)
     game = AISnakeGame(config, log, stats)
     
+    if config.get('restart'):
+        # Restart the simulation
+        restart(config, stats, log, agent, config.get('restart'))
+    
     model = agent.get_model()
-    # For CNNs we want to render the game state during development
-    if config.get('model') == 'cnnr' or config.get('model') == 'cnn':
+    # For CNNs we want to render the game state
+    if config.get('model') == 'cnnr' or config.get('model') == 'cnn' or config.get('model') == 'linear':
         model.set_plot(plot)
+        game.board.set_plot(plot)
+    
+    if config.get('model') == 'rnn':
         game.board.set_plot(plot)
 
     # So that we can print the model from the game
@@ -75,7 +123,10 @@ def train():
             game.reset() # Reset the game
             print_stats(log, stats, agent, config) # Print some stats
             agent.played_game(score) # Update the agent
-            plot.plot() # Plot some stats
+            if num_games % 20 == 0:
+                plot.plot() # Plot some stats
+            if num_games % config.get('checkpoint_freq') == 0:
+                checkpoint(config, stats, agent)
 
     cleanup(agent, plot)
 

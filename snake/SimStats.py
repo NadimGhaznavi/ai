@@ -6,7 +6,7 @@ import sys
 import yaml
 from collections import deque
 
-MAX_LENGTH = 1000
+MAX_LENGTH = 50
 class SimStats:
     def __init__(self, ini, log):
         self.ini = ini

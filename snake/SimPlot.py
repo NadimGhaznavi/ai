@@ -5,10 +5,12 @@ import numpy as np
 from IPython import display
 from IPython.utils import io
 import os, sys
+import time
 
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
 
+MAX_POINTS = 20
 class SimPlot():
   def __init__(self, ini, log, stats):
     self.ini = ini
@@ -26,7 +28,9 @@ class SimPlot():
     plt.close()
 
   def plot(self):
+    start_time = time.time()
     self.update()
+    #print("DEBUG plot update() time: ", round(time.time() - start_time, 2))
     
     with io.capture_output() as captured:
       display.display(plt.gcf())
@@ -42,6 +46,8 @@ class SimPlot():
     self.axs[1][1].set_facecolor('#002000')
     self.axs[0][0].tick_params(labelcolor='#00ff00')
     self.axs[1][0].tick_params(labelcolor='#00ff00')
+    self.axs[0][1].tick_params(labelcolor='#00ff00')
+    self.axs[1][1].tick_params(labelcolor='#00ff00')
 
     # Plot the scores and the mean scores
     #self.axs[0].set_ylim(ymin=0)
@@ -54,21 +60,22 @@ class SimPlot():
     self.axs[1][0].set_title('Score Count', color='#00ff00')
     self.axs[1][0].set_ylabel('Score Count', color='#00ff00')
     self.axs[1][0].set_xlabel('Score', color='#00ff00')
-    self.axs[1][0].bar(self.bar_scores, self.bar_count, color='#ff8f00')
+    self.axs[1][0].bar(self.bar_scores, self.bar_count, color='#6666ff')
     # Render an image if it's been set
-    if self.image_1 is not None:
-      self.axs[0][1].set_title('TBoard ' + str(len(self.games)), color='#00ff00')
-      image_1 = self.image_1.detach().numpy()
-      self.axs[0][1].imshow(image_1, cmap='gray')
-    if self.image_2 is not None:
-      self.axs[1][1].set_facecolor('#000000')
-      self.axs[1][1].set_title('After conv_b1 ' + str(len(self.games)), color='#00ff00')
-      image_2 = self.image_2.detach().numpy()
-      self.axs[1][1].imshow(image_2, cmap='gray')
+    self.axs[0][1].set_title('Image 1, epoch ' + str(len(self.games)), color='#00ff00')
+    image_1 = self.image_1.detach().numpy()
+    #print("DEBUG image_1.shape: ", image_1.shape)
+    # image_1.shape should be (x, x)
+    self.axs[0][1].imshow(image_1, cmap='gray')
+
+    self.axs[1][1].set_title('Lose Reason', color='#00ff00')
+    self.axs[1][1].set_ylabel('Count', color='#00ff00')
+    self.axs[1][1].bar(self.lose_labels, self.lose_counts, color='#6666ff')
 
     plt.show()
     plt.pause(0.1)
     display.clear_output(wait=True)
+    #print("DEBUG plot complete time: ", round(time.time() - start_time, 2))
 
   def set_image_1(self, img):
     self.image_1 = img
@@ -92,7 +99,7 @@ class SimPlot():
     self.games = games
     self.scores = scores
     self.mean_scores = mean_scores
-
+    
     bar_scores = []
     bar_count = []
     for x in range(0,max(self.scores) + 1):
@@ -104,6 +111,11 @@ class SimPlot():
     self.bar_scores = bar_scores
     self.bar_count = bar_count
 
+    wall_count = self.stats.get('game', 'wall_collision_count')
+    snake_count = self.stats.get('game', 'snake_collision_count')
+    max_steps = self.stats.get('game', 'exceeded_max_moves_count')
+    self.lose_labels = ['Wall', 'Snake', 'Max Moves']
+    self.lose_counts = [wall_count, snake_count, max_steps]
 
   def save(self):
     ini = self.ini

@@ -25,7 +25,8 @@ class SimConfig():
         parser.add_argument('-ma', '--max_epochs', default=0, type=int, help='Number of simulations to run.')
         parser.add_argument('-mo', '--model', default=None, type=str, help='Model to use [linear|rnn|t], default linear.')
         parser.add_argument('-ne', '--nu_enabled', default=1, type=int, help='Enable the Nu algorithm.')
-        parser.add_argument('-nu', '--nu_epochs', default=None, type=int, help='Number of games before disabling the Nu algorithm.')
+        parser.add_argument('-nu', '--nu_max_epochs', default=None, type=int, help='Number of games before disabling the Nu algorithm.')
+        parser.add_argument('-re', '--restart', default=None, type=int, help='Restart simulation version RESTART.')
         parser.add_argument('-sp', '--speed', default=0, type=int, help='Set the game speed, default is 500.')
 
         args = parser.parse_args()
@@ -39,10 +40,14 @@ class SimConfig():
             self.set('epsilon_value', args.epsilon)
         if args.max_epochs:
             self.set('max_epochs', args.max_epochs)
-        if args.nu_epochs:
-            self.set('nu_max_epochs', args.nu_epochs)
+        if args.nu_max_epochs is not None:
+            self.set('nu_max_epochs', args.nu_max_epochs)
         if args.model:
             self.set('model', args.model)
+        if args.restart:
+            self.set('restart', args.restart)
+        else:
+            self.set('restart', 0)
         if args.speed:
             self.set('game_speed', args.speed)
 

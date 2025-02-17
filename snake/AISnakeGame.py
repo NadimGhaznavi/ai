@@ -150,6 +150,7 @@ class AISnakeGame():
             reward = self.ini.get('reward_food')
             self.place_food()
         else:
+            reward = self.ini.get('reward_move')
             self.snake.pop()
 
         

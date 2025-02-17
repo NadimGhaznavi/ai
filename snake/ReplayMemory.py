@@ -16,8 +16,9 @@ class ReplayMemory():
       self.memory = deque(maxlen=max_len)
     else:
       if ini.get('model') == 'cnn':
-        self.memory = deque(maxlen=ini.get('batch_size'))
-      else:
+        self.memories = deque(maxlen=ini.get('max_memories'))
+        self.cur_memory = []
+      else: 
         self.memory = deque(maxlen=ini.get('max_memory'))
     self.batch_size = ini.get('batch_size')
 
@@ -25,11 +26,26 @@ class ReplayMemory():
     return len(self.memory)
 
   def append(self, transition):
-    self.memory.append(transition)
+    # This is called from the AIAgent as:
+    #
+    #   self.memory.append((state, action, reward, next_state, done))
+    #
+    if self.ini.get('model') != 'cnn':
+      self.memory.append(transition)
 
+    else:
+      state, action, reward, next_state, done = transition
+      if done:
+        self.cur_memory.append(transition)
+        self.memories.append(self.cur_memory)
+        self.cur_memory = []
+      else:
+        self.cur_memory.append(transition)
+
+      
   def get_memory(self):
     if self.ini.get('model') == 'cnn':
-      return self.memory
+      return random.sample(self.memories, 1)
     else:
       if len(self.memory) > self.batch_size:
         return random.sample(self.memory, self.batch_size)
