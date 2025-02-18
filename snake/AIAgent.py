@@ -100,9 +100,14 @@ class AIAgent:
 
     def train_long_memory(self):
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
-        if self.ini.get('model') == 'cnn' or self.ini.get('model') == 'cnnr':
+        model_type = self.ini.get('model')
+        if model_type == 'cnn' or model_type == 'cnnr':
             memory = self.memory.get_memory()
             for state, action, reward, next_state, done in memory:
+                self.trainer.train_step(state, action, reward, next_state, done)
+        elif model_type == 'rnn':
+            memory = self.memory.get_memory()
+            for state, action, reward, next_state, done in memory[0]:
                 self.trainer.train_step(state, action, reward, next_state, done)
         else:
             memory = self.memory.get_memory()

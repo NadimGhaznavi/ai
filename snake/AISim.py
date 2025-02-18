@@ -123,8 +123,8 @@ def train():
             game.reset() # Reset the game
             print_stats(log, stats, agent, config) # Print some stats
             agent.played_game(score) # Update the agent
-            if num_games % 20 == 0:
-                plot.plot() # Plot some stats
+            if num_games % config.get('plot_freq') == 0:
+                plot.plot() # Plot some stats every plot_freq games
             if num_games % config.get('checkpoint_freq') == 0:
                 checkpoint(config, stats, agent)
 

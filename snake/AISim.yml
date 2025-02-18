@@ -1,5 +1,5 @@
 custom:
-  sim_num: 2403
+  sim_num: 2436
 default:
   ai_version_file: next_ai_version.txt
   batch_size: 1000
@@ -17,12 +17,12 @@ default:
   headless: 0
   hidden_size: 270
   input_size: 400
-  learning_rate: 0.001 # Was 0.001
+  learning_rate: 0.001
   linear_input_size: 27
   log_basename: _log.txt
   matplot_max_x: 1000
   max_epochs: 0
-  max_memories: 50
+  max_memories: 100
   max_memory: 100000
   max_moves: 100
   model: linear
@@ -39,6 +39,7 @@ default:
   output_size: 3
   plot_basename: _plot.png
   plot_dir: sim_plots
+  plot_freq: 10
   random_seed: 129
   reward_excessive_move: -10
   reward_food: 10
