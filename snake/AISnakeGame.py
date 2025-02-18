@@ -80,14 +80,17 @@ class AISnakeGame():
                 if event.type == self.pygame.KEYDOWN:
                     if event.key == self.pygame.K_SPACE:
                         is_paused = False
+                        self.log.log("Resuming the simulation...")
                     if event.key == self.pygame.K_d:
                         self.headless = True
                         self.board.set_headless(True)
                         is_paused = False
+                        self.log.log("Resuming the simulation...")
                     if event.key == self.pygame.K_u:
                         self.headless = False
                         self.board.set_headless(False)
                         is_paused = False
+                        self.log.log("Resuming the simulation...")
                     if event.key == self.pygame.K_q:
                         self.quit_game()
                     if event.key == self.pygame.K_a:

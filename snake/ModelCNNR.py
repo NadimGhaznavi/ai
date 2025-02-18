@@ -44,7 +44,7 @@ class ModelCNNR(nn.Module):
     def forward(self, x):
         self.stats.incr('model', 'steps')
         x = self.conv_b1(x)
-        #x = self.conv_b2(x)
+        x = self.conv_b2(x)
         pic_1 = x[len(x) - 1]
         self.plot.set_image_1(pic_1)
         inputs = x.view(1, -1, 9)

@@ -31,6 +31,8 @@ BATCH_SIZE = 4
 # Initialize the RNN.
 rnn = nn.RNN(input_size=INPUT_SIZE, hidden_size=HIDDEN_SIZE, num_layers = 1, batch_first=True)
 # input size : (batch, seq_len, input_size)
+print("DEBUG data.view(BATCH_SIZE, SEQ_LENGTH, INPUT_SIZE): ")
+print("DEBUG data.view({}, {}, {}).shape: ".format(BATCH_SIZE, SEQ_LENGTH, INPUT_SIZE))
 inputs = data.view(BATCH_SIZE, SEQ_LENGTH, INPUT_SIZE)
 # out shape = (batch, seq_len, num_directions * hidden_size)
 # h_n shape  = (num_layers * num_directions, batch, hidden_size)

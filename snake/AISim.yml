@@ -17,7 +17,7 @@ default:
   headless: 0
   hidden_size: 270
   input_size: 400
-  learning_rate: 0.001
+  learning_rate: 0.001 # Was 0.001
   linear_input_size: 27
   log_basename: _log.txt
   matplot_max_x: 1000
@@ -32,19 +32,19 @@ default:
   nu_bad_games: 6
   nu_enabled: true
   nu_high_grace: 3
-  nu_max_epochs: 55
+  nu_max_epochs: 45
   nu_pool: 5
   nu_score: 0
   nu_verbose: false
   output_size: 3
   plot_basename: _plot.png
   plot_dir: sim_plots
-  random_seed: 1970
-  reward_excessive_move: -100
-  reward_food: 100
-  reward_move: -1
-  reward_snake_collision: -100
-  reward_wall_collision: -100
+  random_seed: 129
+  reward_excessive_move: -10
+  reward_food: 10
+  reward_move: 0
+  reward_snake_collision: -10
+  reward_wall_collision: -10
   rnn_layers: 1
   rnnt_hidden_size: 128
   rnnt_input_size: 20

@@ -22,18 +22,11 @@ class ModelRNN(nn.Module):
 
     def forward(self, x):
         self.stats.incr('model', 'steps')
-        #print("DEBUG self.x_count: ", self.x_count)
-        #print("DEBUG x.shape: ", x.shape)
         x = F.relu(self.m_in(x))
-        # Parameters are: x.view(batch_size, sequence_length, input_size)
-        #inputs = x.view(1, -1, self.ini.get('hidden_size'))
         inputs = x.view(1, -1, self.ini.get('hidden_size'))
-        #print("DEBUG inputs.shape: ", inputs.shape)
         x, h_n = self.m_rnn(inputs)
         x = self.m_out(x)
-        #print("DEBUG x.shape: ", x.shape)
-        #return x[len(x) - 1]
-        return x[0]
+        return x[len(x) - 1]
 
     def get_steps(self):
         return self.stats.get('model', 'steps')
