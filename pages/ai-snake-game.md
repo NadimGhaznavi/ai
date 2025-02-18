@@ -348,7 +348,7 @@ Game Number,High Score
 ```
 
 # Matplotlib Game Score Plot
-The `AISim.py` front end launches a matplatlib window that graphs out game score and average game score as the simulation runs.
+The `AISim.py` front end launches a matplatlib window that graphs out game score and average game score as the simulation runs. It also shows a bitmap representation of the board that the game maintains internally (and provides to the CNN and CNNR models as a state map). The reason the game was lost is either  because the snake hit the wall or the edge of the board, because the snake collided with itself or because the maximum number of moves was exceeded. These metrics are plotted as well in the bottom right bar chart. The distribution of scores is also shown in the bottom right bar chart.
 
 ![Screenshot of the Matplotlib Game Score Graph](/assets/images/snake/ai_metrics.png)
 
