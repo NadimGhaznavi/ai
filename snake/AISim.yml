@@ -17,12 +17,12 @@ default:
   headless: 0
   hidden_size: 270
   input_size: 400
-  learning_rate: 0.00008 # 0.001
+  learning_rate: 0.00007 # 0.00008 # 0.001
   linear_input_size: 27
   log_basename: _log.txt
   matplot_max_x: 1000
   max_epochs: 0
-  max_memories: 100
+  max_memories: 500
   max_memory: 100000
   max_moves: 100
   model: linear
