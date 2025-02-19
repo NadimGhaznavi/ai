@@ -133,13 +133,13 @@ def train():
 def print_stats(log, stats, agent, config):
     summary = ''
     summary += 'AISim (v' + str(agent.ini.get('sim_num')) + '): Game {:<4}'.format(stats.get('game', 'num_games'))
-    summary += ' Score: {:>2}'.format(stats.get('game', 'last_score'))
+    summary += ' Score: {:>3}'.format(stats.get('game', 'last_score'))
     summary += ', Time(s): {:6.2f}'.format(stats.get('game', 'game_time'))
     summary += ', Highscore: {:>3}'.format(stats.get('game', 'highscore'))
     if config.get('trainer_stats'):
-        summary += ', Trainer steps {:>4}'.format(stats.get('trainer', 'steps'))
+        summary += ', Trainer steps {:>5}'.format(stats.get('trainer', 'steps'))
     if config.get('model_stats'):
-        summary += ', Model steps {:>4}'.format(stats.get('model', 'steps'))
+        summary += ', Model steps {:>5}'.format(stats.get('model', 'steps'))
     if config.get('epsilon_enabled'):
         summary += ', Epsilon: {}'.format(stats.get('epsilon', 'status'))
         agent.reset_epsilon_injected()
