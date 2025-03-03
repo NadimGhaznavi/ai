@@ -4,6 +4,7 @@ AIAgent.py
 
 import torch
 import time
+import sys
 from ModelCNN import ModelCNN
 from ModelCNNR import ModelCNNR
 from ModelL import ModelL
@@ -62,8 +63,6 @@ class AIAgent:
         random_move = self.nu_algo.get_move(self.stats.get('game', 'score'))
         if random_move:
             return random_move # Random move was returned
-        
-
         # AI agent based action
         final_move = [0, 0, 0]
         if type(state) != torch.Tensor:
@@ -82,8 +81,6 @@ class AIAgent:
  
     def remember(self, state, action, reward, next_state, done):
         # Store the state, action, reward, next_state, and done in memory
-        # Recall that memory is a deque, so it will automatically remove the oldest memory 
-        # if the memory exceeds MAX_MEMORY
         self.memory.append((state, action, reward, next_state, done))
 
     def reset_epsilon_injected(self):
@@ -103,16 +100,18 @@ class AIAgent:
         model_type = self.ini.get('model')
         if model_type == 'cnn' or model_type == 'cnnr':
             memory = self.memory.get_memory()
-            for state, action, reward, next_state, done in memory:
+            for state, action, reward, next_state, done in memory[0]:
                 self.trainer.train_step(state, action, reward, next_state, done)
-        elif model_type == 'rnn':
+        elif model_type == 't':
             memory = self.memory.get_memory()
             for state, action, reward, next_state, done in memory[0]:
                 self.trainer.train_step(state, action, reward, next_state, done)
+        elif model_type == 'rnn':
+            pass
         else:
             memory = self.memory.get_memory()
             states, actions, rewards, next_states, dones = zip(*memory)
             self.trainer.train_step(states, actions, rewards, next_states, dones)
 
     def train_short_memory(self, state, action, reward, next_state, done):
-        self.trainer.train_step(state, action, reward, next_state, done)
+        self.trainer.train_step(state, action, reward, next_state, [done])

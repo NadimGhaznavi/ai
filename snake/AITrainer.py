@@ -15,9 +15,9 @@ class AITrainer():
         self.gamma = ini.get('discount')
         self.model = model
         self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
-        if ini.get('model') == 'cnn':
-            #self.optimizer = optim.SGD(model.parameters(), lr=self.lr)
-            self.criterion = nn.CrossEntropyLoss()
+        if ini.get('model') == 'cnn' or ini.get('model') == 'rnn':
+            self.criterion = nn.SmoothL1Loss()
+            #self.criterion = nn.MSELoss()
         else:
             self.criterion = nn.MSELoss()
         self.stats.set('trainer', 'steps', 0)
@@ -36,12 +36,12 @@ class AITrainer():
 
     def train_step(self, state, action, reward, next_state, game_over):
         self.stats.incr('trainer', 'steps')
-        start_time = time.time()
+        model_type = self.ini.get('model')
         state = torch.tensor(np.array(state), dtype=torch.float)
         next_state = torch.tensor(np.array(next_state), dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
-        if self.ini.get('model') == 'linear' and len(state.shape) == 1:
+        if model_type == 'linear' and len(state.shape) == 1:
             # Add a batch dimension
             state = torch.unsqueeze(state, 0)
             next_state = torch.unsqueeze(next_state, 0)
@@ -49,7 +49,7 @@ class AITrainer():
             reward = torch.unsqueeze(reward, 0)
             game_over = (game_over, )
 
-        elif self.ini.get('model') == 'rnn' and len(state.shape) == 1:
+        elif model_type == 'rnn' and len(state.shape) == 1:
             # Add a batch dimension
             state = torch.unsqueeze(state, 0)
             next_state = torch.unsqueeze(next_state, 0)
@@ -57,48 +57,36 @@ class AITrainer():
             reward = torch.unsqueeze(reward, 0)
             game_over = (game_over, )
 
-
-        pred = self.model(state)
+        if model_type == 't':
+            pred = self.model(state).squeeze(0)
+        else:
+            pred = self.model(state)
         target = pred.clone()
 
-        if self.ini.get('model') == 'cnn' or self.ini.get('model') == 'cnnr':
-            #print("DEBUG len(state.shape): ", len(state.shape))
-            pred = self.model(state)
-            target = pred.clone()
-            if len(state.shape) == 3:
-                state = torch.unsqueeze(state, 0)
-                next_state = torch.unsqueeze(next_state, 0)
-                action = torch.unsqueeze(action, 0)
-                reward = torch.unsqueeze(reward, 0)
-                game_over = (game_over, )
-            pred = torch.unsqueeze(pred, 0)
-            target = torch.unsqueeze(target, 0)
+        if model_type == 't':
+            # Ensure reward is a tensor of shape [1] if it's scalar
+            if reward.dim() == 0:
+                reward = reward.unsqueeze(0)
+            if isinstance(game_over, bool):
+                game_over = [game_over]
+            for idx in range(len(game_over)):  
+                Q_new = reward[idx]  # Ensure reward is properly indexed
+                if not game_over[idx]:
+                    with torch.no_grad():
+                        Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state))
+                target[0, action[idx].argmax().item()] = Q_new  # Update Q value
+        else:
+            for idx in range(len(game_over)):  # Loop for RNN/Linear models
+                Q_new = reward[idx]
+                if not game_over[idx]:
+                    Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
+                target[idx][action[idx].argmax().item()] = Q_new  # Update Q value
 
+        self.optimizer.zero_grad()  # Reset gradients
 
-        #print("DEBUG state.shape: ", state.shape)
-        #print("DEBUG next_state.shape: ", next_state.shape)
-        #print("DEBUG action.shape: ", action.shape)
-        #print("DEBUG reward.shape: ", reward.shape)
-        #print("DEBUG game_over: ", game_over)   
-        #print("DEBUG target.shape: ", target.shape)
-        #print("DEBUG target: ", target)
-        #print("DEBUG target[0]: ", target[0])
-
-
-        for idx in range(len(game_over)):
-            #print("DEBUG idx: ", idx)
-            Q_new = reward[idx]
-            if not game_over[idx]:
-                #print('DEBUG next_state[idx].shape: ', next_state[idx].shape)
-                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
-            target[idx][torch.argmax(action).item()] = Q_new
-
-        self.optimizer.zero_grad() # Reset the gradients to zero
-        # Time these steps
         loss = self.criterion(target, pred) # Calculate the loss
         self.stats.set('trainer', 'loss', loss.item())
+        self.stats.append('recent', 'loss', loss.item())
         loss.backward()
         self.optimizer.step() # Adjust the weights
 
-            
-            

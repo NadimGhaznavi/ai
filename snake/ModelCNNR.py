@@ -17,20 +17,20 @@ class ModelCNNR(nn.Module):
         output_size = ini.get('output_size')
 
         self.conv_b1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=20, kernel_size=2, stride=1, padding=0),
+            nn.Conv2d(in_channels=1, out_channels=32, kernel_size=2, stride=1, padding=0),
             nn.ReLU(),
-            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=2, stride=1, padding=0),
-            nn.ReLU(),
+            #nn.Conv2d(in_channels=10, out_channels=10, kernel_size=2, stride=1, padding=0),
+            #nn.ReLU(),
             nn.MaxPool2d(kernel_size=2)
         )
         self.conv_b2 = nn.Sequential(
-            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=2, stride=1, padding=0),
+            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=2, stride=1, padding=0),
             nn.ReLU(),
             nn.Conv2d(in_channels=20, out_channels=20, kernel_size=2, stride=1, padding=0),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2)
         )
-        self.rnn = nn.RNN(input_size=9, hidden_size=9, num_layers=1)
+        self.rnn = nn.RNN(input_size=9, hidden_size=9, num_layers=2)
         self.out = nn.Sequential(
             nn.Flatten(),
             #nn.ReLU(),
@@ -44,8 +44,9 @@ class ModelCNNR(nn.Module):
     def forward(self, x):
         self.stats.incr('model', 'steps')
         x = self.conv_b1(x)
-        x = self.conv_b2(x)
+        #x = self.conv_b2(x)
         pic_1 = x[len(x) - 1]
+        #print("DEBUG pic_1: ", pic_1)
         self.plot.set_image_1(pic_1)
         inputs = x.view(1, -1, 9)
         x, h_n = self.rnn(inputs)

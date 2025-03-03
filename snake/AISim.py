@@ -105,11 +105,12 @@ def train():
         if game_over:
             max_epochs = int(config.get('max_epochs'))
             nu_max_epochs = int(config.get('nu_max_epochs'))
+            nu_enabled = config.get('nu_enabled')
             num_games = int(stats.get('game', 'num_games'))
             if max_epochs > 0 and max_epochs == num_games:
                 in_progress = False # Reached max epochs
                 log.log("Reached max epochs (" + str(max_epochs) + "), exiting")
-            if nu_max_epochs > 0 and nu_max_epochs == num_games:
+            if nu_enabled and nu_max_epochs > 0 and nu_max_epochs == num_games:
                 log.log("Reached Nu max epochs (" + str(nu_max_epochs) + "), disabling Nu")
                 config.set('nu_enabled', False)
             # Track how often a specific score has been reached
@@ -127,12 +128,14 @@ def train():
                 plot.plot() # Plot some stats every plot_freq games
             if num_games % config.get('checkpoint_freq') == 0:
                 checkpoint(config, stats, agent)
+            if num_games % config.get('show_summary_freq') == 0:
+                show_summary(log, stats, config)
 
     cleanup(agent, plot)
 
 def print_stats(log, stats, agent, config):
     summary = ''
-    summary += 'AISim (v' + str(agent.ini.get('sim_num')) + '): Game {:<4}'.format(stats.get('game', 'num_games'))
+    summary += 'AISim #' + str(agent.ini.get('sim_num')) + ': Game {:<4}'.format(stats.get('game', 'num_games'))
     summary += ' Score: {:>3}'.format(stats.get('game', 'last_score'))
     summary += ', Time(s): {:6.2f}'.format(stats.get('game', 'game_time'))
     summary += ', Highscore: {:>3}'.format(stats.get('game', 'highscore'))
@@ -147,7 +150,27 @@ def print_stats(log, stats, agent, config):
         agent.nu_algo.update_status()
         summary += ', Nu: {}'.format(stats.get('nu', 'status'))
         agent.reset_nu_injected()
+    if config.get('show_reward'):
+        summary += ', Reward: {:>6}'.format(round(stats.get('game', 'move_reward'), 1))
+    if config.get('show_loss'):
+        summary += ', Loss: {:>6}'.format(round(stats.get('trainer', 'loss'), 4))
     summary += ' - {}'.format(stats.get('game', 'lose_reason'))
+    log.log(summary)
+
+def show_summary(log, stats, config):
+    summary = ''
+    recent_freq = config.get('show_summary_freq')
+    recent_loss = 0
+    for loss in stats.get('recent', 'loss'):
+        recent_loss += loss
+    recent_loss = round(recent_loss / recent_freq, 2)
+    recent_score = 0
+    for score in stats.get('recent', 'score'):
+        recent_score += score
+    recent_score = round(recent_score / recent_freq, 2)
+    
+    summary += f"Average loss over the past {recent_freq} games  : {recent_loss}\n"
+    summary += f"Average score over the past {recent_freq} games : {recent_score}"
     log.log(summary)
 
 if __name__ == "__main__":

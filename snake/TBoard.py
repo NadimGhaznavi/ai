@@ -18,8 +18,8 @@ GREY = (25,25,25)
 # Representation of the board state
 EMPTY_VALUE = 0.0
 FOOD_VALUE = 0.4
-SNAKE_VALUE = 0.3
-SNAKE_HEAD_VALUE = 0.2
+SNAKE_VALUE = 0.2
+SNAKE_HEAD_VALUE = 0.3
 
 class TBoard():
     def __init__(self, ini, log, stats, pygame):
@@ -82,8 +82,7 @@ class TBoard():
         return out_list
 
     def get_state(self):
-        if self.ini.get('model') == 't' or \
-            self.ini.get('model') == 'rnnx':
+        if self.ini.get('model') == 'rnnx':
             # [400]
             out = self.board.reshape(1, -1)[0]
             return out
@@ -161,8 +160,12 @@ class TBoard():
             self.food.x > self.head.x, # Food right
             self.food.y < self.head.y, # Food up
             self.food.y > self.head.y, # Food down
-            self.food.x == self.head.x, # Food ahead or behind
-            self.food.y == self.head.y, # Food above or below
+            self.food.x == self.head.x,
+            self.food.x == self.head.x and self.food.y > self.head.y, # Food ahead
+            self.food.x == self.head.x and self.food.y < self.head.y, # Food behind
+            self.food.y == self.head.y,
+            self.food.y == self.head.y and self.food.x > self.head.x, # Food above
+            self.food.y == self.head.y and self.food.x < self.head.x, # Food below
 
             # Snake length in binary using 7 bits
             slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6],

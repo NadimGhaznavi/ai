@@ -18,11 +18,18 @@ class AISnakeGame():
         self.model = None # Only used to print out it's structure on demand
         self.headless = False # If True, the game will run without updating the display
         self.init_stats()
+        self.move_reward = 0
         random.seed(ini.get('random_seed'))
 
     def get_direction(self):
         return self.direction
     
+    def get_distance(self, point1, point2):
+        model_type = self.ini.get('model')
+        if model_type == 't' or model_type == 'rnn':
+            return abs(point1.x - point2.x) + abs(point1.y - point2.y)
+        return 0
+
     def init_stats(self):
         self.stats.set('game', 'score', 0)
         self.stats.set('game', 'num_games', 0)
@@ -37,6 +44,7 @@ class AISnakeGame():
     def move(self, action):
         self.stats.incr('game', 'game_moves')
         self.direction = self.move_helper(action)
+        self.old_head = self.head
         self.head = self.move_helper2(self.head.x, self.head.y, self.direction)
     
     def move_helper(self, action):
@@ -118,7 +126,7 @@ class AISnakeGame():
                     self.pause_game()
 
         # 2. move
-        self.move(action) # update the head
+        self.move(action) # update the head and old_head
         self.snake.insert(0, self.head)
         self.board.update_snake(self.snake, self.direction)
 
@@ -129,32 +137,46 @@ class AISnakeGame():
             game_over = True
             reward = self.ini.get('reward_wall_collision')
             lose_reason = 'Hit the wall'
-            self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'wall_collision_count')
-            return reward, game_over, self.stats.get('game', 'score')
         elif self.board.is_snake_collision():
             game_over = True
             reward = self.ini.get('reward_snake_collision')
+            self.move_reward += reward
             lose_reason = 'Hit the snake'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'snake_collision_count')
-            return reward, game_over, self.stats.get('game', 'score')
         if self.stats.get('game', 'game_moves') > self.ini.get('max_moves') * len(self.snake):
             game_over = True
             reward = self.ini.get('reward_excessive_move')
-            lose_reason = 'Exceeded max moves'
+            self.move_reward += reward
+            lose_reason = 'Exceeded max moves (' + str(self.ini.get('max_moves') * len(self.snake)) + ')'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'exceeded_max_moves_count')
+        if game_over == True:
+            self.move_reward += reward
+            self.stats.set('game', 'lose_reason', lose_reason)
+            self.stats.set('game', 'move_reward', round(self.move_reward, 1))
+            self.stats.append('recent', 'score', self.stats.get('game', 'score'))
             return reward, game_over, self.stats.get('game', 'score')
 
         # 4. Place new food or just move
         if self.head == self.food:
             self.stats.incr('game', 'score')
-            reward = self.ini.get('reward_food')
+            reward += self.ini.get('reward_food')
             self.place_food()
         else:
-            reward = self.ini.get('reward_move')
             self.snake.pop()
+
+        # Update move reward
+        old_distance = self.get_distance(self.old_head, self.food)
+        new_distance = self.get_distance(self.head, self.food)
+        if new_distance < old_distance:
+            reward += self.ini.get('reward_move_closer')
+        elif new_distance > old_distance:
+            reward += self.ini.get('reward_move_further')
+        
+        self.move_reward = self.move_reward + reward
+        self.stats.set('game', 'move_reward', round(self.move_reward, 1))
 
         
         # 5. update the ui and clock
@@ -176,6 +198,7 @@ class AISnakeGame():
 
     def reset(self):
         self.board.reset()
+        self.move_reward = 0
         self.stats.set('game', 'game_time', round(time() - self.stats.get('game', 'start_time'), 2))
         self.stats.set('game', 'last_score', self.stats.get('game', 'score'))
         self.stats.set('game', 'score', 0)

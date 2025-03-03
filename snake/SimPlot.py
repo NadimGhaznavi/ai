@@ -19,7 +19,7 @@ class SimPlot():
     self.image_1 = None
     self.image_2 = None
     plt.ion()
-    self.fig, self.axs = plt.subplots(2, 2, figsize=(12,6), layout="tight", facecolor="#000000", gridspec_kw={'width_ratios': [3, 1]})
+    self.fig, self.axs = plt.subplots(2, 2, figsize=(20,6), layout="tight", facecolor="#000000", gridspec_kw={'width_ratios': [10, 1]})
     self.fig.suptitle('AI Sim (v' + str(self.ini.get('sim_num')) + ')', color="#00FF00")
     self.log.log('SimPlot initialization:     [OK]')
 
@@ -62,11 +62,11 @@ class SimPlot():
     self.axs[1][0].set_xlabel('Score', color='#00ff00')
     self.axs[1][0].bar(self.bar_scores, self.bar_count, color='#6666ff')
     # Render an image if it's been set
-    self.axs[0][1].set_title('Image 1, epoch ' + str(len(self.games)), color='#00ff00')
-    image_1 = self.image_1.detach().numpy()
+    #self.axs[0][1].set_title('Image 1, epoch ' + str(len(self.games)), color='#00ff00')
+    #image_1 = self.image_1.detach().numpy()
     #print("DEBUG image_1.shape: ", image_1.shape)
     # image_1.shape should be (x, x)
-    self.axs[0][1].imshow(image_1, cmap='gray')
+    #self.axs[0][1].imshow(image_1, cmap='gray')
 
     self.axs[1][1].set_title('Lose Reason', color='#00ff00')
     self.axs[1][1].set_ylabel('Count', color='#00ff00')

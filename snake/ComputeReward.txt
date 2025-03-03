@@ -1,0 +1,23 @@
+def compute_reward(snake, food, action):
+    if snake.has_collided():
+        return -10
+    elif snake.has_eaten_food():
+        return +10
+    else:
+        # Distance-based reward
+        old_distance = euclidean_distance(snake.prev_head, food)
+        new_distance = euclidean_distance(snake.head, food)
+
+        if new_distance < old_distance:
+            return +0.1  # Encourages moving toward food
+        else:
+            return -0.1  # Discourages moving away
+
+    return 0
+
+
+This should help it learn basic navigation. Later, you can experiment with shaping the rewards further, like:
+
+Encouraging longer survival (small reward per timestep)
+Penalizing unnecessary movement (to avoid looping in place)
+Increasing reward for eating food as the game progresses (to prevent stalling behavior)

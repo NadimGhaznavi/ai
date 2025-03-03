@@ -21,6 +21,8 @@ class EpsilonAlgo():
     # Set this random seed so things are repeatable
     random.seed(ini.get('random_seed')) 
     self.epsilon_value = ini.get('epsilon_value')
+    self.epsilon_min = ini.get('epsilon_min')
+    self.epsilon_decay = ini.get('epsilon_decay')
     if self.epsilon_value != 0:
       self.stats.set('epsilon', 'depleted', False)
     self.print_stats = ini.get('epsilon_print_stats')
@@ -40,33 +42,30 @@ class EpsilonAlgo():
   def __str__(self):
     str_val = ''
     if self.epsilon > 0:
-      str_val = 'injected# {:>3}, units# {:>3}'.format(self.injected, self.epsilon)
+      str_val = 'injected# {:>3}, value {:>5}'.format(self.injected, self.epsilon)
     return str_val
 
   def get_move(self):
-    if not self.enabled:
+    if not self.enabled or self.epsilon == 0:
       return False
-    if self.enabled and self.depleted == False and self.epsilon < 0:
-      self.log.log(f"EpilsonAlgo: Pool has been depleted")
-      self.depleted = True
-    rand_num = randint(0, self.epsilon_value)
-    if self.epsilon <= 0:
-      self.stats.set('epsilon', 'depleted', True)
-    if rand_num < self.epsilon:
+    
+    if self.num_games % 2 == 0:
+      return False
+    
+    if random.random() < self.epsilon:
       rand_move = [ 0, 0, 0 ]
       rand_idx = randint(0, 2)
       rand_move[rand_idx] = 1
       self.injected += 1
       return rand_move
-    str_val = 'injected# {:>3}, units# {:>3}'.format(self.injected, self.epsilon)
+
+    str_val = 'injected# {:>3}, value {:>5}'.format(self.injected, round(self.epsilon, 3))
     self.stats.set('epsilon', 'status', str_val)
     return False
   
   def played_game(self):
     self.num_games += 1
-    self.epsilon = self.epsilon_value - self.num_games
-    if self.epsilon < 0:
-      self.epsilon = 0
+    self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay) 
   
   def reset_injected(self):
     self.injected = 0

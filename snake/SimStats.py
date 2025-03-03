@@ -14,6 +14,10 @@ class SimStats:
         self.stats = {}
         self.max_len = MAX_LENGTH
         self.log.log('SimStats initialization:    [OK]')
+        summary_freq = ini.get('show_summary_freq')
+        self.stats['recent'] = {}
+        self.stats['recent']['loss'] = deque(maxlen=summary_freq)
+        self.stats['recent']['score'] = deque(maxlen=summary_freq)
 
     def __del__(self):
         self.save()
@@ -23,7 +27,8 @@ class SimStats:
             self.stats[category] = {}
         if key not in self.stats[category]:
             self.stats[category][key] = [] 
-        if type(self.stats[category][key]) != list:
+        if type(self.stats[category][key]) != list and \
+            type(self.stats[category][key]) != deque:
             self.log.log("ERROR: Cannot append to non-list value (" + str(key) + ") for category (" + category + ")")
             sys.exit(1)
         self.stats[category][key].append(value)

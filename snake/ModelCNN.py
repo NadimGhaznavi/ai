@@ -17,39 +17,40 @@ class ModelCNN(nn.Module):
         output_size = ini.get('output_size')
 
         self.conv_b1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=20, kernel_size=2, stride=1, padding=0),
+            nn.Conv2d(in_channels=1, out_channels=64, kernel_size=2, stride=1, padding=0),
             nn.ReLU(),
-            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=2, stride=1, padding=0),
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=2, stride=1, padding=0),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2)
         )
         self.conv_b2 = nn.Sequential(
-            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=2, stride=1, padding=0),
+            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=3, stride=1, padding=0),
             nn.ReLU(),
-            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=2, stride=1, padding=0),
+            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=3, stride=1, padding=0),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2)
         )
         self.out = nn.Sequential(
             nn.Flatten(),
+            nn.Linear(in_features=81, out_features=64),
             nn.ReLU(),
-            nn.Linear(in_features=9, out_features=9),
-            nn.Linear(in_features=9, out_features=3)
+            nn.Linear(in_features=64, out_features=32),
+            nn.ReLU(),
+            nn.Linear(in_features=32, out_features=3)
         )
         self.stats.set('model', 'steps', 0)
         self.log.log("ModelCNN initialization:    [OK]")
 
     def forward(self, x):
         self.stats.incr('model', 'steps')
-        #print("DEBUG x: ", x)
         x = self.conv_b1(x)
-        x = self.conv_b2(x)
-        #image_2 = x[len(x) - 1]
-        #self.plot.set_image_2(image_2)
-        #print("DEBUG image_2: ", image_2)
+        self.plot.set_image_1(x[len(x) - 1])
+        print(x[0])
+        #x = self.conv_b2(x)
+        x = x.view(x.size(0), -1)  # Flatten (batch_size, channels*height*width)
         x = self.out(x)
         x = x[0]
-        return x
+        return x.unsqueeze(0)
     
     def get_steps(self):
         return self.stats.get('model', 'steps')
