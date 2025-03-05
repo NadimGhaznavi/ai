@@ -10,7 +10,7 @@ from ModelCNNR import ModelCNNR
 from ModelL import ModelL
 from ModelRNN import ModelRNN
 from ModelRNNT import ModelRNNT
-from ModelRNNX import ModelRNNX
+from ModelRNNL import ModelRNNL
 from ModelT import ModelT
 from ReplayMemory import ReplayMemory
 from EpsilonAlgo import EpsilonAlgo
@@ -27,6 +27,8 @@ class AIAgent:
             self.model = ModelL(ini, log, stats)
         elif ini.get('model') == 'rnn':
             self.model = ModelRNN(ini, log, stats)
+        elif ini.get('model') == 'rnnl':
+            self.model = ModelRNNL(ini, log, stats)
         elif ini.get('model') == 't':
             self.model = ModelT(ini, log, stats)
         elif ini.get('model') == 'rnnt':
@@ -98,15 +100,13 @@ class AIAgent:
     def train_long_memory(self):
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
         model_type = self.ini.get('model')
-        if model_type == 'cnn' or model_type == 'cnnr':
-            memory = self.memory.get_memory()
-            for state, action, reward, next_state, done in memory[0]:
-                self.trainer.train_step(state, action, reward, next_state, done)
+        if model_type == 'cnn':
+            pass
         elif model_type == 't':
             memory = self.memory.get_memory()
             for state, action, reward, next_state, done in memory[0]:
                 self.trainer.train_step(state, action, reward, next_state, done)
-        elif model_type == 'rnn':
+        elif model_type == 'rnn' or model_type == 'rnnl':
             pass
         else:
             memory = self.memory.get_memory()
@@ -114,4 +114,7 @@ class AIAgent:
             self.trainer.train_step(states, actions, rewards, next_states, dones)
 
     def train_short_memory(self, state, action, reward, next_state, done):
-        self.trainer.train_step(state, action, reward, next_state, [done])
+        if self.ini.get('model') == 'cnn':
+            self.trainer.train_step_cnn(state, action, reward, next_state, [done])
+        else:
+            self.trainer.train_step(state, action, reward, next_state, [done])

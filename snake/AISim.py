@@ -99,10 +99,11 @@ def train():
         old_state = game.board.get_state() # Get the current state
         move = agent.get_move(old_state) # Get the next move
         reward, game_over, score = game.play_step(move) # Play the game step
-        new_state = game.board.get_state() # Get the new state
-        agent.train_short_memory(old_state, move, reward, new_state, game_over) # Train short memory
-        agent.remember(old_state, move, reward, new_state, game_over) # Remember
-        if game_over:
+        if not game_over:
+            new_state = game.board.get_state() # Get the new state
+            agent.train_short_memory(old_state, move, reward, new_state, game_over) # Train short memory
+            agent.remember(old_state, move, reward, new_state, game_over) # Remember
+        else:
             max_epochs = int(config.get('max_epochs'))
             nu_max_epochs = int(config.get('nu_max_epochs'))
             nu_enabled = config.get('nu_enabled')

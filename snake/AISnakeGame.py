@@ -26,7 +26,7 @@ class AISnakeGame():
     
     def get_distance(self, point1, point2):
         model_type = self.ini.get('model')
-        if model_type == 't' or model_type == 'rnn':
+        if model_type == 't' or model_type == 'rnn' or model_type == 'cnn':
             return abs(point1.x - point2.x) + abs(point1.y - point2.y)
         return 0
 
@@ -141,17 +141,16 @@ class AISnakeGame():
         elif self.board.is_snake_collision():
             game_over = True
             reward = self.ini.get('reward_snake_collision')
-            self.move_reward += reward
             lose_reason = 'Hit the snake'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'snake_collision_count')
         if self.stats.get('game', 'game_moves') > self.ini.get('max_moves') * len(self.snake):
             game_over = True
             reward = self.ini.get('reward_excessive_move')
-            self.move_reward += reward
             lose_reason = 'Exceeded max moves (' + str(self.ini.get('max_moves') * len(self.snake)) + ')'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'exceeded_max_moves_count')
+
         if game_over == True:
             self.move_reward += reward
             self.stats.set('game', 'lose_reason', lose_reason)

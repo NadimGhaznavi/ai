@@ -16,42 +16,44 @@ class ModelCNN(nn.Module):
         hidden_size = ini.get('hidden_size')
         output_size = ini.get('output_size')
 
-        self.conv_b1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=64, kernel_size=2, stride=1, padding=0),
+        # A channel for the snake head, body and food
+        input_channels = 3
+        self.conv_layers = nn.Sequential(
+            # First conv block: maintains spatial dimensions with padding.
+            nn.Conv2d(in_channels=input_channels, out_channels=16, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=2, stride=1, padding=0),
+            nn.MaxPool2d(kernel_size=2),  # Reduces 20x20 -> 10x10
+
+            # Second conv block:
+            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)
+            nn.MaxPool2d(kernel_size=2)   # Reduces 10x10 -> 5x5
         )
-        self.conv_b2 = nn.Sequential(
-            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=3, stride=1, padding=0),
-            nn.ReLU(),
-            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=3, stride=1, padding=0),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)
-        )
-        self.out = nn.Sequential(
+        # The flattened feature size is 32 channels * 5 * 5 = 800.
+        self.fc_layers = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_features=81, out_features=64),
+            nn.Linear(32 * 5 * 5, 128),
             nn.ReLU(),
-            nn.Linear(in_features=64, out_features=32),
-            nn.ReLU(),
-            nn.Linear(in_features=32, out_features=3)
+            nn.Linear(128, output_size)
         )
         self.stats.set('model', 'steps', 0)
         self.log.log("ModelCNN initialization:    [OK]")
-
+    
     def forward(self, x):
         self.stats.incr('model', 'steps')
-        x = self.conv_b1(x)
-        self.plot.set_image_1(x[len(x) - 1])
-        print(x[0])
-        #x = self.conv_b2(x)
-        x = x.view(x.size(0), -1)  # Flatten (batch_size, channels*height*width)
-        x = self.out(x)
-        x = x[0]
-        return x.unsqueeze(0)
-    
+        #print("DEBUG 1 x.shape: ", x.shape)
+        x = x.unsqueeze(0)  # Shape becomes [1, 3, 20, 20]
+        #print("DEBUG 2 x.shape: ", x.shape)
+        x = self.conv_layers(x)
+        #print("DEBUG 3 x.shape: ", x.shape)
+        # Optional visualization of feature maps
+        if self.plot is not None:
+            # Visualize the feature map from the first sample in the batch
+            self.plot.set_image_2(x[0].detach().cpu())
+        x = self.fc_layers(x)
+        #print("DEBUG 4 x.shape: ", x.shape)
+        return x
+
     def get_steps(self):
         return self.stats.get('model', 'steps')
     

@@ -34,6 +34,26 @@ class AITrainer():
     def set_optimizer(self, optimizer):
         self.optimizer = optimizer
 
+    def train_step_cnn(self, state, action, reward, next_state, game_over):
+        self.stats.incr('trainer', 'steps')
+        state = torch.tensor(np.array(state), dtype=torch.float)
+        next_state = torch.tensor(np.array(next_state), dtype=torch.float)
+        action = torch.tensor(action, dtype=torch.long)
+        reward = torch.tensor(reward, dtype=torch.float)
+        pred = self.model(state)
+        target = pred.clone()
+        if game_over:
+            Q_new = reward # No future rewards, the game is over.
+        else:
+            Q_new = reward + self.gamma * torch.max(self.model(next_state))
+        target[0][action.argmax().item()] = Q_new  # Update Q value
+        self.optimizer.zero_grad()  # Reset gradients
+        loss = self.criterion(target, pred) # Calculate the loss
+        self.stats.set('trainer', 'loss', loss.item())
+        self.stats.append('recent', 'loss', loss.item())
+        loss.backward()
+        self.optimizer.step() # Adjust the weights
+
     def train_step(self, state, action, reward, next_state, game_over):
         self.stats.incr('trainer', 'steps')
         model_type = self.ini.get('model')
@@ -76,7 +96,7 @@ class AITrainer():
                         Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state))
                 target[0, action[idx].argmax().item()] = Q_new  # Update Q value
         else:
-            for idx in range(len(game_over)):  # Loop for RNN/Linear models
+            for idx in range(len(game_over)):
                 Q_new = reward[idx]
                 if not game_over[idx]:
                     Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))

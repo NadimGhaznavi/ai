@@ -93,11 +93,24 @@ class TBoard():
             # [20,20]??
             return self.board.reshape(-1, 1, self.width, self.height)
         elif self.ini.get('model') == 'cnn':
-            # [1, 20, 20]
-            self.plot.set_image_1(self.board)
-            return self.board.reshape(1, self.width, self.height)
-            #return self.board.reshape(self.width, self.height)
-            #return self.board.reshape(1, -1)[0]
+            # Return a 3 channel representation of the game state for the CNN.
+            # Where the snake body, head and food each get their own channel.
+            state = np.zeros((3, self.height, self.width), dtype=np.float32)
+            # Snake head, channel 0
+            if self.snake is not None and len(self.snake) > 0:
+                head = self.head
+                state[0, int(head.y), int(head.x)] = 1.0
+            # Snake body, channel 1
+            if self.snake is not None and len(self.snake) > 1:
+                for seg in self.snake[1:]:
+                    state[1, int(seg.y), int(seg.x)] = 1.0
+            # Food, channel 2
+            if self.food is not None:
+                state[2, int(self.food.y), int(self.food.x)] = 1.0
+            # Render the state as a pixmap in matplotlib
+            self.plot.set_image_1(state)
+            return state
+        
         elif self.ini.get('model') == 'cnnr':
             # [1, 20, 20]
             self.plot.set_image_2(self.board)
