@@ -11,7 +11,6 @@ from ModelL import ModelL
 from ModelRNN import ModelRNN
 from ModelRNNT import ModelRNNT
 from ModelRNNL import ModelRNNL
-from ModelT import ModelT
 from ReplayMemory import ReplayMemory
 from EpsilonAlgo import EpsilonAlgo
 from AITrainer import AITrainer
@@ -29,12 +28,8 @@ class AIAgent:
             self.model = ModelRNN(ini, log, stats)
         elif ini.get('model') == 'rnnl':
             self.model = ModelRNNL(ini, log, stats)
-        elif ini.get('model') == 't':
-            self.model = ModelT(ini, log, stats)
         elif ini.get('model') == 'rnnt':
             self.model = ModelRNNT(ini, log, stats)
-        elif ini.get('model') == 'rnnx':
-            self.model = ModelRNNX(ini, log, stats)
         elif ini.get('model') == 'cnn':
             self.model = ModelCNN(ini, log, stats)
         elif ini.get('model') == 'cnnr':
@@ -43,7 +38,7 @@ class AIAgent:
             raise Exception(f"Unknown model type {ini.get('model')}")
         self.epsilon_algo = EpsilonAlgo(ini, log, stats)
         self.nu_algo = NuAlgo(ini, log, stats)
-        self.memory = ReplayMemory(ini)
+        self.memory = ReplayMemory(ini, stats)
         self.trainer = AITrainer(ini, log, stats, self.model)
         self.log.log('AIAgent initialization:     [OK]')
         self.last_dirs = [ 0, 0, 1, 0 ]
@@ -79,11 +74,17 @@ class AIAgent:
         self.nu_algo.played_game(score)
         self.trainer.reset_steps()
         self.model.reset_steps()
+        if self.ini.get('model') == 'cnnr':
+            self.model.reset_hidden()
         self.stats.set('agent', 'score', score)
  
     def remember(self, state, action, reward, next_state, done):
         # Store the state, action, reward, next_state, and done in memory
-        self.memory.append((state, action, reward, next_state, done))
+        model_type = self.ini.get('model')
+        if model_type == 'rnn' or model_type == 'cnn': # or model_type == 'cnnr':
+            pass
+        else:
+            self.memory.append((state, action, reward, next_state, done))
 
     def reset_epsilon_injected(self):
         self.epsilon_algo.reset_injected()
@@ -100,12 +101,13 @@ class AIAgent:
     def train_long_memory(self):
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
         model_type = self.ini.get('model')
-        if model_type == 'cnn':
+        if model_type == 'cnn': # or model_type == 'cnnr':
             pass
-        elif model_type == 't':
+        elif model_type == 'cnnr':
             memory = self.memory.get_memory()
-            for state, action, reward, next_state, done in memory[0]:
-                self.trainer.train_step(state, action, reward, next_state, done)
+            if memory != False:                
+                for state, action, reward, next_state, done in memory[0]:
+                    self.trainer.train_step_cnn(state, action, reward, next_state, [done])
         elif model_type == 'rnn' or model_type == 'rnnl':
             pass
         else:
@@ -114,7 +116,7 @@ class AIAgent:
             self.trainer.train_step(states, actions, rewards, next_states, dones)
 
     def train_short_memory(self, state, action, reward, next_state, done):
-        if self.ini.get('model') == 'cnn':
+        if self.ini.get('model') == 'cnn' or self.ini.get('model') == 'cnnr':
             self.trainer.train_step_cnn(state, action, reward, next_state, [done])
         else:
             self.trainer.train_step(state, action, reward, next_state, [done])

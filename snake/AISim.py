@@ -104,6 +104,7 @@ def train():
             agent.train_short_memory(old_state, move, reward, new_state, game_over) # Train short memory
             agent.remember(old_state, move, reward, new_state, game_over) # Remember
         else:
+            agent.remember(old_state, move, reward, new_state, game_over) # Remember
             max_epochs = int(config.get('max_epochs'))
             nu_max_epochs = int(config.get('nu_max_epochs'))
             nu_enabled = config.get('nu_enabled')

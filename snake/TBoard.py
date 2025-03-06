@@ -92,7 +92,7 @@ class TBoard():
         elif self.ini.get('model') == 'rnnt':
             # [20,20]??
             return self.board.reshape(-1, 1, self.width, self.height)
-        elif self.ini.get('model') == 'cnn':
+        elif self.ini.get('model') == 'cnn' or self.ini.get('model') == 'cnnr':
             # Return a 3 channel representation of the game state for the CNN.
             # Where the snake body, head and food each get their own channel.
             state = np.zeros((3, self.height, self.width), dtype=np.float32)

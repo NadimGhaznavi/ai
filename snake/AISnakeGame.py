@@ -26,7 +26,7 @@ class AISnakeGame():
     
     def get_distance(self, point1, point2):
         model_type = self.ini.get('model')
-        if model_type == 't' or model_type == 'rnn' or model_type == 'cnn':
+        if model_type == 't' or model_type == 'rnn' or model_type == 'cnn' or model_type == 'cnnr':
             return abs(point1.x - point2.x) + abs(point1.y - point2.y)
         return 0
 
@@ -129,10 +129,13 @@ class AISnakeGame():
         self.move(action) # update the head and old_head
         self.snake.insert(0, self.head)
         self.board.update_snake(self.snake, self.direction)
+        snake_length = len(self.snake)
+        max_moves = self.ini.get('max_moves')
 
         # 3. check if game over, track the reward and the reason the game ended
         reward = 0
         game_over = False
+        board_squares = self.ini.get('board_height') * self.ini.get('board_width')
         if self.board.is_wall_collision():
             game_over = True
             reward = self.ini.get('reward_wall_collision')
@@ -140,14 +143,15 @@ class AISnakeGame():
             self.stats.incr('game', 'wall_collision_count')
         elif self.board.is_snake_collision():
             game_over = True
-            reward = self.ini.get('reward_snake_collision')
+            s_col_reward = self.ini.get('reward_snake_collision')
+            reward = max(s_col_reward * (snake_length / board_squares), s_col_reward)
             lose_reason = 'Hit the snake'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'snake_collision_count')
-        if self.stats.get('game', 'game_moves') > self.ini.get('max_moves') * len(self.snake):
+        if self.stats.get('game', 'game_moves') > max_moves * snake_length:
             game_over = True
             reward = self.ini.get('reward_excessive_move')
-            lose_reason = 'Exceeded max moves (' + str(self.ini.get('max_moves') * len(self.snake)) + ')'
+            lose_reason = 'Exceeded max moves (' + str(max_moves * snake_length) + ')'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'exceeded_max_moves_count')
 
@@ -164,6 +168,8 @@ class AISnakeGame():
             reward += self.ini.get('reward_food')
             self.place_food()
         else:
+            # Small reward for staying alive
+            reward += self.ini.get('reward_move') * (snake_length / board_squares)
             self.snake.pop()
 
         # Update move reward

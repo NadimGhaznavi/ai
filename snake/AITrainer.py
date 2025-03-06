@@ -15,7 +15,8 @@ class AITrainer():
         self.gamma = ini.get('discount')
         self.model = model
         self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
-        if ini.get('model') == 'cnn' or ini.get('model') == 'rnn':
+        model_type = ini.get('model')
+        if model_type == 'cnn' or model_type == 'rnn' or model_type == 'cnnr':
             self.criterion = nn.SmoothL1Loss()
             #self.criterion = nn.MSELoss()
         else:
@@ -45,7 +46,7 @@ class AITrainer():
         if game_over:
             Q_new = reward # No future rewards, the game is over.
         else:
-            Q_new = reward + self.gamma * torch.max(self.model(next_state))
+            Q_new = reward + self.gamma * torch.max(self.model(next_state).detach())
         target[0][action.argmax().item()] = Q_new  # Update Q value
         self.optimizer.zero_grad()  # Reset gradients
         loss = self.criterion(target, pred) # Calculate the loss
