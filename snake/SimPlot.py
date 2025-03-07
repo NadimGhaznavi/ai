@@ -19,7 +19,7 @@ class SimPlot():
     self.image_1 = None
     self.image_2 = None
     plt.ion()
-    self.fig, self.axs = plt.subplots(2, 2, figsize=(20,6), layout="tight", facecolor="#000000", gridspec_kw={'width_ratios': [10, 1]})
+    self.fig, self.axs = plt.subplots(2, 2, figsize=(20,6), layout="tight", facecolor="#000000", gridspec_kw={'width_ratios': [20, 1]})
     self.fig.suptitle('AI Sim (v' + str(self.ini.get('sim_num')) + ')', color="#00FF00")
     self.log.log('SimPlot initialization:     [OK]')
 
@@ -30,7 +30,6 @@ class SimPlot():
   def plot(self):
     start_time = time.time()
     self.update()
-    #print("DEBUG plot update() time: ", round(time.time() - start_time, 2))
     
     with io.capture_output() as captured:
       display.display(plt.gcf())
@@ -39,7 +38,9 @@ class SimPlot():
     for y in range(10, 100, 10):
       if max(self.scores) >= y:
         self.axs[0][0].axhline(y=y, color='r', linestyle=(0, (1, 10)), linewidth=1)
-
+    # Clear the figure before plotting new data to support a sliding view to maintain constant 
+    # resolution at the cost of losing visibility into old data
+    self.axs[0][0].cla() 
     self.axs[0][0].set_facecolor('#002000')
     self.axs[1][0].set_facecolor('#002000')
     self.axs[0][1].set_facecolor('#002000')
@@ -62,12 +63,10 @@ class SimPlot():
     self.axs[1][0].set_xlabel('Score', color='#00ff00')
     self.axs[1][0].bar(self.bar_scores, self.bar_count, color='#6666ff')
     # Render an image if it's been set
-    #self.axs[0][1].set_title('Image 1, epoch ' + str(len(self.games)), color='#00ff00')
-    #image_1 = self.image_1.detach().numpy()
-    #print("DEBUG image_1.shape: ", image_1.shape)
-    # image_1.shape should be (x, x)
-    #self.axs[0][1].imshow(image_1, cmap='gray')
-
+    self.axs[0][1].set_title('Input Image #' + str(len(self.games)), color='#00ff00')
+    self.axs[0][1].axis('off')  # Hide x and y axis
+    self.axs[0][1].imshow(self.image_1)
+    # Bar graph showing the reason games were lost
     self.axs[1][1].set_title('Lose Reason', color='#00ff00')
     self.axs[1][1].set_ylabel('Count', color='#00ff00')
     self.axs[1][1].bar(self.lose_labels, self.lose_counts, color='#6666ff')
@@ -75,13 +74,10 @@ class SimPlot():
     plt.show()
     plt.pause(0.1)
     display.clear_output(wait=True)
-    #print("DEBUG plot complete time: ", round(time.time() - start_time, 2))
 
   def set_image_1(self, img):
-    self.image_1 = img
-
-  def set_image_2(self, img):
-    self.image_2 = img
+    # Change the type from tensor to numpy array and the shape from [3, x, y] to [x, y, 3]
+    self.image_1 = np.transpose(img.detach().numpy(), (1, 2, 0)) 
 
   def update(self):
     games = []

@@ -50,8 +50,9 @@ class AITrainer():
         target[0][action.argmax().item()] = Q_new  # Update Q value
         self.optimizer.zero_grad()  # Reset gradients
         loss = self.criterion(target, pred) # Calculate the loss
-        self.stats.set('trainer', 'loss', loss.item())
-        self.stats.append('recent', 'loss', loss.item())
+        with torch.no_grad():
+            self.stats.set('trainer', 'loss', loss.item())
+            self.stats.append('recent', 'loss', loss.item())
         loss.backward()
         self.optimizer.step() # Adjust the weights
 
@@ -78,36 +79,21 @@ class AITrainer():
             reward = torch.unsqueeze(reward, 0)
             game_over = (game_over, )
 
-        if model_type == 't':
-            pred = self.model(state).squeeze(0)
-        else:
-            pred = self.model(state)
+        pred = self.model(state)
         target = pred.clone()
 
-        if model_type == 't':
-            # Ensure reward is a tensor of shape [1] if it's scalar
-            if reward.dim() == 0:
-                reward = reward.unsqueeze(0)
-            if isinstance(game_over, bool):
-                game_over = [game_over]
-            for idx in range(len(game_over)):  
-                Q_new = reward[idx]  # Ensure reward is properly indexed
-                if not game_over[idx]:
-                    with torch.no_grad():
-                        Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state))
-                target[0, action[idx].argmax().item()] = Q_new  # Update Q value
-        else:
-            for idx in range(len(game_over)):
-                Q_new = reward[idx]
-                if not game_over[idx]:
-                    Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
-                target[idx][action[idx].argmax().item()] = Q_new  # Update Q value
+        for idx in range(len(game_over)):
+            Q_new = reward[idx]
+            if not game_over[idx]:
+                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
+            target[idx][action[idx].argmax().item()] = Q_new  # Update Q value
 
         self.optimizer.zero_grad()  # Reset gradients
 
         loss = self.criterion(target, pred) # Calculate the loss
-        self.stats.set('trainer', 'loss', loss.item())
-        self.stats.append('recent', 'loss', loss.item())
+        with torch.no_grad():
+            self.stats.set('trainer', 'loss', loss.item())
+            self.stats.append('recent', 'loss', loss.item())
         loss.backward()
         self.optimizer.step() # Adjust the weights
 

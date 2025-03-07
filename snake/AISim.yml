@@ -1,6 +1,7 @@
+custom:
+  sim_num: 2988
 default:
   ai_version_file: next_ai_version.txt
-  batch_size: 1000
   board_height: 20
   board_square: 16
   board_width: 20
@@ -8,11 +9,11 @@ default:
   cnnr_hidden_size: 128
   data_dir: sim_data
   discount: 0.99
+  epsilon_decay: 0.95
   epsilon_enabled: false
+  epsilon_min: 0
   epsilon_print_stats: 1
   epsilon_value: 0.9
-  epsilon_min: 0
-  epsilon_decay: 0.95
   game_speed: 500
   game_title: AI Snake Game
   headless: 0
@@ -23,14 +24,15 @@ default:
   log_basename: _log.txt
   matplot_max_x: 1000
   max_epochs: 0
-  max_memories: 1000
+  max_memories: 20
   max_memory: 100000
   max_moves: 200
+  max_scores: 1000
   model: linear
   model_basename: _model.pth
   model_stats: false
   next_num_file: next_num.txt
-  nu_bad_games: 6
+  nu_bad_games: 10
   nu_enabled: true
   nu_high_grace: 4
   nu_max_epochs: 0
@@ -40,18 +42,19 @@ default:
   output_size: 3
   plot_basename: _plot.png
   plot_dir: sim_plots
-  plot_freq: 100
-  random_seed: 129
-  reward_excessive_move: -10
+  plot_freq: 50
+  plot_cnn_freq: 50
+  random_seed: 1970
+  reward_excessive_move: 0
   reward_food: 10
-  reward_move: 0.1
-  reward_move_closer: 0.1
-  reward_move_further: -0.1
-  reward_snake_collision: -10
-  reward_wall_collision: -10
+  reward_move: 1
+  reward_move_closer: 1
+  reward_move_further: -1
+  reward_snake_collision: 0
+  reward_wall_collision: 0
+  rnn_dropout: 0.2
   rnn_hidden_size: 270
   rnn_layers: 10
-  rnn_dropout: 0.2
   rnnt_input_size: 20
   rnnt_sequence_length: 20
   show_loss: true
@@ -63,9 +66,9 @@ default:
   sim_plot_basename: _plot.png
   stats_basename: _stats.yml
   status_iter: 50
+  t_dropout: 0.05
+  t_feedforward_dim: 1024
   t_hidden_size: 256
   t_num_heads: 8
   t_num_layers: 4
-  t_feedforward_dim: 1024
-  t_dropout: 0.05
   trainer_stats: true

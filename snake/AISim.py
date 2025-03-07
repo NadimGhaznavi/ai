@@ -4,7 +4,7 @@ from SimPlot import SimPlot
 from SimStats import SimStats
 from AIAgent import AIAgent
 from AISnakeGame import AISnakeGame
-import time
+from PlotCNN import PlotCNN
 import os
 import torch
 import sys
@@ -72,8 +72,11 @@ def train():
     stats = SimStats(config, log)
     plot = SimPlot(config, log, stats)
     agent = AIAgent(config, log, stats)
+    model = agent.get_model()
+    model.set_plot(plot)
     game = AISnakeGame(config, log, stats)
-    
+    cnn_plot = PlotCNN(log, model)
+    plot_cnn_freq = config.get('plot_cnn_freq')
     if config.get('restart'):
         # Restart the simulation
         restart(config, stats, log, agent, config.get('restart'))
@@ -94,6 +97,9 @@ def train():
     
     log.log("AISim initialization:       [OK]")
     in_progress = True
+    max_epochs = int(config.get('max_epochs'))
+    nu_max_epochs = int(config.get('nu_max_epochs'))
+
     while in_progress:
         # The actual training loop
         old_state = game.board.get_state() # Get the current state
@@ -105,10 +111,10 @@ def train():
             agent.remember(old_state, move, reward, new_state, game_over) # Remember
         else:
             agent.remember(old_state, move, reward, new_state, game_over) # Remember
-            max_epochs = int(config.get('max_epochs'))
-            nu_max_epochs = int(config.get('nu_max_epochs'))
-            nu_enabled = config.get('nu_enabled')
             num_games = int(stats.get('game', 'num_games'))
+            if config.get('model') == 'cnnr' and num_games % plot_cnn_freq == 0:
+                cnn_plot.plot(new_state) # Visualize the CNN feature maps
+            nu_enabled = config.get('nu_enabled')
             if max_epochs > 0 and max_epochs == num_games:
                 in_progress = False # Reached max epochs
                 log.log("Reached max epochs (" + str(max_epochs) + "), exiting")

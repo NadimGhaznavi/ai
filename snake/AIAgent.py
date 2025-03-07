@@ -38,7 +38,7 @@ class AIAgent:
             raise Exception(f"Unknown model type {ini.get('model')}")
         self.epsilon_algo = EpsilonAlgo(ini, log, stats)
         self.nu_algo = NuAlgo(ini, log, stats)
-        self.memory = ReplayMemory(ini, stats)
+        self.memory = ReplayMemory(ini, log, stats)
         self.trainer = AITrainer(ini, log, stats, self.model)
         self.log.log('AIAgent initialization:     [OK]')
         self.last_dirs = [ 0, 0, 1, 0 ]
@@ -81,7 +81,7 @@ class AIAgent:
     def remember(self, state, action, reward, next_state, done):
         # Store the state, action, reward, next_state, and done in memory
         model_type = self.ini.get('model')
-        if model_type == 'rnn' or model_type == 'cnn': # or model_type == 'cnnr':
+        if model_type == 'rnn' or model_type == 'cnn': 
             pass
         else:
             self.memory.append((state, action, reward, next_state, done))

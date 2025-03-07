@@ -107,14 +107,7 @@ class TBoard():
             # Food, channel 2
             if self.food is not None:
                 state[2, int(self.food.y), int(self.food.x)] = 1.0
-            # Render the state as a pixmap in matplotlib
-            self.plot.set_image_1(state)
             return state
-        
-        elif self.ini.get('model') == 'cnnr':
-            # [1, 20, 20]
-            self.plot.set_image_2(self.board)
-            return self.board.reshape(1, self.width, self.height)
 
         head = self.head
         direction = self.direction
