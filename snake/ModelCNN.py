@@ -41,17 +41,9 @@ class ModelCNN(nn.Module):
     
     def forward(self, x):
         self.stats.incr('model', 'steps')
-        #print("DEBUG 1 x.shape: ", x.shape)
         x = x.unsqueeze(0)  # Shape becomes [1, 3, 20, 20]
-        #print("DEBUG 2 x.shape: ", x.shape)
         x = self.conv_layers(x)
-        #print("DEBUG 3 x.shape: ", x.shape)
-        # Optional visualization of feature maps
-        if self.plot is not None:
-            # Visualize the feature map from the first sample in the batch
-            self.plot.set_image_2(x[0].detach().cpu())
         x = self.fc_layers(x)
-        #print("DEBUG 4 x.shape: ", x.shape)
         return x
 
     def get_steps(self):
