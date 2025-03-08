@@ -24,7 +24,7 @@ class PlotCNN:
         self.feature_maps = None  # To store feature maps
 
         # Set up the figure and axes for plotting feature maps
-        self.fig, self.axs = plt.subplots(rows, cols, figsize=(10, 32), layout="tight", facecolor="#000000")  # 8 rows, 4 columns for 32 feature maps
+        self.fig, self.axs = plt.subplots(rows, cols, figsize=(10, 32), layout="tight", facecolor="#000000")
         self.fig.suptitle('Feature Maps of CNN Layers', color="#00FF00")
         self.upsample = nn.Upsample(scale_factor=2, mode='bicubic')
         plt.ion()
@@ -45,7 +45,6 @@ class PlotCNN:
 
         self.feature_maps = x.squeeze(0)  # Remove the batch dimension
         num_feature_maps = self.feature_maps.shape[0]  # Should be 32
-        
         # Clear axes before plotting new feature maps
         for ax in self.axs.flat:
             ax.cla()
@@ -53,7 +52,7 @@ class PlotCNN:
         # Plot the feature maps
         for i in range(num_feature_maps):
             ax = self.axs[i // 4, i % 4]  # Arrange in a grid (8x4)
-            feature_map = self.feature_maps[i].cpu().numpy()
+            feature_map = self.feature_maps[i].cpu().detach().numpy()
             #ax.imshow(feature_map, cmap='gray')
             ax.imshow(feature_map)
             ax.set_title(f'Feature Map {i + 1}')
