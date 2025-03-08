@@ -117,7 +117,6 @@ def train():
             num_games = int(stats.get('game', 'num_games'))
             if config.get('model') == 'cnnr' and num_games % plot_cnn_freq == 0:
                 cnn_plot.plot(new_state) # Visualize the CNN feature maps
-                time.sleep(5)
             nu_enabled = config.get('nu_enabled')
             if max_epochs > 0 and max_epochs == num_games:
                 in_progress = False # Reached max epochs
