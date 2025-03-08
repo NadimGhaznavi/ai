@@ -69,6 +69,7 @@ def train():
     """
 
     config = SimConfig()
+    model_type = config.get('model')
     log = SimLogger(config)
     stats = SimStats(config, log)
     plot = SimPlot(config, log, stats)
@@ -76,7 +77,8 @@ def train():
     model = agent.get_model()
     model.set_plot(plot)
     game = AISnakeGame(config, log, stats)
-    cnn_plot = PlotCNN(log, config, model)
+    if model_type == 'cnnr':
+        cnn_plot = PlotCNN(log, config, model)
     plot_cnn_freq = config.get('plot_cnn_freq')
     if config.get('restart'):
         # Restart the simulation
@@ -84,11 +86,11 @@ def train():
     
     model = agent.get_model()
     # For CNNs we want to render the game state
-    if config.get('model') == 'cnnr' or config.get('model') == 'cnn' or config.get('model') == 'linear':
+    if model_type == 'cnnr' or model_type == 'cnn' or model_type == 'linear':
         model.set_plot(plot)
         game.board.set_plot(plot)
     
-    if config.get('model') == 'rnn':
+    if model_type == 'rnn':
         game.board.set_plot(plot)
 
     # So that we can print the model from the game

@@ -19,7 +19,7 @@ class ModelCNNR(nn.Module):
 
 
         # Add an upsampling layer to increase input resolution from 20x20 to 40x40.
-        self.upsample = nn.Upsample(scale_factor=4, mode='nearest')
+        self.upsample = nn.Upsample(scale_factor=4, mode='bicubic')
 
         # A channel each for the snake head, body and food
         input_channels = 3
@@ -42,9 +42,10 @@ class ModelCNNR(nn.Module):
             nn.MaxPool2d(kernel_size=2)   # Reduces 20x20 -> 10x10
         )
         # The flattened feature size is 32 channels * 10 * 10 = 3200.
+        fc_in = c3_out_chan * 10 * 10
         self.fc_cnn = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(c3_out_chan * 10 * 10, 128),
+            nn.Linear(fc_in, 128),
             nn.ReLU()
         )
          # Use an LSTM to process the sequence of CNN embeddings.

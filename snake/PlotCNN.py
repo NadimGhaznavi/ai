@@ -26,7 +26,7 @@ class PlotCNN:
         # Set up the figure and axes for plotting feature maps
         self.fig, self.axs = plt.subplots(rows, cols, figsize=(10, 32), layout="tight", facecolor="#000000")  # 8 rows, 4 columns for 32 feature maps
         self.fig.suptitle('Feature Maps of CNN Layers', color="#00FF00")
-        self.upsample = nn.Upsample(scale_factor=4, mode='nearest')
+        self.upsample = nn.Upsample(scale_factor=4, mode='bicubic')
         plt.ion()
         self.log.log("PlotCNN initialization:     [OK]")
 

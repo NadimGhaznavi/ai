@@ -13,7 +13,9 @@ class SimConfig():
         # Get the next simulation number
         with open(self.get('next_num_file'), 'r') as file:
             for line in file:
-                self.set('sim_num', int(line.strip()))
+                sim_num = int(line.strip())
+                self.set('sim_num', sim_num)
+
         with open(self.get('next_num_file'), 'w') as file:
             file.write(str(self.get('sim_num') + 1))
 
@@ -24,16 +26,18 @@ class SimConfig():
         parser.add_argument('-in', '--ini_file', default=None, type=str, help='Initial configuration file.')
         parser.add_argument('-ma', '--max_epochs', default=0, type=int, help='Number of simulations to run.')
         parser.add_argument('-mo', '--model', default=None, type=str, help='Model to use [linear|rnn|t], default linear.')
-        parser.add_argument('-ne', '--nu_enabled', default=1, type=int, help='Enable the Nu algorithm.')
+        parser.add_argument('-ne', '--nu_enabled', default=0, type=int, help='Enable the Nu algorithm.')
         parser.add_argument('-nu', '--nu_max_epochs', default=None, type=int, help='Number of games before disabling the Nu algorithm.')
         parser.add_argument('-re', '--restart', default=None, type=int, help='Restart simulation version RESTART.')
         parser.add_argument('-sp', '--speed', default=0, type=int, help='Set the game speed, default is 500.')
 
         args = parser.parse_args()
-        if self.set('ini_file', args.ini_file):
+        if args.ini_file:
             self.load(args.ini_file)
-        if args.nu_enabled == 0:
-            self.set('nu_enabled', False)
+            self.set('sim_num', sim_num)
+            print(f"Loading configuration from {args.ini_file}")
+        if args.nu_enabled == 1:
+            self.set('nu_enabled', True)
         if args.block_size:
             self.set('block_size', args.block_size)
         if args.epsilon:
@@ -51,6 +55,7 @@ class SimConfig():
         if args.speed:
             self.set('game_speed', args.speed)
 
+        print("DEBUG: sim_num: ", self.get('sim_num'))
         self.init()
       
     def __del__(self):

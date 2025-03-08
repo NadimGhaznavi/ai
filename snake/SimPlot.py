@@ -77,7 +77,10 @@ class SimPlot():
 
   def set_image_1(self, img):
     # Change the type from tensor to numpy array and the shape from [3, x, y] to [x, y, 3]
-    self.image_1 = np.transpose(img.detach().numpy(), (1, 2, 0)) 
+    if self.ini.get('model') == 'cnnr':
+      self.image_1 = np.transpose(img.detach().numpy(), (1, 2, 0))
+    else:
+      self.image_1 = img
 
   def update(self):
     games = []

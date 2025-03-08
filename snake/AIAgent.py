@@ -80,11 +80,7 @@ class AIAgent:
  
     def remember(self, state, action, reward, next_state, done):
         # Store the state, action, reward, next_state, and done in memory
-        model_type = self.ini.get('model')
-        if model_type == 'rnn' or model_type == 'cnn': 
-            pass
-        else:
-            self.memory.append((state, action, reward, next_state, done))
+        self.memory.append((state, action, reward, next_state, done))
 
     def reset_epsilon_injected(self):
         self.epsilon_algo.reset_injected()
@@ -103,17 +99,18 @@ class AIAgent:
         model_type = self.ini.get('model')
         if model_type == 'cnn': # or model_type == 'cnnr':
             pass
-        elif model_type == 'cnnr':
+        elif model_type == 'cnnr' or model_type == 'rnn':
             memory = self.memory.get_memory()
             if memory != False:                
                 for state, action, reward, next_state, done in memory[0]:
                     self.trainer.train_step_cnn(state, action, reward, next_state, [done])
-        elif model_type == 'rnn' or model_type == 'rnnl':
-            pass
         else:
             memory = self.memory.get_memory()
-            states, actions, rewards, next_states, dones = zip(*memory)
-            self.trainer.train_step(states, actions, rewards, next_states, dones)
+            if memory != False:
+                if model_type == 'linear':
+                    memory = memory[0]
+                states, actions, rewards, next_states, dones = zip(*memory)
+                self.trainer.train_step(states, actions, rewards, next_states, dones)
 
     def train_short_memory(self, state, action, reward, next_state, done):
         if self.ini.get('model') == 'cnn' or self.ini.get('model') == 'cnnr':

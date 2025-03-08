@@ -35,3 +35,5 @@ class ModelRNN(nn.Module):
     def reset_steps(self):
         self.stats.set('model', 'steps', 0)
         
+    def set_plot(self, plot):
+        self.plot = plot
