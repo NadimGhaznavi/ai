@@ -43,9 +43,9 @@ default:
   nu_verbose: false
   output_size: 3
   plot_basename: _plot.png
-  plot_cnn_freq: 5
+  plot_cnn_freq: 100
   plot_dir: sim_plots
-  plot_freq: 5
+  plot_freq: 20
   random_seed: 1970
   reward_excessive_move: -10
   reward_food: 10

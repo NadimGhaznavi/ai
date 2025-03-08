@@ -19,7 +19,7 @@ class ModelCNNR(nn.Module):
         c2_out_chan = ini.get('cnn_b2_channels')
 
         # Add an upsampling layer to increase input resolution from 20x20 to 40x40.
-        self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
+        self.upsample = nn.Upsample(scale_factor=2, mode='bicubic')
 
         # A channel for the snake head, body and food
         input_channels = 3
