@@ -26,7 +26,7 @@ class AISnakeGame():
     
     def get_distance(self, point1, point2):
         model_type = self.ini.get('model')
-        if model_type == 't' or model_type == 'rnn' or model_type == 'cnn' or model_type == 'cnnr':
+        if model_type == 'linear' or model_type == 'rnn' or model_type == 'cnn' or model_type == 'cnnr':
             return abs(point1.x - point2.x) + abs(point1.y - point2.y)
         return 0
 
