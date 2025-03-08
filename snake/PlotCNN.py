@@ -14,15 +14,19 @@ import torch
 import torch.nn as nn
 
 class PlotCNN:
-    def __init__(self, log, cnn_model):
+    def __init__(self, log, config, cnn_model):
         self.log = log
         self.cnn_model = cnn_model
+        
+        rows = config.get('cnn_b3_channels') // 4
+        cols = config.get('cnn_b3_channels') // rows
+
         self.feature_maps = None  # To store feature maps
 
         # Set up the figure and axes for plotting feature maps
-        self.fig, self.axs = plt.subplots(8, 4, figsize=(16, 32), facecolor="#000000")  # 8 rows, 4 columns for 32 feature maps
+        self.fig, self.axs = plt.subplots(rows, cols, figsize=(10, 32), layout="tight", facecolor="#000000")  # 8 rows, 4 columns for 32 feature maps
         self.fig.suptitle('Feature Maps of CNN Layers', color="#00FF00")
-        self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
+        self.upsample = nn.Upsample(scale_factor=4, mode='nearest')
         plt.ion()
         self.log.log("PlotCNN initialization:     [OK]")
 
@@ -39,6 +43,7 @@ class PlotCNN:
             # Pass through the first two conv layers and capture the feature maps
             x = self.cnn_model.conv_1(x)  # After first conv
             x = self.cnn_model.conv_2(x)  # After second conv
+            x = self.cnn_model.conv_3(x)  # After second conv
 
         self.feature_maps = x.squeeze(0)  # Remove the batch dimension
         num_feature_maps = self.feature_maps.shape[0]  # Should be 32

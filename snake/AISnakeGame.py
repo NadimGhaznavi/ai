@@ -145,7 +145,6 @@ class AISnakeGame():
             game_over = True
             s_col_reward = self.ini.get('reward_snake_collision')
             reward = (s_col_reward // 2) - snake_length
-            self.log.log(f"Snake collision reward: {reward}")
             lose_reason = 'Hit the snake'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'snake_collision_count')

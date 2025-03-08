@@ -13,38 +13,32 @@ class ModelCNNR(nn.Module):
         self.stats = stats
         self.plot = None
 
-        c1_out_chan = ini.get('cnn_b1_channels') # 16
-        c2_out_chan = ini.get('cnn_b2_channels') # 24
-        c3_out_chan = ini.get('cnn_b3_channels') # 32
-
+        #c1_out_chan = 16
+        #c2_out_chan = 32
+        c1_out_chan = ini.get('cnn_b1_channels')
+        c2_out_chan = ini.get('cnn_b2_channels')
 
         # Add an upsampling layer to increase input resolution from 20x20 to 40x40.
-        self.upsample = nn.Upsample(scale_factor=4, mode='nearest')
+        self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
 
-        # A channel each for the snake head, body and food
+        # A channel for the snake head, body and food
         input_channels = 3
         self.conv_1 = nn.Sequential(
             # First conv block: maintains spatial dimensions with padding.
             nn.Conv2d(in_channels=input_channels, out_channels=c1_out_chan, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),  # Reduces 80x80 -> 40x40
+            nn.MaxPool2d(kernel_size=2),  # Reduces 40x40 -> 20x20
         )
         self.conv_2 = nn.Sequential(
             # Second conv block:
             nn.Conv2d(in_channels=c1_out_chan, out_channels=c2_out_chan, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)   # Reduces 40x40 -> 20x20
-        )
-        self.conv_3 = nn.Sequential(
-            # Second conv block:
-            nn.Conv2d(in_channels=c2_out_chan, out_channels=c3_out_chan, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)   # Reduces 20x20 -> 10x10
+            nn.MaxPool2d(kernel_size=2)   # Reduces 20x10 -> 10x10
         )
         # The flattened feature size is 32 channels * 10 * 10 = 3200.
         self.fc_cnn = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(c3_out_chan * 10 * 10, 128),
+            nn.Linear(c2_out_chan * 10 * 10, 128),
             nn.ReLU()
         )
          # Use an LSTM to process the sequence of CNN embeddings.
@@ -69,10 +63,9 @@ class ModelCNNR(nn.Module):
         with torch.no_grad():
             self.plot.set_image_1(x.squeeze()[-1].unsqueeze(0))
         x = x.unsqueeze(0)  # shape [1, 3, 20, 20]
-        x = self.upsample(x)  # now shape [1, 3, 80, 80]
-        x = self.conv_1(x)    # shape becomes [1, 16, 40, 40]
-        x = self.conv_2(x)    # shape becomes [1, 24, 20, 20]
-        x = self.conv_3(x)    # shape becomes [1, 32, 10, 10]
+        x = self.upsample(x)  # now shape [1, 3, 40, 40]
+        x = self.conv_1(x)    # shape becomes [1, 16, 20, 20]
+        x = self.conv_2(x)    # shape becomes [1, 32, 10, 10]
         #with torch.no_grad():
         #    self.plot.set_image_2(x.squeeze()[-1].unsqueeze(0))
         embedding = self.fc_cnn(x)  # shape: [1, 128]
