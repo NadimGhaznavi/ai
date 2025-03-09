@@ -1,4 +1,5 @@
-custom: {}
+custom:
+  sim_num: 4130
 default:
   ai_version_file: next_ai_version.txt
   board_height: 20
