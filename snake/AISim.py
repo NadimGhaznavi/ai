@@ -116,7 +116,16 @@ def train():
         else:
             agent.remember(old_state, move, reward, new_state, game_over) # Remember
             num_games = int(stats.get('game', 'num_games'))
-            stats.append('loss', 'all', stats.get('trainer', 'loss'))
+            all_losses = stats.get('loss', 'all')
+            cur_loss = stats.get('trainer', 'loss')
+            if len(all_losses) == 0:
+                stats.append('loss', 'all', cur_loss)
+            else:
+                total_loss = 0
+                for loss in all_losses:
+                    total_loss += loss
+                total_loss += cur_loss
+                stats.append('loss', 'all', total_loss / (len(all_losses) + 1))
             model_type = config.get('model')
             if (num_games % plot_cnn_freq == 0) and \
                 (model_type == 'cnnr' or model_type == 'cnnr3' or model_type == 'cnnr4'):
