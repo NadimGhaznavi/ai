@@ -4,9 +4,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ModelCNNR(nn.Module):
+class ModelCNNR3(nn.Module):
     def __init__(self, ini, log, stats):
-        super(ModelCNNR, self).__init__()
+        super(ModelCNNR3, self).__init__()
         torch.manual_seed(ini.get('random_seed'))
         self.ini = ini
         self.log = log
@@ -67,8 +67,6 @@ class ModelCNNR(nn.Module):
     
     def forward(self, x):
         self.stats.incr('model', 'steps')
-        with torch.no_grad():
-            self.plot.set_image_1(x.squeeze()[-1].unsqueeze(0))
         x = x.unsqueeze(0)  # shape [1, 3, 20, 20]
         x = self.upsample(x)  # now shape [1, 3, 80, 80]
         x = self.conv_1(x)    # shape becomes [1, 16, 40, 40]

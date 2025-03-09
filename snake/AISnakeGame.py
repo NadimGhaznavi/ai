@@ -148,13 +148,14 @@ class AISnakeGame():
             lose_reason = 'Hit the snake'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'snake_collision_count')
+            msg = f"Snake collision reward: {reward}"
+            self.log.log(msg)
         if self.stats.get('game', 'game_moves') > max_moves * snake_length:
             game_over = True
             reward = self.ini.get('reward_excessive_move')
             lose_reason = 'Exceeded max moves (' + str(max_moves * snake_length) + ')'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'exceeded_max_moves_count')
-
         if game_over == True:
             self.move_reward += reward
             self.stats.set('game', 'lose_reason', lose_reason)

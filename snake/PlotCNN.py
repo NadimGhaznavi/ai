@@ -14,19 +14,27 @@ import torch
 import torch.nn as nn
 
 class PlotCNN:
-    def __init__(self, log, config, cnn_model):
+    def __init__(self, log, ini, cnn_model):
         self.log = log
+        self.ini = ini
         self.cnn_model = cnn_model
         
-        rows = config.get('cnn_b2_channels') // 4
-        cols = config.get('cnn_b2_channels') // rows
+        model_type = ini.get('model')
+        if model_type == 'cnn' or model_type == 'cnnr':
+            rows = ini.get('cnn_b2_channels') // 4
+            cols = ini.get('cnn_b2_channels') // rows
+            u_scale = 2
+        elif model_type == 'cnnr3':
+            rows = ini.get('cnn_b3_channels') // 4
+            cols = ini.get('cnn_b3_channels') // rows
+            u_scale = 4
 
         self.feature_maps = None  # To store feature maps
 
         # Set up the figure and axes for plotting feature maps
         self.fig, self.axs = plt.subplots(rows, cols, figsize=(10, 32), layout="tight", facecolor="#000000")
         self.fig.suptitle('Feature Maps of CNN Layers', color="#00FF00")
-        self.upsample = nn.Upsample(scale_factor=2, mode='bicubic')
+        self.upsample = nn.Upsample(scale_factor=u_scale, mode='bicubic')
         plt.ion()
         self.log.log("PlotCNN initialization:     [OK]")
 
@@ -42,6 +50,8 @@ class PlotCNN:
             # Pass through the first two conv layers and capture the feature maps
             x = self.cnn_model.conv_1(x)  # After first conv
             x = self.cnn_model.conv_2(x)  # After second conv
+            if self.ini.get('model') == 'cnnr3':
+                x = self.cnn_model.conv_3(x)
 
         self.feature_maps = x.squeeze(0)  # Remove the batch dimension
         num_feature_maps = self.feature_maps.shape[0]  # Should be 32

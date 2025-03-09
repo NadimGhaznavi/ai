@@ -16,13 +16,11 @@ class AITrainer():
         self.model = model
         self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
         model_type = ini.get('model')
-        if model_type == 'cnn' or model_type == 'rnn' or model_type == 'cnnr':
+        if model_type == 'cnn' or model_type == 'rnn' or model_type == 'cnnr' or model_type == 'cnnr3':
             self.criterion = nn.SmoothL1Loss()
-            #self.criterion = nn.MSELoss()
         else:
             self.criterion = nn.MSELoss()
         self.stats.set('trainer', 'steps', 0)
-        #torch.autograd.set_detect_anomaly(True)
         torch.manual_seed(ini.get('random_seed'))
         self.log.log('AITrainer initialization:   [OK]')
 
@@ -63,15 +61,7 @@ class AITrainer():
         next_state = torch.tensor(np.array(next_state), dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
-        if model_type == 'linear' and len(state.shape) == 1:
-            # Add a batch dimension
-            state = torch.unsqueeze(state, 0)
-            next_state = torch.unsqueeze(next_state, 0)
-            action = torch.unsqueeze(action, 0)
-            reward = torch.unsqueeze(reward, 0)
-            game_over = (game_over, )
-
-        elif model_type == 'rnn' and len(state.shape) == 1:
+        if model_type == 'linear' or model_type == 'rnn' and len(state.shape) == 1:
             # Add a batch dimension
             state = torch.unsqueeze(state, 0)
             next_state = torch.unsqueeze(next_state, 0)

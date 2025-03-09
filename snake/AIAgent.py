@@ -3,14 +3,11 @@ AIAgent.py
 """
 
 import torch
-import time
-import sys
 from ModelCNN import ModelCNN
 from ModelCNNR import ModelCNNR
+from ModelCNNR3 import ModelCNNR3
 from ModelL import ModelL
 from ModelRNN import ModelRNN
-from ModelRNNT import ModelRNNT
-from ModelRNNL import ModelRNNL
 from ReplayMemory import ReplayMemory
 from EpsilonAlgo import EpsilonAlgo
 from AITrainer import AITrainer
@@ -26,14 +23,12 @@ class AIAgent:
             self.model = ModelL(ini, log, stats)
         elif ini.get('model') == 'rnn':
             self.model = ModelRNN(ini, log, stats)
-        elif ini.get('model') == 'rnnl':
-            self.model = ModelRNNL(ini, log, stats)
-        elif ini.get('model') == 'rnnt':
-            self.model = ModelRNNT(ini, log, stats)
         elif ini.get('model') == 'cnn':
             self.model = ModelCNN(ini, log, stats)
         elif ini.get('model') == 'cnnr':
             self.model = ModelCNNR(ini, log, stats)
+        elif ini.get('model') == 'cnnr3':
+            self.model = ModelCNNR3(ini, log, stats)
         else:
             raise Exception(f"Unknown model type {ini.get('model')}")
         self.epsilon_algo = EpsilonAlgo(ini, log, stats)
@@ -96,24 +91,19 @@ class AIAgent:
 
     def train_long_memory(self):
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
+        memory = self.memory.get_memory()
         model_type = self.ini.get('model')
-        if model_type == 'cnn': # or model_type == 'cnnr':
-            pass
-        elif model_type == 'cnnr' or model_type == 'rnn':
-            memory = self.memory.get_memory()
-            if memory != False:                
+        if memory != False:                
+            if model_type == 'cnn' or model_type == 'cnnr' or model_type == 'cnnr3':
                 for state, action, reward, next_state, done in memory[0]:
                     self.trainer.train_step_cnn(state, action, reward, next_state, [done])
-        else:
-            memory = self.memory.get_memory()
-            if memory != False:
-                if model_type == 'linear':
-                    memory = memory[0]
-                states, actions, rewards, next_states, dones = zip(*memory)
-                self.trainer.train_step(states, actions, rewards, next_states, dones)
+            else:
+                for state, action, reward, next_state, done in memory[0]:
+                    self.trainer.train_step(state, action, reward, next_state, [done])
 
     def train_short_memory(self, state, action, reward, next_state, done):
-        if self.ini.get('model') == 'cnn' or self.ini.get('model') == 'cnnr':
+        model_type = self.ini.get('model')
+        if model_type == 'cnn' or model_type == 'cnnr' or model_type == 'cnnr3':
             self.trainer.train_step_cnn(state, action, reward, next_state, [done])
         else:
             self.trainer.train_step(state, action, reward, next_state, [done])
