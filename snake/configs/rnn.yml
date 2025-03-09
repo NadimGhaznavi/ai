@@ -14,15 +14,15 @@ default:
   discount: 0.82
   epsilon_decay: 0.95
   epsilon_enabled: true
-  epsilon_min: 0.01
+  epsilon_min: 0
   epsilon_print_stats: 1
-  epsilon_value: 0.95
+  epsilon_value: 0.5
   game_speed: 500
   game_title: AI Snake Game
   headless: 0
   hidden_size: 270
   input_size: 400
-  learning_rate: 0.001
+  learning_rate: 0.0001
   linear_input_size: 31
   log_basename: _log.txt
   matplot_max_x: 1000
@@ -46,7 +46,7 @@ default:
   plot_basename: _plot.png
   plot_cnn_freq: 50
   plot_dir: sim_plots
-  plot_freq: 50
+  plot_freq: 20
   random_seed: 1970
   reward_excessive_move: -10
   reward_food: 10
@@ -56,14 +56,12 @@ default:
   reward_snake_collision: -10
   reward_wall_collision: -10
   rnn_dropout: 0.2
-  rnn_hidden_size: 270
-  rnn_layers: 4
-  rnnt_input_size: 20
-  rnnt_sequence_length: 20
+  rnn_hidden_size: 350
+  rnn_layers: 8
   show_loss: true
   show_reward: true
   show_summary: true
-  show_summary_freq: 500
+  show_summary_freq: 100
   sim_highscore_basename: _highscore.csv
   sim_plot_basename: _plot.png
   stats_basename: _stats.yml

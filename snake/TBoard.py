@@ -85,7 +85,7 @@ class TBoard():
         model_type = self.ini.get('model')
         if model_type == 'rnn' or model_type == 'linear':
             self.plot.set_image_1(self.board)
-        elif model_type == 'cnn' or model_type == 'cnnr' or model_type == 'cnnr3':
+        elif model_type == 'cnn' or model_type == 'cnnr' or model_type == 'cnnr3' or model_type == 'cnnr4':
             # Return a 3 channel representation of the game state for the CNN.
             # Where the snake body, head and food each get their own channel.
             state = np.zeros((3, self.height, self.width), dtype=np.float32)
@@ -95,7 +95,7 @@ class TBoard():
                 state[0, int(head.y), int(head.x)] = 1.0
             # Snake body, channel 1
             if self.snake is not None and len(self.snake) > 1:
-                for seg in self.snake:
+                for seg in self.snake[1:]:
                     state[1, int(seg.y), int(seg.x)] = 1.0
             # Food, channel 2
             if self.food is not None:

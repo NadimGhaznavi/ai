@@ -1,14 +1,12 @@
-custom: {}
 default:
   ai_version_file: next_ai_version.txt
   board_height: 20
   board_square: 16
   board_width: 20
   checkpoint_freq: 50
-  cnn_b1_channels: 16
+  cnn_b1_channels: 64
   cnn_b2_channels: 32
   cnn_b3_channels: 32
-  cnnr_learning_rate: 0.00005
   cnnr_hidden_size: 128
   data_dir: sim_data
   discount: 0.99
@@ -31,7 +29,7 @@ default:
   max_memory: 100000
   max_moves: 200
   max_scores: 1000
-  model: cnnr
+  model: cnnr3
   model_basename: _model.pth
   model_stats: false
   next_num_file: next_num.txt
@@ -44,7 +42,7 @@ default:
   nu_verbose: false
   output_size: 3
   plot_basename: _plot.png
-  plot_cnn_freq: 50
+  plot_cnn_freq: 2
   plot_dir: sim_plots
   plot_freq: 20
   random_seed: 1970

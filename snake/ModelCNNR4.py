@@ -4,41 +4,44 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ModelCNNR3(nn.Module):
+class ModelCNNR4(nn.Module):
     def __init__(self, ini, log, stats):
-        super(ModelCNNR3, self).__init__()
+        super(ModelCNNR4, self).__init__()
         torch.manual_seed(ini.get('random_seed'))
         self.ini = ini
         self.log = log
         self.stats = stats
         self.plot = None
-        c1_out_chan = ini.get('cnn_b1_channels') # 32
-        c2_out_chan = ini.get('cnn_b2_channels') # 32
-        c3_out_chan = ini.get('cnn_b3_channels') # 32
-        # Add an upsampling layer to increase input resolution from 20x20 to 40x40.
-        self.upsample = nn.Upsample(scale_factor=4, mode='bicubic')
+
+        b1_chan = ini.get('cnn_b1_channels') # 32
+        b2_chan = ini.get('cnn_b2_channels') # 32
+        b3_chan = ini.get('cnn_b3_channels') # 32
+
         # A channel each for the snake head, body and food
         input_channels = 3
         self.conv_1 = nn.Sequential(
             # First conv block: maintains spatial dimensions with padding.
-            nn.Conv2d(in_channels=input_channels, out_channels=c1_out_chan, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=input_channels, out_channels=b1_chan, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)  # Reduces 80x80 -> 40x40
+            nn.Conv2d(in_channels=b1_chan, out_channels=b2_chan, kernel_size=3, padding=1),
+            nn.ReLU()
         )
         self.conv_2 = nn.Sequential(
             # Second conv block:
-            nn.Conv2d(in_channels=c1_out_chan, out_channels=c2_out_chan, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=b2_chan, out_channels=b2_chan, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)   # Reduces 40x40 -> 20x20
+            nn.Conv2d(in_channels=b2_chan, out_channels=b3_chan, kernel_size=3, padding=1),
+            nn.ReLU()
         )
         self.conv_3 = nn.Sequential(
-            # Second conv block:
-            nn.Conv2d(in_channels=c2_out_chan, out_channels=c3_out_chan, kernel_size=3, padding=1),
+            # Third conv block:
+            nn.Conv2d(in_channels=b3_chan, out_channels=b3_chan, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)   # Reduces 20x20 -> 10x10
+            nn.Conv2d(in_channels=b3_chan, out_channels=b3_chan, kernel_size=3, padding=1),
+            nn.ReLU()
         )
         # The flattened feature size is 32 channels * 10 * 10 = 3200.
-        fc_in = c3_out_chan * 10 * 10
+        fc_in = b3_chan * 20 * 20
         self.fc_cnn = nn.Sequential(
             nn.Flatten(),
             nn.Linear(fc_in, 128),
@@ -64,12 +67,9 @@ class ModelCNNR3(nn.Module):
     def forward(self, x):
         self.stats.incr('model', 'steps')
         x = x.unsqueeze(0)  # shape [1, 3, 20, 20]
-        x = self.upsample(x)  # now shape [1, 3, 80, 80]
         x = self.conv_1(x)    # shape becomes [1, 16, 40, 40]
         x = self.conv_2(x)    # shape becomes [1, 24, 20, 20]
         x = self.conv_3(x)    # shape becomes [1, 32, 10, 10]
-        #with torch.no_grad():
-        #    self.plot.set_image_2(x.squeeze()[-1].unsqueeze(0))
         embedding = self.fc_cnn(x)  # shape: [1, 128]
         embedding = embedding.unsqueeze(1)  # shape: [1, 1, 128]
         # Initialize or detach the hidden state as needed:

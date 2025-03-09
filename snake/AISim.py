@@ -77,7 +77,7 @@ def train():
     model = agent.get_model()
     model.set_plot(plot)
     game = AISnakeGame(config, log, stats)
-    if model_type == 'cnnr' or model_type == 'cnnr3':
+    if model_type == 'cnnr' or model_type == 'cnnr3' or model_type == 'cnnr4':
         cnn_plot = PlotCNN(log, config, model)
     plot_cnn_freq = config.get('plot_cnn_freq')
     if config.get('restart'):
@@ -86,7 +86,8 @@ def train():
     
     model = agent.get_model()
     # For CNNs we want to render the game state
-    if model_type == 'cnnr' or model_type == 'cnn' or model_type == 'cnnr3' or model_type == 'linear':
+    if model_type == 'cnnr' or model_type == 'cnn' or model_type == 'cnnr3' or \
+        model_type == 'cnnr4' or model_type == 'linear':
         model.set_plot(plot)
         game.board.set_plot(plot)
     
@@ -115,8 +116,10 @@ def train():
         else:
             agent.remember(old_state, move, reward, new_state, game_over) # Remember
             num_games = int(stats.get('game', 'num_games'))
+            stats.append('loss', 'all', stats.get('trainer', 'loss'))
             model_type = config.get('model')
-            if model_type == 'cnnr' or model_type == 'cnnr3' and num_games % plot_cnn_freq == 0:
+            if (num_games % plot_cnn_freq == 0) and \
+                (model_type == 'cnnr' or model_type == 'cnnr3' or model_type == 'cnnr4'):
                 cnn_plot.plot(new_state) # Visualize the CNN feature maps
             nu_enabled = config.get('nu_enabled')
             if max_epochs > 0 and max_epochs == num_games:
@@ -149,7 +152,7 @@ def print_stats(log, stats, agent, config):
     summary = ''
     summary += 'AISim #' + str(agent.ini.get('sim_num')) + ': Game {:<4}'.format(stats.get('game', 'num_games'))
     summary += ' Score: {:>3}'.format(stats.get('game', 'last_score'))
-    summary += ', Time(s): {:6.2f}'.format(stats.get('game', 'game_time'))
+    summary += ', Time: {:6.2f}s'.format(stats.get('game', 'game_time'))
     summary += ', Highscore: {:>3}'.format(stats.get('game', 'highscore'))
     if config.get('trainer_stats'):
         summary += ', Trainer steps {:>5}'.format(stats.get('trainer', 'steps'))
@@ -175,7 +178,7 @@ def show_summary(log, stats, config):
     recent_loss = 0
     for loss in stats.get('recent', 'loss'):
         recent_loss += loss
-    recent_loss = round(recent_loss / recent_freq, 2)
+    recent_loss = round(recent_loss / recent_freq, 4)
     recent_score = 0
     for score in stats.get('recent', 'score'):
         recent_score += score

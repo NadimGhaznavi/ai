@@ -19,8 +19,14 @@ class SimPlot():
     self.image_1 = None
     self.image_2 = None
     plt.ion()
-    self.fig, self.axs = plt.subplots(2, 2, figsize=(20,6), layout="tight", facecolor="#000000", gridspec_kw={'width_ratios': [20, 1]})
-    self.fig.suptitle('AI Sim (v' + str(self.ini.get('sim_num')) + ')', color="#00FF00")
+    #self.fig, self.axs = plt.subplots(2, 2, figsize=(20,6), layout="tight", facecolor="#000000", 
+    #                                  gridspec_kw={'width_ratios': [20, 1]})
+    self.fig, self.axs = plt.subplots(3, 2, figsize=(20, 8), layout="tight", facecolor="#000000", 
+                                  gridspec_kw={'width_ratios': [20, 1]})
+    # Single plot that spans two columns in the third row:
+    gs = self.fig.add_gridspec(3, 2)
+    self.ax3 = self.fig.add_subplot(gs[2, :], facecolor="#000000")
+    self.fig.suptitle('AI Sim (v' + str(self.ini.get('sim_num')) + ')', color="#00ff00")
     self.log.log('SimPlot initialization:     [OK]')
 
   def __del__(self):
@@ -45,10 +51,12 @@ class SimPlot():
     self.axs[1][0].set_facecolor('#002000')
     self.axs[0][1].set_facecolor('#002000')
     self.axs[1][1].set_facecolor('#002000')
+    self.ax3.set_facecolor('#002000')
     self.axs[0][0].tick_params(labelcolor='#00ff00')
     self.axs[1][0].tick_params(labelcolor='#00ff00')
     self.axs[0][1].tick_params(labelcolor='#00ff00')
     self.axs[1][1].tick_params(labelcolor='#00ff00')
+    self.ax3.tick_params(labelcolor='#00ff00')
 
     # Plot the scores and the mean scores
     #self.axs[0].set_ylim(ymin=0)
@@ -70,6 +78,12 @@ class SimPlot():
     self.axs[1][1].set_title('Lose Reason', color='#00ff00')
     self.axs[1][1].set_ylabel('Count', color='#00ff00')
     self.axs[1][1].bar(self.lose_labels, self.lose_counts, color='#6666ff')
+
+    # Plot loss 
+    self.ax3.set_title('Loss', color='#00ff00')
+    self.ax3.set_ylabel('Loss', color='#00ff00')
+    self.ax3.set_xlabel('Number of Games', color='#00ff00')
+    self.ax3.plot(self.games, self.losses, color='#6666ff')
 
     plt.show()
     plt.pause(0.1)
@@ -112,6 +126,10 @@ class SimPlot():
     max_steps = self.stats.get('game', 'exceeded_max_moves_count')
     self.lose_labels = ['Wall', 'Snake', 'Max Moves']
     self.lose_counts = [wall_count, snake_count, max_steps]
+
+    self.losses = []
+    for x in self.stats.get('loss', 'all'):
+      self.losses.append(x)
 
   def save(self):
     ini = self.ini

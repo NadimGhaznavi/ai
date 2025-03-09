@@ -21,6 +21,8 @@ class SimStats:
         self.stats['recent']['score'] = deque(maxlen=summary_freq)
         self.stats['scores'] = {}
         self.stats['scores']['all'] = deque(maxlen=max_scores)
+        self.stats['loss'] = {}
+        self.stats['loss']['all'] = []
 
     def __del__(self):
         self.save()

@@ -25,10 +25,7 @@ class AISnakeGame():
         return self.direction
     
     def get_distance(self, point1, point2):
-        model_type = self.ini.get('model')
-        if model_type == 'linear' or model_type == 'rnn' or model_type == 'cnn' or model_type == 'cnnr':
-            return abs(point1.x - point2.x) + abs(point1.y - point2.y)
-        return 0
+        return abs(point1.x - point2.x) + abs(point1.y - point2.y)
 
     def init_stats(self):
         self.stats.set('game', 'score', 0)
@@ -143,8 +140,7 @@ class AISnakeGame():
             self.stats.incr('game', 'wall_collision_count')
         elif self.board.is_snake_collision():
             game_over = True
-            s_col_reward = self.ini.get('reward_snake_collision')
-            reward = (s_col_reward // 2) - snake_length
+            reward = self.ini.get('reward_snake_collision') - (snake_length * 0.2)
             lose_reason = 'Hit the snake'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'snake_collision_count')

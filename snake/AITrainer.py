@@ -11,11 +11,13 @@ class AITrainer():
         self.ini = ini
         self.log = log
         self.stats = stats
-        self.lr = ini.get('learning_rate')
         self.gamma = ini.get('discount')
         self.model = model
-        self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
         model_type = ini.get('model')
+        if model_type == 'cnnr':
+            self.optimizer = optim.AdamW(self.model.parameters(), lr=ini.get('cnnr_learning_rate'))
+        else:
+            self.optimizer = optim.Adam(self.model.parameters(), lr=ini.get('learning_rate'))
         if model_type == 'cnn' or model_type == 'rnn' or model_type == 'cnnr' or model_type == 'cnnr3':
             self.criterion = nn.SmoothL1Loss()
         else:
@@ -49,8 +51,10 @@ class AITrainer():
         self.optimizer.zero_grad()  # Reset gradients
         loss = self.criterion(target, pred) # Calculate the loss
         with torch.no_grad():
-            self.stats.set('trainer', 'loss', loss.item())
-            self.stats.append('recent', 'loss', loss.item())
+            loss_num = loss.item()
+            self.stats.set('trainer', 'loss', loss_num)
+            self.stats.append('recent', 'loss', loss_num)
+            self.stats.append('loss', 'all', loss_num)
         loss.backward()
         self.optimizer.step() # Adjust the weights
 
@@ -82,8 +86,9 @@ class AITrainer():
 
         loss = self.criterion(target, pred) # Calculate the loss
         with torch.no_grad():
-            self.stats.set('trainer', 'loss', loss.item())
-            self.stats.append('recent', 'loss', loss.item())
+            loss_num = loss.item()
+            self.stats.set('trainer', 'loss', loss_num)
+            self.stats.append('recent', 'loss', loss_num)
         loss.backward()
         self.optimizer.step() # Adjust the weights
 

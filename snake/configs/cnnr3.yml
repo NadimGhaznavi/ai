@@ -5,9 +5,10 @@ default:
   board_width: 20
   checkpoint_freq: 50
   cnn_b1_channels: 32
-  cnn_b2_channels: 64
-  cnn_b3_channels: 64
+  cnn_b2_channels: 32
+  cnn_b3_channels: 32
   cnnr_hidden_size: 128
+  cnnr_learning_rate: 0.0005
   data_dir: sim_data
   discount: 0.99
   epsilon_decay: 0.95
@@ -20,7 +21,7 @@ default:
   headless: 0
   hidden_size: 270
   input_size: 400
-  learning_rate: 0.0005
+  learning_rate: 0.0008
   linear_input_size: 31
   log_basename: _log.txt
   matplot_max_x: 1000
@@ -42,9 +43,9 @@ default:
   nu_verbose: false
   output_size: 3
   plot_basename: _plot.png
-  plot_cnn_freq: 50
+  plot_cnn_freq: 100
   plot_dir: sim_plots
-  plot_freq: 20
+  plot_freq: 10
   random_seed: 1970
   reward_excessive_move: -10
   reward_food: 10
@@ -61,7 +62,7 @@ default:
   show_loss: true
   show_reward: true
   show_summary: true
-  show_summary_freq: 500
+  show_summary_freq: 100
   sim_highscore_basename: _highscore.csv
   sim_num: 1000
   sim_plot_basename: _plot.png

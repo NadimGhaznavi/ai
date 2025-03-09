@@ -55,7 +55,6 @@ class SimConfig():
         if args.speed:
             self.set('game_speed', args.speed)
 
-        print("DEBUG: sim_num: ", self.get('sim_num'))
         self.init()
       
     def __del__(self):

@@ -24,7 +24,7 @@ class PlotCNN:
             rows = ini.get('cnn_b2_channels') // 4
             cols = ini.get('cnn_b2_channels') // rows
             u_scale = 2
-        elif model_type == 'cnnr3':
+        elif model_type == 'cnnr3' or model_type == 'cnnr4':
             rows = ini.get('cnn_b3_channels') // 4
             cols = ini.get('cnn_b3_channels') // rows
             u_scale = 4
@@ -32,7 +32,7 @@ class PlotCNN:
         self.feature_maps = None  # To store feature maps
 
         # Set up the figure and axes for plotting feature maps
-        self.fig, self.axs = plt.subplots(rows, cols, figsize=(10, 32), layout="tight", facecolor="#000000")
+        self.fig, self.axs = plt.subplots(rows, cols, figsize=(5, 12), layout="tight", facecolor="#000000")
         self.fig.suptitle('Feature Maps of CNN Layers', color="#00FF00")
         self.upsample = nn.Upsample(scale_factor=u_scale, mode='bicubic')
         plt.ion()
