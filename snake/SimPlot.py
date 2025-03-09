@@ -83,7 +83,7 @@ class SimPlot():
     self.ax3.set_title('Average Loss', color='#00ff00')
     self.ax3.set_ylabel('Average Loss', color='#00ff00')
     self.ax3.set_xlabel('Number of Games', color='#00ff00')
-    self.ax3.plot(self.games, self.losses, color='#6666ff')
+    self.ax3.plot(self.games, self.losses, 'o', markeredgewidth=2, color='#6666ff')
 
     plt.show()
     plt.pause(0.1)
