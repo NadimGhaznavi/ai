@@ -124,7 +124,7 @@ class SimPlot():
     wall_count = self.stats.get('game', 'wall_collision_count')
     snake_count = self.stats.get('game', 'snake_collision_count')
     max_steps = self.stats.get('game', 'exceeded_max_moves_count')
-    self.lose_labels = ['Wall', 'Snake', 'Max Moves']
+    self.lose_labels = ['Wall', 'Snake', 'Moves']
     self.lose_counts = [wall_count, snake_count, max_steps]
 
     self.losses = []

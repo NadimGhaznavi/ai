@@ -222,10 +222,5 @@ def update_highscore_file(config, num_games, score):
         handle.write(str(num_games) + ',' + str(score) + '\n')
         handle.close()
 
-
-        
-
-    
-
 if __name__ == "__main__":
     train()
