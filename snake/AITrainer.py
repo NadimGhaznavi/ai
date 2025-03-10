@@ -54,7 +54,6 @@ class AITrainer():
             loss_num = loss.item()
             self.stats.set('trainer', 'loss', loss_num)
             self.stats.append('recent', 'loss', loss_num)
-            self.stats.append('loss', 'all', loss_num)
         loss.backward()
         self.optimizer.step() # Adjust the weights
 

@@ -49,9 +49,6 @@ class EpsilonAlgo():
     if not self.enabled or self.epsilon == 0:
       return False
     
-    if self.num_games % 2 == 0:
-      return False
-    
     if random.random() < self.epsilon:
       rand_move = [ 0, 0, 0 ]
       rand_idx = randint(0, 2)

@@ -10,13 +10,15 @@ default:
   cnn_b3_channels: 32
   cnnr_learning_rate: 0.00005
   cnnr_hidden_size: 128
+  cnnr_layers: 4
+  cnnr_dropout: 0.2
   data_dir: sim_data
   discount: 0.99
-  epsilon_decay: 0.95
+  epsilon_decay: 0.99
   epsilon_enabled: false
   epsilon_min: 0
   epsilon_print_stats: 1
-  epsilon_value: 0.9
+  epsilon_value: 0.99
   game_speed: 500
   game_title: AI Snake Game
   headless: 0
@@ -36,7 +38,7 @@ default:
   model_stats: false
   next_num_file: next_num.txt
   nu_bad_games: 6
-  nu_enabled: true
+  nu_enabled: false
   nu_high_grace: 4
   nu_max_epochs: 0
   nu_pool: 5

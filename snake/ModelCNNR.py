@@ -43,8 +43,10 @@ class ModelCNNR(nn.Module):
         )
          # Use an LSTM to process the sequence of CNN embeddings.
         self.hidden_size = ini.get('cnnr_hidden_size')  # Example hidden size; tweak as needed.
+        self.dropout = ini.get('cnnr_dropout') # Dropout layer on the outputs of each LSTM layer except the last layer
+        self.num_layers = ini.get('cnnr_layers')
         # The LSTM will take in the 128-dim embedding at each time step.
-        self.lstm = nn.LSTM(input_size=128, hidden_size=self.hidden_size, num_layers=1, batch_first=True)
+        self.lstm = nn.LSTM(input_size=128, hidden_size=self.hidden_size, num_layers=self.num_layers, dropout=self.dropout, batch_first=True)
         # --- End RNN Part ---
 
         # --- Output Layer ---
@@ -71,8 +73,8 @@ class ModelCNNR(nn.Module):
         # Initialize or detach the hidden state as needed:
         if self.hidden is None:
             # Initialize hidden state and cell state with zeros
-            self.hidden = (torch.zeros(1, 1, self.hidden_size),
-                           torch.zeros(1, 1, self.hidden_size))
+            self.hidden = (torch.zeros(self.num_layers, 1, self.hidden_size),
+                           torch.zeros(self.num_layers, 1, self.hidden_size))
         else:
             # Detach hidden state from previous graph to avoid backpropagating through entire history
             self.hidden = (self.hidden[0].detach(), self.hidden[1].detach())

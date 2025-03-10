@@ -21,7 +21,7 @@ class SimPlot():
     plt.ion()
     #self.fig, self.axs = plt.subplots(2, 2, figsize=(20,6), layout="tight", facecolor="#000000", 
     #                                  gridspec_kw={'width_ratios': [20, 1]})
-    self.fig, self.axs = plt.subplots(3, 2, figsize=(25, 8), layout="tight", facecolor="#000000", 
+    self.fig, self.axs = plt.subplots(3, 2, figsize=(28, 8), layout="tight", facecolor="#000000", 
                                   gridspec_kw={'width_ratios': [20, 1]})
     # Single plot that spans two columns in the third row:
     gs = self.fig.add_gridspec(3, 2)
@@ -83,7 +83,7 @@ class SimPlot():
     self.ax3.set_title('Average Loss', color='#00ff00')
     self.ax3.set_ylabel('Average Loss', color='#00ff00')
     self.ax3.set_xlabel('Number of Games', color='#00ff00')
-    self.ax3.plot(self.games, self.losses, '.', markeredgewidth=2, color='#6666ff')
+    self.ax3.plot(self.loss_count, self.losses, '.', markeredgewidth=1, color='#6666ff')
 
     plt.show()
     plt.pause(0.1)
@@ -128,8 +128,12 @@ class SimPlot():
     self.lose_counts = [wall_count, snake_count, max_steps]
 
     self.losses = []
+    self.loss_count = []
+    count = 0
     for x in self.stats.get('loss', 'all'):
       self.losses.append(x)
+      self.loss_count.append(count)
+      count += 1
 
   def save(self):
     ini = self.ini
