@@ -103,6 +103,8 @@ def train():
     in_progress = True
     max_epochs = int(config.get('max_epochs'))
     nu_max_epochs = int(config.get('nu_max_epochs'))
+    matplot_max_x = int(config.get('matplot_max_x'))
+    num_plots = 0
 
     while in_progress:
         # The actual training loop
@@ -117,6 +119,7 @@ def train():
             agent.remember(old_state, move, reward, new_state, game_over) # Remember
             num_games = int(stats.get('game', 'num_games'))
             all_losses = stats.get('loss', 'all')
+            # Collect loss data for matplotlib
             cur_loss = stats.get('trainer', 'loss')
             if len(all_losses) == 0:
                 stats.append('loss', 'all', cur_loss)
@@ -137,7 +140,10 @@ def train():
             if nu_enabled and nu_max_epochs > 0 and nu_max_epochs == num_games:
                 log.log("Reached Nu max epochs (" + str(nu_max_epochs) + "), disabling Nu")
                 config.set('nu_enabled', False)
-            # Track how often a specific score has been reached
+            if num_games % matplot_max_x == 0:
+                num_plots += 1
+                plot.save(num_plots)
+            # Track how often a specific score has been reached for matplotlib's score distribution
             stats.incr('scores', score)
             # Track the scores for each game
             stats.append('scores', 'all', score)
@@ -145,6 +151,7 @@ def train():
             if score > stats.get('game', 'highscore'):
                 # New highscore!!! YAY!
                 stats.set('game', 'highscore', score)
+                update_highscore_file(config, num_games, score)
             game.reset() # Reset the game
             print_stats(log, stats, agent, config) # Print some stats
             agent.played_game(score) # Update the agent
@@ -196,6 +203,29 @@ def show_summary(log, stats, config):
     summary += f"Average loss over the past {recent_freq} games  : {recent_loss}\n"
     summary += f"Average score over the past {recent_freq} games : {recent_score}"
     log.log(summary)
+
+def update_highscore_file(config, num_games, score):
+    data_dir = config.get('data_dir')
+    sim_num = config.get('sim_num')
+    sim_data_dir = os.path.join(data_dir, str(sim_num))
+    basename = config.get('highscore_file_basename')
+    highscore_file = os.path.join(sim_data_dir, str(sim_num) + basename)
+    if os.path.isfile(highscore_file):
+        # Highscore file exists, update it
+        handle = open(highscore_file, mode='a')
+        handle.write(str(num_games) + ',' + str(score) + '\n')
+        handle.close()
+    else:
+        # Highscore file does not exist, create it
+        handle = open(highscore_file, mode='w')
+        handle.write('Game Number,Score\n')
+        handle.write(str(num_games) + ',' + str(score) + '\n')
+        handle.close()
+
+
+        
+
+    
 
 if __name__ == "__main__":
     train()

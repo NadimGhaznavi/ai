@@ -21,6 +21,7 @@ default:
   game_title: AI Snake Game
   headless: 0
   hidden_size: 270
+  highscore_file_basename: _highscores.csv
   input_size: 400
   learning_rate: 0.0005
   linear_input_size: 31

@@ -135,11 +135,11 @@ class SimPlot():
       self.loss_count.append(count)
       count += 1
 
-  def save(self):
+  def save(self, num_plots=0):
     ini = self.ini
     plot_basename = ini.get('plot_basename')
     plot_dir = ini.get('plot_dir')
     os.makedirs(plot_dir, exist_ok=True)
-    plot_file = os.path.join(plot_dir, str(ini.get('sim_num')) + plot_basename)
+    plot_file = os.path.join(plot_dir, str(ini.get('sim_num')) + '_' + str(num_plots) + plot_basename)
     plt.savefig(plot_file)
 
