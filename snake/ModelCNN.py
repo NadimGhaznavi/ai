@@ -12,27 +12,32 @@ class ModelCNN(nn.Module):
         self.log = log
         self.stats = stats
         self.plot = None
-        input_size = ini.get('input_size')
-        hidden_size = ini.get('hidden_size')
+        self.cnn_b1_channels = ini.get('cnn_b1_channels')
+        self.cnn_b2_channels = ini.get('cnn_b2_channels')
         output_size = ini.get('output_size')
 
         # A channel for the snake head, body and food
         input_channels = 3
-        self.conv_layers = nn.Sequential(
+        self.conv_1 = nn.Sequential(
             # First conv block: maintains spatial dimensions with padding.
-            nn.Conv2d(in_channels=input_channels, out_channels=16, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=input_channels, 
+                      out_channels=self.cnn_b1_channels, 
+                      kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),  # Reduces 20x20 -> 10x10
-
+            nn.MaxPool2d(kernel_size=2))  # Reduces 20x20 -> 10x10
+        self.conv_2 = nn.Sequential(
             # Second conv block:
-            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=self.cnn_b1_channels, 
+                      out_channels=self.cnn_b2_channels, 
+                      kernel_size=3, 
+                      padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2)   # Reduces 10x10 -> 5x5
         )
         # The flattened feature size is 32 channels * 5 * 5 = 800.
         self.fc_layers = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(32 * 5 * 5, 128),
+            nn.Linear(self.cnn_b2_channels * 5 * 5, 128),
             nn.ReLU(),
             nn.Linear(128, output_size)
         )
@@ -42,7 +47,8 @@ class ModelCNN(nn.Module):
     def forward(self, x):
         self.stats.incr('model', 'steps')
         x = x.unsqueeze(0)  # Shape becomes [1, 3, 20, 20]
-        x = self.conv_layers(x)
+        x = self.conv_1(x)
+        x = self.conv_2(x)
         x = self.fc_layers(x)
         return x
 

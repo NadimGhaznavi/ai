@@ -12,6 +12,7 @@ default:
   cnnr_hidden_size: 128
   data_dir: sim_data
   discount: 0.82
+  enable_long_training: false
   epsilon_decay: 0.95
   epsilon_enabled: true
   epsilon_min: 0
@@ -21,8 +22,9 @@ default:
   game_title: AI Snake Game
   headless: 0
   hidden_size: 270
+  highscore_file_basename: _highscores.csv
   input_size: 400
-  learning_rate: 0.0001
+  learning_rate: 0.00001
   linear_input_size: 31
   log_basename: _log.txt
   matplot_max_x: 1000
@@ -53,7 +55,8 @@ default:
   reward_move: 0
   reward_move_closer: 1
   reward_move_further: -1
-  reward_snake_collision: -10
+  reward_snake_collision: -15
+  reward_snake_multiplier: 0.5
   reward_wall_collision: -10
   rnn_dropout: 0.2
   rnn_hidden_size: 350

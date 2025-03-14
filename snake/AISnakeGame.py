@@ -140,7 +140,7 @@ class AISnakeGame():
             self.stats.incr('game', 'wall_collision_count')
         elif self.board.is_snake_collision():
             game_over = True
-            reward = self.ini.get('reward_snake_collision') - (snake_length * 0.2)
+            reward = self.ini.get('reward_snake_collision') - (snake_length * self.ini.get('reward_snake_multiplier'))
             lose_reason = 'Hit the snake'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'snake_collision_count')

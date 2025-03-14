@@ -77,7 +77,7 @@ def train():
     model = agent.get_model()
     model.set_plot(plot)
     game = AISnakeGame(config, log, stats)
-    if model_type == 'cnnr' or model_type == 'cnnr3' or model_type == 'cnnr4':
+    if model_type == 'cnnr' or model_type == 'cnn' or model_type == 'cnnr4':
         cnn_plot = PlotCNN(log, config, model)
     plot_cnn_freq = config.get('plot_cnn_freq')
     if config.get('restart'):
@@ -131,7 +131,7 @@ def train():
                 stats.append('loss', 'all', total_loss / (len(all_losses) + 1))
             model_type = config.get('model')
             if (num_games % plot_cnn_freq == 0) and \
-                (model_type == 'cnnr' or model_type == 'cnnr3' or model_type == 'cnnr4'):
+                (model_type == 'cnnr' or model_type == 'cnn' or model_type == 'cnnr4'):
                 cnn_plot.plot(new_state) # Visualize the CNN feature maps
             nu_enabled = config.get('nu_enabled')
             if max_epochs > 0 and max_epochs == num_games:

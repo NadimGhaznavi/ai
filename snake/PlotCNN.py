@@ -44,8 +44,9 @@ class PlotCNN:
     def plot(self, input_image):
         # Run the input image through the CNN to get the feature maps
         x = torch.tensor(input_image)
-        x = x.unsqueeze(0) 
-        x = self.upsample(x)  # now shape [1, 3, 40, 40]
+        x = x.unsqueeze(0)
+        if self.ini.get('model') != 'cnn':
+            x = self.upsample(x)  # now shape [1, 3, 40, 40]
         with torch.no_grad():
             # Pass through the first two conv layers and capture the feature maps
             x = self.cnn_model.conv_1(x)  # After first conv
