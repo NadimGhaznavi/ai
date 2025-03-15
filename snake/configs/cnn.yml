@@ -48,7 +48,7 @@ default:
   nu_verbose: false
   output_size: 3
   plot_basename: _plot.png
-  plot_cnn_freq: 5
+  plot_cnn_freq: 100
   plot_cnn_enable: true
   plot_dir: sim_plots
   plot_freq: 50
