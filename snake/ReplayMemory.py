@@ -25,6 +25,7 @@ class ReplayMemory():
     if done:
       score = self.stats.get('game', 'score')
       if score > 0:
+        # Don't store games with a score of zero
         if score not in self.memories:
           self.memories[score] = deque(maxlen=self.ini.get('max_memories'))
         self.cur_memory.append(transition)
@@ -52,3 +53,8 @@ class ReplayMemory():
     
   def set_memory(self, memory):
     self.memory = memory
+
+    
+    
+
+    

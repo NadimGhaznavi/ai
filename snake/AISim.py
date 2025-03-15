@@ -77,9 +77,10 @@ def train():
     model = agent.get_model()
     model.set_plot(plot)
     game = AISnakeGame(config, log, stats)
-    if model_type == 'cnnr' or model_type == 'cnn' or model_type == 'cnnr4':
+    plot_cnn_enable = config.get('plot_cnn_enable')
+    if plot_cnn_enable and model_type == 'cnnr' or model_type == 'cnn' or model_type == 'cnnr4':
         cnn_plot = PlotCNN(log, config, model)
-    plot_cnn_freq = config.get('plot_cnn_freq')
+        plot_cnn_freq = config.get('plot_cnn_freq')
     if config.get('restart'):
         # Restart the simulation
         restart(config, stats, log, agent, config.get('restart'))
@@ -130,7 +131,7 @@ def train():
                 total_loss += cur_loss
                 stats.append('loss', 'all', total_loss / (len(all_losses) + 1))
             model_type = config.get('model')
-            if (num_games % plot_cnn_freq == 0) and \
+            if plot_cnn_enable and (num_games % plot_cnn_freq == 0) and \
                 (model_type == 'cnnr' or model_type == 'cnn' or model_type == 'cnnr4'):
                 cnn_plot.plot(new_state) # Visualize the CNN feature maps
             nu_enabled = config.get('nu_enabled')
@@ -161,6 +162,8 @@ def train():
                 checkpoint(config, stats, agent)
             if num_games % config.get('show_summary_freq') == 0:
                 show_summary(log, stats, config)
+            if num_games % config.get('stats_save_freq') == 0:
+                stats.save()
 
     cleanup(agent, plot)
 

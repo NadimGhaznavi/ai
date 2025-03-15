@@ -39,6 +39,7 @@ class ModelCNN(nn.Module):
             nn.Flatten(),
             nn.Linear(self.cnn_b2_channels * 5 * 5, 128),
             nn.ReLU(),
+            nn.Dropout(p=0.2),
             nn.Linear(128, output_size)
         )
         self.stats.set('model', 'steps', 0)
