@@ -16,12 +16,16 @@ class AITrainer():
         model_type = ini.get('model')
         if model_type == 'cnnr':
             self.optimizer = optim.AdamW(self.model.parameters(), lr=ini.get('cnnr_learning_rate'))
-        else:
-            self.optimizer = optim.Adam(self.model.parameters(), lr=ini.get('learning_rate'))
-        if model_type == 'cnn' or model_type == 'rnn' or model_type == 'cnnr' or model_type == 'cnnr3':
+        elif model_type == 'cnn':
+            self.optimizer = optim.AdamW(self.model.parameters(), lr=ini.get('cnn_learning_rate'))
+            self.criterion = nn.SmoothL1Loss()
+        elif model_type == 'rnn':
+            self.optimizer = optim.AdamW(self.model.parameters(), lr=ini.get('rnn_learning_rate'))
             self.criterion = nn.SmoothL1Loss()
         else:
+            self.optimizer = optim.Adam(self.model.parameters(), lr=ini.get('learning_rate'))
             self.criterion = nn.MSELoss()
+            
         self.stats.set('trainer', 'steps', 0)
         torch.manual_seed(ini.get('random_seed'))
         self.log.log('AITrainer initialization:   [OK]')

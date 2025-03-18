@@ -7,7 +7,10 @@ default:
   cnn_b1_channels: 32
   cnn_b2_channels: 32
   cnn_b3_channels: 32
-  cnnr_learning_rate: 0.00005
+  cnn_enable_dropout: True
+  cnn_dropout: 0.3
+  cnn_learning_rate: 0.00004
+  cnnr_learning_rate: 0.001
   lstm_hidden_size: 128
   lstm_layers: 4
   lstm_dropout: 0.2
@@ -16,7 +19,7 @@ default:
   discount: 0.95
   enable_long_training: true
   enable_top10_memory: true
-  epsilon_decay: 0.95
+  epsilon_decay: 0.99
   epsilon_enabled: true
   epsilon_min: 0
   epsilon_print_stats: 1
@@ -27,7 +30,7 @@ default:
   hidden_size: 270
   highscore_file_basename: _highscores.csv
   input_size: 400
-  learning_rate: 0.0005
+  learning_rate: 0.001
   linear_input_size: 31
   log_basename: _log.txt
   matplot_max_x: 1000
@@ -37,6 +40,7 @@ default:
   max_scores: 1000
   model: cnn
   model_basename: _model.pth
+  model_desc_basename: _model.txt
   model_stats: false
   next_num_file: next_num.txt
   nu_bad_games: 6
@@ -48,11 +52,14 @@ default:
   nu_verbose: false
   output_size: 3
   plot_basename: _plot.png
-  plot_cnn_freq: 100
+  plot_cnn_freq: 50
   plot_cnn_enable: true
   plot_dir: sim_plots
-  plot_freq: 50
+  plot_freq: 20
   random_seed: 1970
+  replay_mem_enable_shuffle: True
+  replay_mem_batch_size: 500
+  replay_mem_size: 25000
   reward_excessive_move: -10
   reward_food: 10
   reward_move: 0
@@ -69,7 +76,7 @@ default:
   show_loss: true
   show_reward: true
   show_summary: true
-  show_summary_freq: 500
+  show_summary_freq: 100
   sim_highscore_basename: _highscore.csv
   sim_num: 1000
   sim_plot_basename: _plot.png

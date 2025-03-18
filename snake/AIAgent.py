@@ -79,7 +79,8 @@ class AIAgent:
  
     def remember(self, state, action, reward, next_state, done):
         # Store the state, action, reward, next_state, and done in memory
-        self.memory.append((state, action, reward, next_state, done))
+        if self.ini.get('enable_long_training'):
+            self.memory.append((state, action, reward, next_state, done))
 
     def reset_epsilon_injected(self):
         self.epsilon_algo.reset_injected()
@@ -96,9 +97,17 @@ class AIAgent:
     def train_long_memory(self):
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
         enable = self.ini.get('enable_long_training')
-        if enable:
+        shuffle = self.ini.get('replay_mem_enable_shuffle')
+        model_type = self.ini.get('model')
+        if enable and shuffle:
+            memory = self.memory.get_memory()
+            for state, action, reward, next_state, done in memory:
+                if model_type == 'cnn':
+                    self.trainer.train_step_cnn(state, action, reward, next_state, done)
+                else:
+                    self.trainer.train_step(state, action, reward, next_state, done)
+        else:
             num_games = 4
-            model_type = self.ini.get('model')
             while num_games > 0:
                 num_games -= 1
                 memory = self.memory.get_memory()

@@ -53,6 +53,15 @@ def restart(config, stats, log, agent, sim_num):
         log.log('No model file found: ' + model_file)
         sys.exit(1)
 
+def save_model(config, model):
+    data_dir = config.get('sim_data_dir')
+    sim_num = str(config.get('sim_num'))
+    model_basename = config.get('model_desc_basename')
+    model_file = os.path.join(data_dir, sim_num + model_basename)
+    print("Saving model to file: " + model_file)
+    handle = open(model_file, mode='w')
+    handle.write(str(model) + '\n')
+
 def train():
     """
     Train the AI agent to play the snake game using reinforcement learning.
@@ -76,6 +85,7 @@ def train():
     agent = AIAgent(config, log, stats)
     model = agent.get_model()
     model.set_plot(plot)
+    save_model(config, model)
     game = AISnakeGame(config, log, stats)
     plot_cnn_enable = config.get('plot_cnn_enable')
     if plot_cnn_enable and model_type == 'cnnr' or model_type == 'cnn' or model_type == 'cnnr4':
@@ -131,9 +141,6 @@ def train():
                 total_loss += cur_loss
                 stats.append('loss', 'all', total_loss / (len(all_losses) + 1))
             model_type = config.get('model')
-            if plot_cnn_enable and (num_games % plot_cnn_freq == 0) and \
-                (model_type == 'cnnr' or model_type == 'cnn' or model_type == 'cnnr4'):
-                cnn_plot.plot(new_state) # Visualize the CNN feature maps
             nu_enabled = config.get('nu_enabled')
             if max_epochs > 0 and max_epochs == num_games:
                 in_progress = False # Reached max epochs
@@ -144,6 +151,9 @@ def train():
             if num_games % matplot_max_x == 0:
                 num_plots += 1
                 plot.save(num_plots)
+            if plot_cnn_enable and (num_games % plot_cnn_freq == 0) and model_type == 'cnn':
+                cnn_plot.plot(new_state) # Visualize the CNN feature maps
+                #pass
             # Track how often a specific score has been reached for matplotlib's score distribution
             stats.incr('scores', score)
             # Track the scores for each game
