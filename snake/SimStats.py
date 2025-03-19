@@ -16,13 +16,25 @@ class SimStats:
         self.log.log('SimStats initialization:    [OK]')
         summary_freq = ini.get('show_summary_freq')
         max_scores = ini.get('max_scores')
+        self.stats['avg'] = {}
+        self.stats['avg']['loss'] = []
+        self.stats['avg']['score'] = []
+
+        self.stats['loss'] = {}
+        self.stats['loss']['all'] = []
+
         self.stats['recent'] = {}
         self.stats['recent']['loss'] = deque(maxlen=summary_freq)
         self.stats['recent']['score'] = deque(maxlen=summary_freq)
+
+        self.stats['replay'] = {}
+        self.stats['replay']['mem_size'] = 'N/A'
+
         self.stats['scores'] = {}
         self.stats['scores']['all'] = deque(maxlen=max_scores)
-        self.stats['loss'] = {}
-        self.stats['loss']['all'] = []
+
+        self.stats['trainer'] = {}
+        self.stats['trainer']['long_training_msg'] = 'N/A'
 
     def __del__(self):
         self.save()

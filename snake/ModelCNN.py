@@ -20,7 +20,7 @@ class ModelCNN(nn.Module):
         if self.enable_dropout:
             dropout = ini.get('cnn_dropout')
 
-        #self.upsample = nn.Upsample(scale_factor=4, mode='bicubic')
+        self.upsample = nn.Upsample(scale_factor=20, mode='bicubic')
         # A channel for the snake head, body and food
         input_channels = 3
         padding_mode = 'zeros'
@@ -28,12 +28,13 @@ class ModelCNN(nn.Module):
         b1_kernel_size = 3
         b2_kernel_size = 3
         b3_kernel_size = 3
+        neg_slope = ini.get('relu_slope')
         self.conv_1 = nn.Sequential(
             # First conv block: maintains spatial dimensions with padding.
             nn.Conv2d(in_channels=input_channels, 
                       out_channels=self.cnn_b1_channels, 
                       kernel_size=b1_kernel_size, padding=padding, padding_mode=padding_mode),
-            nn.ReLU(),
+            nn.LeakyReLU(negative_slope=neg_slope),
             #nn.MaxPool2d(kernel_size=2)  # Reduces 20x20 -> 10x10
         )
         self.conv_2 = nn.Sequential(
@@ -41,7 +42,7 @@ class ModelCNN(nn.Module):
             nn.Conv2d(in_channels=self.cnn_b1_channels, 
                       out_channels=self.cnn_b2_channels, 
                       kernel_size=b2_kernel_size, padding=padding, padding_mode=padding_mode),
-            nn.ReLU(),
+            nn.LeakyReLU(negative_slope=neg_slope),
             nn.MaxPool2d(kernel_size=2)  # Reduces 20x20 -> 10x10
         )
         self.conv_3 = nn.Sequential(
@@ -49,20 +50,20 @@ class ModelCNN(nn.Module):
             nn.Conv2d(in_channels=self.cnn_b2_channels, 
                       out_channels=self.cnn_b3_channels, 
                       kernel_size=b3_kernel_size, padding=padding, padding_mode=padding_mode),
-            nn.ReLU(),
+            nn.LeakyReLU(negative_slope=neg_slope),
             nn.MaxPool2d(kernel_size=2)  # Reduces 20x20 -> 10x10
         )
         # The flattened feature size is 32 channels * 5 * 5 = 800.
         self.fc_layer = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(288, 128),
-            nn.ReLU()
+            nn.Linear(576, 288),
+            nn.LeakyReLU(negative_slope=neg_slope)
         )
         # Dropout layer
         if self.enable_dropout:
             self.dropout_layer = nn.Dropout(p=dropout)
         # Output 
-        self.output_layer = nn.Linear(128, output_size)
+        self.output_layer = nn.Linear(288, output_size)
         self.stats.set('model', 'steps', 0)
         self.log.log("ModelCNN initialization:    [OK]")
     

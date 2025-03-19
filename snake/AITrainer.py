@@ -20,8 +20,8 @@ class AITrainer():
             self.optimizer = optim.AdamW(self.model.parameters(), lr=ini.get('cnn_learning_rate'))
             self.criterion = nn.SmoothL1Loss()
         elif model_type == 'rnn':
-            self.optimizer = optim.AdamW(self.model.parameters(), lr=ini.get('rnn_learning_rate'))
-            self.criterion = nn.SmoothL1Loss()
+            self.optimizer = optim.Adam(self.model.parameters(), lr=ini.get('rnn_learning_rate'))
+            self.criterion = nn.MSELoss()
         else:
             self.optimizer = optim.Adam(self.model.parameters(), lr=ini.get('learning_rate'))
             self.criterion = nn.MSELoss()

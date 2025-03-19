@@ -183,21 +183,36 @@ def print_stats(log, stats, agent, config):
     summary += ' Score: {:>3}'.format(stats.get('game', 'last_score'))
     summary += ', Time: {:6.2f}s'.format(stats.get('game', 'game_time'))
     summary += ', Highscore: {:>3}'.format(stats.get('game', 'highscore'))
-    if config.get('trainer_stats'):
-        summary += ', Trainer steps {:>5}'.format(stats.get('trainer', 'steps'))
+    summary += ', ReplayMem: {:>4}'.format(stats.get('replay', 'mem_size'))
+
+    long_training_msg = stats.get('trainer', 'long_training_msg')
+    trainer_steps = stats.get('trainer', 'steps')
+    if config.get('enable_long_training'):
+        # The number of trainings steps in the epoch and the number of training steps for the 
+        # epoch and the long training (AIAgent:train_long_memory()) training steps.
+        summary += ', Trainer (long {:>5}) steps {:>5}'.format(long_training_msg, trainer_steps)
+    elif config.get('trainer_stats'):
+        # Number of training steps for the epoch
+        summary += ', Trainer steps {:>5}'.format(long_training_msg, trainer_steps)
+
     if config.get('model_stats'):
+        # Number of forward(x) calls to the model for this epoch
         summary += ', Model steps {:>5}'.format(stats.get('model', 'steps'))
     if config.get('epsilon_enabled'):
+        # Epsilon stats
         summary += ', Epsilon: {}'.format(stats.get('epsilon', 'status'))
         agent.reset_epsilon_injected()
     if config.get('nu_enabled'):
+        # NuAlgo stats
         agent.nu_algo.update_status()
         summary += ', Nu: {}'.format(stats.get('nu', 'status'))
         agent.reset_nu_injected()
     if config.get('show_reward'):
-        summary += ', Reward: {:>6}'.format(round(stats.get('game', 'move_reward'), 1))
+        # Epoch reward
+        summary += ', Reward: {:>6}'.format(round(stats.get('game', 'game_reward'), 1))
     if config.get('show_loss'):
-        summary += ', Loss: {:>6}'.format(round(stats.get('trainer', 'loss'), 4))
+        # Loss
+        summary += ', Loss: {:>5}'.format(round(stats.get('trainer', 'loss'), 2))
     summary += ' - {}'.format(stats.get('game', 'lose_reason'))
     log.log(summary)
 
@@ -208,10 +223,12 @@ def show_summary(log, stats, config):
     for loss in stats.get('recent', 'loss'):
         recent_loss += loss
     recent_loss = round(recent_loss / recent_freq, 4)
+    stats.append('avg', 'loss', recent_loss)
     recent_score = 0
     for score in stats.get('recent', 'score'):
         recent_score += score
     recent_score = round(recent_score / recent_freq, 2)
+    stats.append('avg', 'score', recent_score)
     
     summary += f"Average loss over the past {recent_freq} games  : {recent_loss}\n"
     summary += f"Average score over the past {recent_freq} games : {recent_score}"

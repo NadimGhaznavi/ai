@@ -73,10 +73,6 @@ class NuAlgo():
     #    self.new_high_grace_count = 0
     #  return False
     
-    if self.bad_game_count % 2 == 0:
-      # Only inject random moves after every other bad game
-      return False
-    
     if self.cur_pool == 0:
       # Pool is empty
       return False

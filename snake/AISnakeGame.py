@@ -18,7 +18,7 @@ class AISnakeGame():
         self.model = None # Only used to print out it's structure on demand
         self.headless = False # If True, the game will run without updating the display
         self.init_stats()
-        self.move_reward = 0
+        self.game_reward = 0
         random.seed(ini.get('random_seed'))
 
     def get_direction(self):
@@ -133,37 +133,47 @@ class AISnakeGame():
         reward = 0
         game_over = False
         board_squares = self.ini.get('board_height') * self.ini.get('board_width')
+
+        ## Check for "game over" states
         if self.board.is_wall_collision():
+            # Wall collision
             game_over = True
             reward = self.ini.get('reward_wall_collision')
             lose_reason = 'Hit the wall'
             self.stats.incr('game', 'wall_collision_count')
+
         elif self.board.is_snake_collision():
+            # Snake collision
             game_over = True
             reward = self.ini.get('reward_snake_collision') - (snake_length * self.ini.get('reward_snake_multiplier'))
-            lose_reason = 'Hit the snake'
+            lose_reason = f'Hit the snake (reward: {reward})'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'snake_collision_count')
-            msg = f"Snake collision reward: {reward}"
-            self.log.log(msg)
+
         if self.stats.get('game', 'game_moves') > max_moves * snake_length:
+            # Exceeded max moves
             game_over = True
-            reward = self.ini.get('reward_excessive_move')
+            reward = self.ini.get('reward_excessive_move') 
             lose_reason = 'Exceeded max moves (' + str(max_moves * snake_length) + ')'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'exceeded_max_moves_count')
+        
         if game_over == True:
-            self.move_reward += reward
+            # Game is over: Snake or wall collision or exceeded max moves
+            self.game_reward += reward
             self.stats.set('game', 'lose_reason', lose_reason)
-            self.stats.set('game', 'move_reward', round(self.move_reward, 1))
+            self.stats.set('game', 'game_reward', round(self.game_reward, 1))
             self.stats.append('recent', 'score', self.stats.get('game', 'score'))
             return reward, game_over, self.stats.get('game', 'score')
 
-        # 4. Place new food or just move
+        ## Game is not over, see what's going on
+
         if self.head == self.food:
+            # We found food!!
             self.stats.incr('game', 'score')
             reward += self.ini.get('reward_food')
             self.place_food()
+
         else:
             # Small reward for staying alive
             reward += self.ini.get('reward_move') * (snake_length / board_squares)
@@ -177,8 +187,8 @@ class AISnakeGame():
         elif new_distance > old_distance:
             reward += self.ini.get('reward_move_further')
         
-        self.move_reward = self.move_reward + reward
-        self.stats.set('game', 'move_reward', round(self.move_reward, 1))
+        self.game_reward = self.game_reward + reward
+        self.stats.set('game', 'game_reward', round(self.game_reward, 1))
 
         
         # 5. update the ui and clock
@@ -200,7 +210,7 @@ class AISnakeGame():
 
     def reset(self):
         self.board.reset()
-        self.move_reward = 0
+        self.game_reward = 0
         self.stats.set('game', 'game_time', round(time() - self.stats.get('game', 'start_time'), 2))
         self.stats.set('game', 'last_score', self.stats.get('game', 'score'))
         self.stats.set('game', 'score', 0)

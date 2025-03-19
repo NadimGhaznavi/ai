@@ -10,7 +10,6 @@ import time
 lib_dir = os.path.dirname(__file__)
 sys.path.append(lib_dir)
 
-MAX_POINTS = 20
 class SimPlot():
   def __init__(self, ini, log, stats):
     self.ini = ini
@@ -19,13 +18,11 @@ class SimPlot():
     self.image_1 = None
     self.image_2 = None
     plt.ion()
-    #self.fig, self.axs = plt.subplots(2, 2, figsize=(20,6), layout="tight", facecolor="#000000", 
-    #                                  gridspec_kw={'width_ratios': [20, 1]})
-    self.fig, self.axs = plt.subplots(3, 2, figsize=(28, 8), layout="tight", facecolor="#000000", 
+    self.fig, self.axs = plt.subplots(4, 2, figsize=(28, 10), layout="tight", facecolor="#000000", 
                                   gridspec_kw={'width_ratios': [20, 1]})
-    # Single plot that spans two columns in the third row:
-    gs = self.fig.add_gridspec(3, 2)
+    gs = self.fig.add_gridspec(4, 2)
     self.ax3 = self.fig.add_subplot(gs[2, :], facecolor="#000000")
+    self.ax4 = self.fig.add_subplot(gs[3, :], facecolor="#000000")
     self.fig.suptitle('AI Sim (v' + str(self.ini.get('sim_num')) + ')', color="#00ff00")
     self.log.log('SimPlot initialization:     [OK]')
 
@@ -47,44 +44,61 @@ class SimPlot():
     # Clear the figure before plotting new data to support a sliding view to maintain constant 
     # resolution at the cost of losing visibility into old data
     self.axs[0][0].cla() 
+
     self.axs[0][0].set_facecolor('#002000')
     self.axs[1][0].set_facecolor('#002000')
     self.axs[0][1].set_facecolor('#002000')
     self.axs[1][1].set_facecolor('#002000')
     self.ax3.set_facecolor('#002000')
+    self.ax4.set_facecolor('#002000')
     self.axs[0][0].tick_params(labelcolor='#00ff00')
     self.axs[1][0].tick_params(labelcolor='#00ff00')
     self.axs[0][1].tick_params(labelcolor='#00ff00')
     self.axs[1][1].tick_params(labelcolor='#00ff00')
     self.ax3.tick_params(labelcolor='#00ff00')
+    self.ax4.tick_params(labelcolor='#00ff00')
 
-    # Plot the scores and the mean scores
-    #self.axs[0].set_ylim(ymin=0)
+    # Render an image if it's been set
+    self.axs[0][1].set_title('Input Image #' + str(len(self.games)), color='#00ff00')
+    self.axs[0][1].axis('off')  # Hide x and y axis
+    self.axs[0][1].imshow(self.image_1)
+    
+    # Plot the game score and the mean game score
     self.axs[0][0].set_title('Scores', color='#00ff00')
     self.axs[0][0].set_ylabel('Score', color='#00ff00')
     self.axs[0][0].set_xlabel('Number of Games', color='#00ff00')
     self.axs[0][0].plot(self.games, self.scores, color='#6666ff', linewidth=1)
     self.axs[0][0].plot(self.games, self.mean_scores, color='#cccc00', linewidth=1)
-    # Create a bar chart of the scores
+    
+    # Bar chart of the score distribution
     self.axs[1][0].set_title('Score Distribution', color='#00ff00')
     self.axs[1][0].set_ylabel('Score Distribution', color='#00ff00')
     self.axs[1][0].set_xlabel('Score', color='#00ff00')
     self.axs[1][0].bar(self.bar_scores, self.bar_count, color='#6666ff')
-    # Render an image if it's been set
-    self.axs[0][1].set_title('Input Image #' + str(len(self.games)), color='#00ff00')
-    self.axs[0][1].axis('off')  # Hide x and y axis
-    self.axs[0][1].imshow(self.image_1)
-    # Bar graph showing the reason games were lost
+    
+    # Bar graph showing the reason the game was lost
     self.axs[1][1].set_title('Lose Reason', color='#00ff00')
     self.axs[1][1].set_ylabel('Count', color='#00ff00')
-    self.axs[1][1].bar(self.lose_labels, self.lose_counts, color='#6666ff')
-
-    # Plot loss 
-    self.ax3.set_title('Average Loss', color='#00ff00')
+    self.axs[1][1].bar(self.lose_labels, self.lose_reasons, color='#6666ff')
+    
+    # Plot of average loss
+    span = self.ini.get('show_summary_freq')
+    title = f'Average Loss over the Past {span} Games'
+    self.ax3.set_title(title, color='#00ff00')
     self.ax3.set_ylabel('Average Loss', color='#00ff00')
-    self.ax3.set_xlabel('Number of Games', color='#00ff00')
-    self.ax3.plot(self.loss_count, self.losses, '.', markeredgewidth=1, color='#6666ff')
+    xlabel = f'Number of Games x{span}'
+    self.ax3.set_xlabel(xlabel, color='#00ff00')
+    self.ax3.plot(self.losses_count, self.losses, '.', markeredgewidth=1, color='#6666ff')
 
+    # Plot of average score 
+    span = self.ini.get('show_summary_freq')
+    title = f'Average Score over the Past {span} Games'
+    self.ax4.set_title(title, color='#00ff00')
+    self.ax4.set_ylabel('Average Score', color='#00ff00')
+    xlabel = f'Number of Games x{span}'
+    self.ax4.set_xlabel(xlabel, color='#00ff00')
+    self.ax4.plot(self.avg_scores_count, self.avg_scores, '-x', markeredgewidth=1, color='#6666ff')
+    
     plt.show()
     plt.pause(0.1)
     display.clear_output(wait=True)
@@ -94,6 +108,8 @@ class SimPlot():
     self.image_1 = np.transpose(img.detach().numpy(), (1, 2, 0))
 
   def update(self):
+
+    # Score per Game
     games = []
     scores = []
     mean_scores = []
@@ -109,7 +125,7 @@ class SimPlot():
     self.games = games
     self.scores = scores
     self.mean_scores = mean_scores
-    
+    # Score Distribution
     bar_scores = []
     bar_count = []
     for x in range(0,max(self.scores) + 1):
@@ -120,19 +136,27 @@ class SimPlot():
         bar_count.append(0)
     self.bar_scores = bar_scores
     self.bar_count = bar_count
-
+    # Lose Reason
     wall_count = self.stats.get('game', 'wall_collision_count')
     snake_count = self.stats.get('game', 'snake_collision_count')
     max_steps = self.stats.get('game', 'exceeded_max_moves_count')
     self.lose_labels = ['Wall', 'Snake', 'Moves']
-    self.lose_counts = [wall_count, snake_count, max_steps]
-
+    self.lose_reasons = [wall_count, snake_count, max_steps]
+    # Model Loss Stats
     self.losses = []
-    self.loss_count = []
+    self.losses_count = []
     count = 0
-    for x in self.stats.get('loss', 'all'):
+    for x in self.stats.get('avg', 'loss'):
       self.losses.append(x)
-      self.loss_count.append(count)
+      self.losses_count.append(count)
+      count += 1
+    # Average Score Stats
+    self.avg_scores = []
+    self.avg_scores_count = []
+    count = 0
+    for x in self.stats.get('avg', 'score'):
+      self.avg_scores.append(x)
+      self.avg_scores_count.append(count)
       count += 1
 
   def save(self, num_plots=0):

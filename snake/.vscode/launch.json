@@ -11,7 +11,10 @@
             "program": "AISim.py",
             "console": "integratedTerminal",
             "args": [
-
+                "-mo",
+                "rnn",
+                "-in",
+                "configs/rnn.yml"
             ]
         }
     ]

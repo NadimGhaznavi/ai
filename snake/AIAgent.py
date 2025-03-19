@@ -52,13 +52,15 @@ class AIAgent:
         return self.model
 
     def get_move(self, state):
-        random_move = self.epsilon_algo.get_move()
-        if random_move:
+        random_move = self.epsilon_algo.get_move() # Explore with epsilon
+        if random_move != False:
             return random_move # Random move was returned
-        random_move = self.nu_algo.get_move(self.stats.get('game', 'score'))
-        if random_move:
+        
+        random_move = self.nu_algo.get_move(self.stats.get('game', 'score')) # Explore with Nu
+        if random_move != False:
             return random_move # Random move was returned
-        # AI agent based action
+        
+        # Exploit with an AI agent based action
         final_move = [0, 0, 0]
         if type(state) != torch.Tensor:
             state = torch.tensor(state, dtype=torch.float) # Convert to a tensor
@@ -99,7 +101,9 @@ class AIAgent:
         enable = self.ini.get('enable_long_training')
         shuffle = self.ini.get('replay_mem_enable_shuffle')
         model_type = self.ini.get('model')
-        if enable and shuffle:
+        if not enable:
+            return True
+        if shuffle:
             memory = self.memory.get_memory()
             for state, action, reward, next_state, done in memory:
                 if model_type == 'cnn':
@@ -107,17 +111,19 @@ class AIAgent:
                 else:
                     self.trainer.train_step(state, action, reward, next_state, done)
         else:
-            num_games = 4
-            while num_games > 0:
-                num_games -= 1
-                memory = self.memory.get_memory()
-                if memory != False:                
-                    if model_type == 'cnn' or model_type == 'cnnr' or model_type == 'cnnr3' or model_type == 'cnnr4':
-                        for state, action, reward, next_state, done in memory[0]:
-                            self.trainer.train_step_cnn(state, action, reward, next_state, [done])
-                    else:
-                        for state, action, reward, next_state, done in memory[0]:
-                            self.trainer.train_step(state, action, reward, next_state, [done])
+            memory = self.memory.get_memory()
+            if memory != False:
+                moves = 0
+                if model_type == 'cnn' or model_type == 'cnnr' or model_type == 'cnnr3' or model_type == 'cnnr4':
+                    for state, action, reward, next_state, done in memory[0]:
+                        moves += 1
+                        self.trainer.train_step_cnn(state, action, reward, next_state, [done])
+                else:
+                    for state, action, reward, next_state, done in memory[0]:
+                        moves += 1
+                        self.trainer.train_step(state, action, reward, next_state, [done])
+                        
+                self.stats.set('trainer', 'long_training_msg', moves)
 
     def train_short_memory(self, state, action, reward, next_state, done):
         model_type = self.ini.get('model')

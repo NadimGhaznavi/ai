@@ -15,15 +15,19 @@ class ModelRNN(nn.Module):
         output_size = ini.get('output_size')
         rnn_layers = ini.get('rnn_layers')
         rnn_dropout = ini.get('rnn_dropout')
-        self.m_in = nn.Linear(input_size, hidden_size)
+        self.m_in = nn.Sequential(
+            nn.Linear(input_size, hidden_size),
+            nn.ReLU(),
+        )
+        self.m_rnn = nn.RNN(input_size=hidden_size, hidden_size=hidden_size, nonlinearity='tanh', num_layers=rnn_layers, dropout=rnn_dropout)
         self.m_out = nn.Linear(hidden_size, output_size)
-        self.m_rnn = nn.RNN(input_size=hidden_size, hidden_size=hidden_size, num_layers=rnn_layers, dropout=rnn_dropout)
+        
         self.stats.set('model', 'steps', 0)
         self.log.log("ModelRNN initialization:    [OK]")
 
     def forward(self, x):
         self.stats.incr('model', 'steps')
-        x = F.relu(self.m_in(x))
+        x = self.m_in(x)
         inputs = x.view(1, -1, self.ini.get('rnn_hidden_size'))
         x, h_n = self.m_rnn(inputs)
         x = self.m_out(x)
