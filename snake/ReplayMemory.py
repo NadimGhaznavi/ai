@@ -82,7 +82,7 @@ class ReplayMemory():
       if len(self.memories.keys()) > 0:
         valid_idxs = []
         for idx in self.memories.keys():
-          if len(self.memories[idx]) > 19:
+          if len(self.memories[idx]) == self.max_memories:
             valid_idxs.append(idx)
         if len(valid_idxs) == 0:
           return False

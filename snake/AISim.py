@@ -188,11 +188,7 @@ def print_stats(log, stats, agent, config):
 
     long_training_msg = stats.get('trainer', 'long_training_msg')
     trainer_steps = stats.get('trainer', 'steps')
-    if config.get('enable_long_training'):
-        # The number of trainings steps in the epoch and the number of training steps for the 
-        # epoch and the long training (AIAgent:train_long_memory()) training steps.
-        summary += ', Trainer (long {:>4}) steps {:>5}'.format(long_training_msg, trainer_steps)
-    elif config.get('trainer_stats'):
+    if config.get('trainer_stats'):
         # Number of training steps for the epoch
         summary += ', Trainer steps {:>5}'.format(long_training_msg, trainer_steps)
 

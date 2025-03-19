@@ -38,13 +38,11 @@ class SimPlot():
       display.display(plt.gcf())
     # Plot horizontal lines to differentiate the ranges of scores into groups of 10
     # Only plot the horizontal lines if there is a score that is equal to or greater than 10
-    for y in range(10, 100, 10):
+    for y in range(10, 200, 10):
       if max(self.scores) >= y:
         self.axs[0][0].axhline(y=y, color='r', linestyle=(0, (1, 10)), linewidth=1)
     # Clear the figure before plotting new data to support a sliding view to maintain constant 
     # resolution at the cost of losing visibility into old data
-    self.axs[0][0].cla() 
-
     self.axs[0][0].set_facecolor('#002000')
     self.axs[1][0].set_facecolor('#002000')
     self.axs[0][1].set_facecolor('#002000')
@@ -64,6 +62,7 @@ class SimPlot():
     self.axs[0][1].imshow(self.image_1)
     
     # Plot the game score and the mean game score
+    self.axs[0][0].cla() 
     self.axs[0][0].set_title('Scores', color='#00ff00')
     self.axs[0][0].set_ylabel('Score', color='#00ff00')
     self.axs[0][0].set_xlabel('Number of Games', color='#00ff00')
@@ -118,10 +117,11 @@ class SimPlot():
     scores = []
     mean_scores = []
     count = 0
+    num_games = self.stats.get('game', 'num_games')
     for x in self.stats.get('scores', 'all'):
-      games.append(count)
+      games.append(count + num_games)
       scores.append(x)
-      if count == 0:
+      if len(mean_scores) <= 1:
         mean_scores.append(x)
       else:
         mean_scores.append(round((mean_scores[count - 1] * count + x) / (count + 1), 2))

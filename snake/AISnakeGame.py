@@ -146,6 +146,8 @@ class AISnakeGame():
             # Snake collision
             game_over = True
             reward = self.ini.get('reward_snake_collision') - (snake_length * self.ini.get('reward_snake_multiplier'))
+            max_reward = self.ini.get('reward_snake_collision_max')  # Set an upper limit, otherwise loss gets crazy
+            reward = max(reward, max_reward)
             lose_reason = f'Hit the snake ({reward})'
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'snake_collision_count')

@@ -60,6 +60,7 @@ default:
   reward_move_further: -1
   reward_snake_collision: -10
   reward_snake_multiplier: 1.5
+  reward_snake_collision_max: -30
   reward_wall_collision: -10
   show_loss: true
   show_reward: true
