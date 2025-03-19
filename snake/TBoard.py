@@ -69,15 +69,16 @@ class TBoard():
                     self.board[x][y] = EMPTY_VALUE
                     self.pygame.draw.rect(self.display, BLACK, [x * block_size, y * block_size, block_size, block_size])
 
-    def get_binary(self, num):
+    def get_binary(self, bits_needed, some_int):
         # This is used in the state map, the get_state() function.
-        bin_str = format(num, 'b')
+        some_int = int(some_int)
+        bin_str = format(some_int, 'b')
         out_list = []
         for bit in range(len(bin_str)):
             out_list.append(bin_str[bit])
-        for zero in range(7 - len(out_list)):
+        for zero in range(bits_needed - len(out_list)):
             out_list.insert(0, '0')
-        for x in range(7):
+        for x in range(bits_needed):
             out_list[x] = int(out_list[x])
         return out_list
 
@@ -113,7 +114,9 @@ class TBoard():
         dir_r = direction == Direction.RIGHT
         dir_u = direction == Direction.UP
         dir_d = direction == Direction.DOWN
-        slb = self.get_binary(len(self.snake))
+        slb = self.get_binary(7, len(self.snake))
+        headxb = self.get_binary(5, head.x)
+        headyb = self.get_binary(5, head.y)
 
         state = [
             # Wall collision straight ahead
@@ -152,9 +155,6 @@ class TBoard():
             (dir_r and self.is_snake_collision(point_u)) or
             (dir_l and self.is_snake_collision(point_d)),
 
-            # Move direction
-            dir_l, dir_r, dir_u, dir_d,
-
             # Food location
             self.food.x < self.head.x, # Food left
             self.food.x > self.head.x, # Food right
@@ -167,15 +167,24 @@ class TBoard():
             self.food.y == self.head.y and self.food.x > self.head.x, # Food above
             self.food.y == self.head.y and self.food.x < self.head.x, # Food below
 
+            # Last move direction
+            dir_l, dir_r, dir_u, dir_d,
             # Snake length in binary using 7 bits
             slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6],
         ]
         # Previous direction of the snake
         for aDir in self.last_dirs:
-            state.append(aDir)
+            state.append(int(aDir))
         self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
+
+        # Head location in binary using 4 bits (x,y)
+        for aBit in headxb:
+            state.append(int(aBit))
+        for aBit in headyb:
+            state.append(int(aBit))
+
         #return torch.from_numpy(np.array(state, dtype=np.float32))
-        return np.array(state, dtype=int)
+        return np.array(state, dtype='int8')
 
     def incr_speed(self):
         speed = self.ini.get('game_speed')

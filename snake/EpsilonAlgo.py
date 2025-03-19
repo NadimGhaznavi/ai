@@ -23,27 +23,20 @@ class EpsilonAlgo():
     self.epsilon_value = ini.get('epsilon_value')
     self.epsilon_min = ini.get('epsilon_min')
     self.epsilon_decay = ini.get('epsilon_decay')
-    if self.epsilon_value != 0:
-      self.stats.set('epsilon', 'depleted', False)
     self.print_stats = ini.get('epsilon_print_stats')
     self.enabled = ini.get('epsilon_enabled')
     if not self.enabled:
       self.stats.set('epsilon', 'depleted', False)
+    if self.epsilon_value != 0:
+      self.stats.set('epsilon', 'depleted', False)
     self.epsilon = self.epsilon_value
+    print('self.epsilon', self.epsilon)
     self.num_games = 0
     self.injected = 0
     self.depleted = False
     
     if not self.enabled:
       self.ini.set('epsilon_print_stats', 'False')
-    else:
-      self.stats.set('epsilon', 'status', f'Epsilon greedy initialized with value of {self.epsilon_value}')
-
-  def __str__(self):
-    str_val = ''
-    if self.epsilon > 0:
-      str_val = 'injected# {:>3}, value {:>5}'.format(self.injected, self.epsilon)
-    return str_val
 
   def get_move(self):
     if not self.enabled or self.epsilon == 0:
@@ -54,15 +47,16 @@ class EpsilonAlgo():
       rand_idx = randint(0, 2)
       rand_move[rand_idx] = 1
       self.injected += 1
+      self.stats.set('epsilon', 'injected', self.injected)
       return rand_move
 
-    str_val = 'injected# {:>3}, value {:>5}'.format(self.injected, round(self.epsilon, 3))
-    self.stats.set('epsilon', 'status', str_val)
     return False
   
   def played_game(self):
     self.num_games += 1
     self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay) 
+    self.stats.set('epsilon', 'value', self.epsilon)
+    self.reset_injected()
   
   def reset_injected(self):
     self.injected = 0

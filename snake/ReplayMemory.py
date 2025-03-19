@@ -64,6 +64,7 @@ class ReplayMemory():
     if self.enable_game_shuffle:
       if len(self.memories) == self.max_games:
         ran_game = random.sample(self.memories, 1)
+        self.stats.set('replay', 'mem_size', len(ran_game[0]))
         return ran_game
       else:
         return False
@@ -88,8 +89,8 @@ class ReplayMemory():
         idx = random.choice(valid_idxs)
         ran_game = random.sample(self.memories[idx], 1)
         moves = len(ran_game[0])
-        mem_msg = '{:>2} - {:<4}'.format(idx, moves)
-        self.stats.set('replay', 'mem_size', mem_msg)
+        msg = '{:>2},{:>4}'.format(idx, moves)
+        self.stats.set('replay', 'mem_size', msg)
         return ran_game
       else:
         return False

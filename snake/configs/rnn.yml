@@ -7,8 +7,8 @@ default:
   data_dir: sim_data
   discount: 0.8
   enable_long_training: True
-  epsilon_decay: 0.95
   epsilon_enabled: False
+  epsilon_decay: 0.95
   epsilon_min: 0
   epsilon_print_stats: 1
   epsilon_value: 0.99
@@ -18,29 +18,28 @@ default:
   hidden_size: 270
   highscore_file_basename: _highscores.csv
   input_size: 400
-  linear_input_size: 31
   log_basename: _log.txt
   matplot_max_x: 1000
   max_epochs: 0
   max_memories: 20
-  max_memory: 100000
+  max_memory: 10000
   max_moves: 200
   max_scores: 1000
-  model: linear
+  model: rnn
   model_basename: _model.pth
   model_desc_basename: _model.txt
-  model_stats: false
+  model_stats: False
   next_num_file: next_num.txt
-  nu_bad_games: 6
   nu_enabled: True
+  nu_bad_games: 6
   nu_high_grace: 4
   nu_max_epochs: 75
   nu_pool: 5
   nu_score: 0
-  nu_verbose: false
+  nu_verbose: False
   output_size: 3
   plot_basename: _plot.png
-  plot_cnn_enable: false
+  plot_cnn_enable: False
   plot_cnn_freq: 2
   plot_dir: sim_plots
   plot_freq: 10
@@ -53,16 +52,16 @@ default:
   replay_mem_size: 25000
   reward_excessive_move: -10
   reward_food: 10
-  reward_move: 0.1
+  reward_move: 0.2
   reward_move_closer: 1
   reward_move_further: -1
-  reward_snake_collision: -8.5
-  reward_snake_multiplier: 1
+  reward_snake_collision: -10
+  reward_snake_multiplier: 1.5
   reward_wall_collision: -10
-  rnn_dropout: 0.2
+  rnn_dropout: 0.02
   rnn_hidden_size: 200
   rnn_layers: 4
-  rnn_learning_rate: 0.00008
+  rnn_learning_rate: 0.00009
   show_loss: true
   show_reward: true
   show_replay: true

@@ -5,7 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "AISim.py",
+            "name": "AISim Linear",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "AISim.py",
+            "console": "integratedTerminal",
+            "args": [
+                "-mo",
+                "linear",
+                "-in",
+                "configs/linear.yml"
+            ]
+        },
+        {
+            "name": "AISim RNN",
             "type": "debugpy",
             "request": "launch",
             "program": "AISim.py",
@@ -17,5 +30,6 @@
                 "configs/rnn.yml"
             ]
         }
+
     ]
 }

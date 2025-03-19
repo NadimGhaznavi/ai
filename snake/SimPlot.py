@@ -93,12 +93,16 @@ class SimPlot():
     # Plot of average score 
     span = self.ini.get('show_summary_freq')
     title = f'Average Score over the Past {span} Games'
+    self.ax4.cla()
     self.ax4.set_title(title, color='#00ff00')
     self.ax4.set_ylabel('Average Score', color='#00ff00')
     xlabel = f'Number of Games x{span}'
     self.ax4.set_xlabel(xlabel, color='#00ff00')
-    self.ax4.plot(self.avg_scores_count, self.avg_scores, '-x', markeredgewidth=1, color='#6666ff')
     
+    self.ax4.fill_between(self.avg_scores_count, self.avg_scores, color='#6666ff', alpha=0.3)
+    self.ax4.plot(self.avg_scores_count, self.avg_scores, '-x', markeredgewidth=1, color='#6666ff')
+
+
     plt.show()
     plt.pause(0.1)
     display.clear_output(wait=True)
@@ -125,6 +129,7 @@ class SimPlot():
     self.games = games
     self.scores = scores
     self.mean_scores = mean_scores
+
     # Score Distribution
     bar_scores = []
     bar_count = []
@@ -136,29 +141,32 @@ class SimPlot():
         bar_count.append(0)
     self.bar_scores = bar_scores
     self.bar_count = bar_count
+
     # Lose Reason
     wall_count = self.stats.get('game', 'wall_collision_count')
     snake_count = self.stats.get('game', 'snake_collision_count')
     max_steps = self.stats.get('game', 'exceeded_max_moves_count')
     self.lose_labels = ['Wall', 'Snake', 'Moves']
     self.lose_reasons = [wall_count, snake_count, max_steps]
+
     # Model Loss Stats
-    self.losses = []
-    self.losses_count = []
+    self.losses = [0]
+    self.losses_count = [0]
     count = 0
     for x in self.stats.get('avg', 'loss'):
-      self.losses.append(x)
-      self.losses_count.append(count)
       count += 1
-    # Average Score Stats
-    self.avg_scores = []
-    self.avg_scores_count = []
+      self.losses.append(x)
+      self.losses_count.append(int(count))
+
+    # Average Score Stats 
+    self.avg_scores = [0]
+    self.avg_scores_count = [0]
     count = 0
     for x in self.stats.get('avg', 'score'):
-      self.avg_scores.append(x)
-      self.avg_scores_count.append(count)
       count += 1
-
+      self.avg_scores.append(x)
+      self.avg_scores_count.append(int(count))
+      
   def save(self, num_plots=0):
     ini = self.ini
     plot_basename = ini.get('plot_basename')

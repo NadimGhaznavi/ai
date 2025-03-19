@@ -1,73 +1,76 @@
-custom:
-  restart: 0
 default:
   ai_version_file: next_ai_version.txt
   board_height: 20
   board_square: 16
   board_width: 20
   checkpoint_freq: 50
-  cnn_b1_channels: 16
-  cnn_b2_channels: 24
-  cnn_b3_channels: 32
-  cnnr_hidden_size: 128
   data_dir: sim_data
   discount: 0.82
   epsilon_decay: 0.95
-  epsilon_enabled: true
-  epsilon_min: 0.01
+  enable_long_training: True
+  epsilon_enabled: True
+  epsilon_min: 0
   epsilon_print_stats: 1
-  epsilon_value: 0.95
-  game_speed: 500
+  epsilon_value: 0.5
+  game_speed: 50
   game_title: AI Snake Game
   headless: 0
   hidden_size: 270
+  highscore_file_basename: _highscores.csv
   input_size: 400
-  learning_rate: 0.001
-  linear_input_size: 31
+  linear_learning_rate: 0.0001
+  linear_input_size: 41
+  linear_dropout: 0.02
   log_basename: _log.txt
   matplot_max_x: 1000
   max_epochs: 0
   max_memories: 20
-  max_memory: 100000
-  max_moves: 200
+  max_memory: 10000
+  max_moves: 250
   max_scores: 1000
   model: linear
   model_basename: _model.pth
+  model_desc_basename: _model.txt
   model_stats: false
   next_num_file: next_num.txt
+  nu_enabled: False
   nu_bad_games: 6
-  nu_enabled: false
   nu_high_grace: 4
   nu_max_epochs: 0
   nu_pool: 5
   nu_score: 0
-  nu_verbose: false
+  nu_verbose: False
   output_size: 3
   plot_basename: _plot.png
-  plot_cnn_freq: 50
+  plot_cnn_freq: 20
+  plot_cnn_enable: False
   plot_dir: sim_plots
-  plot_freq: 50
+  plot_freq: 5
   random_seed: 1970
+  relu_slope: 0.1
+  replay_mem_enable_shuffle: False
+  replay_mem_enable_game_shuffle: False
+  replay_mem_max_games: 25
+  replay_mem_batch_size: 100
+  replay_mem_size: 25000
   reward_excessive_move: -10
   reward_food: 10
-  reward_move: 0
+  reward_move: 0.2
   reward_move_closer: 1
   reward_move_further: -1
   reward_snake_collision: -10
+  reward_snake_multiplier: 1.5
   reward_wall_collision: -10
-  rnn_dropout: 0.2
-  rnn_hidden_size: 270
-  rnn_layers: 10
-  rnnt_input_size: 20
-  rnnt_sequence_length: 20
   show_loss: true
   show_reward: true
+  show_replay: true
   show_summary: true
-  show_summary_freq: 500
+  show_summary_freq: 20
   sim_highscore_basename: _highscore.csv
   sim_plot_basename: _plot.png
   stats_basename: _stats.yml
-  status_iter: 50
+  stats_save_freq: 100
+  status_iter: 20
   t_dropout: 0.05
   t_feedforward_dim: 1024
   t_hidden_size: 256

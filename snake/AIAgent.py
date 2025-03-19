@@ -114,7 +114,7 @@ class AIAgent:
             memory = self.memory.get_memory()
             if memory != False:
                 moves = 0
-                if model_type == 'cnn' or model_type == 'cnnr' or model_type == 'cnnr3' or model_type == 'cnnr4':
+                if model_type == 'cnn':
                     for state, action, reward, next_state, done in memory[0]:
                         moves += 1
                         self.trainer.train_step_cnn(state, action, reward, next_state, [done])

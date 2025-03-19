@@ -20,6 +20,10 @@ class SimStats:
         self.stats['avg']['loss'] = []
         self.stats['avg']['score'] = []
 
+        self.stats['epsilon'] = {}
+        self.stats['epsilon']['value'] = 0
+        self.stats['epsilon']['injected'] = 0
+
         self.stats['loss'] = {}
         self.stats['loss']['all'] = []
 

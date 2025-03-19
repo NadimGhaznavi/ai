@@ -123,10 +123,12 @@ def train():
         move = agent.get_move(old_state) # Get the next move
         reward, game_over, score = game.play_step(move) # Play the game step
         if not game_over:
+            # Keep playing, this epoch isn't over
             new_state = game.board.get_state() # Get the new state
             agent.train_short_memory(old_state, move, reward, new_state, game_over) # Train short memory
             agent.remember(old_state, move, reward, new_state, game_over) # Remember
         else:
+            # Game over
             agent.remember(old_state, move, reward, new_state, game_over) # Remember
             num_games = int(stats.get('game', 'num_games'))
             all_losses = stats.get('loss', 'all')
@@ -165,16 +167,15 @@ def train():
                 update_highscore_file(config, num_games, score)
             game.reset() # Reset the game
             print_stats(log, stats, agent, config) # Print some stats
-            agent.played_game(score) # Update the agent
             if num_games % config.get('plot_freq') == 0:
                 plot.plot() # Plot some stats every plot_freq games
             if num_games % config.get('checkpoint_freq') == 0:
                 checkpoint(config, stats, agent)
             if num_games % config.get('show_summary_freq') == 0:
-                show_summary(log, stats, config)
+                update_avg(log, stats, config)
             if num_games % config.get('stats_save_freq') == 0:
                 stats.save()
-
+            agent.played_game(score) # Update the agent
     cleanup(agent, plot)
 
 def print_stats(log, stats, agent, config):
@@ -190,7 +191,7 @@ def print_stats(log, stats, agent, config):
     if config.get('enable_long_training'):
         # The number of trainings steps in the epoch and the number of training steps for the 
         # epoch and the long training (AIAgent:train_long_memory()) training steps.
-        summary += ', Trainer (long {:>5}) steps {:>5}'.format(long_training_msg, trainer_steps)
+        summary += ', Trainer (long {:>4}) steps {:>5}'.format(long_training_msg, trainer_steps)
     elif config.get('trainer_stats'):
         # Number of training steps for the epoch
         summary += ', Trainer steps {:>5}'.format(long_training_msg, trainer_steps)
@@ -198,26 +199,31 @@ def print_stats(log, stats, agent, config):
     if config.get('model_stats'):
         # Number of forward(x) calls to the model for this epoch
         summary += ', Model steps {:>5}'.format(stats.get('model', 'steps'))
+
     if config.get('epsilon_enabled'):
         # Epsilon stats
-        summary += ', Epsilon: {}'.format(stats.get('epsilon', 'status'))
-        agent.reset_epsilon_injected()
+        epsilon_value = stats.get('epsilon', 'value')
+        if epsilon_value > 0:
+            epsilon_value = round(epsilon_value, 2)
+            epsilon_injected = stats.get('epsilon', 'injected')
+            summary += ', Epsilon value: {:>5}, injected: {:>4}'.format(epsilon_value, epsilon_injected)
+
     if config.get('nu_enabled'):
         # NuAlgo stats
         agent.nu_algo.update_status()
         summary += ', Nu: {}'.format(stats.get('nu', 'status'))
-        agent.reset_nu_injected()
+
     if config.get('show_reward'):
         # Epoch reward
         summary += ', Reward: {:>6}'.format(round(stats.get('game', 'game_reward'), 1))
+
     if config.get('show_loss'):
         # Loss
-        summary += ', Loss: {:>5}'.format(round(stats.get('trainer', 'loss'), 2))
+        summary += ', Loss: {:>6}'.format(round(stats.get('trainer', 'loss'), 2))
     summary += ' - {}'.format(stats.get('game', 'lose_reason'))
     log.log(summary)
 
-def show_summary(log, stats, config):
-    summary = ''
+def update_avg(log, stats, config):
     recent_freq = config.get('show_summary_freq')
     recent_loss = 0
     for loss in stats.get('recent', 'loss'):
@@ -230,10 +236,6 @@ def show_summary(log, stats, config):
     recent_score = round(recent_score / recent_freq, 2)
     stats.append('avg', 'score', recent_score)
     
-    summary += f"Average loss over the past {recent_freq} games  : {recent_loss}\n"
-    summary += f"Average score over the past {recent_freq} games : {recent_score}"
-    log.log(summary)
-
 def update_highscore_file(config, num_games, score):
     data_dir = config.get('data_dir')
     sim_num = config.get('sim_num')

@@ -22,8 +22,8 @@ class AITrainer():
         elif model_type == 'rnn':
             self.optimizer = optim.Adam(self.model.parameters(), lr=ini.get('rnn_learning_rate'))
             self.criterion = nn.MSELoss()
-        else:
-            self.optimizer = optim.Adam(self.model.parameters(), lr=ini.get('learning_rate'))
+        elif model_type == 'linear':
+            self.optimizer = optim.Adam(self.model.parameters(), lr=ini.get('linear_learning_rate'))
             self.criterion = nn.MSELoss()
             
         self.stats.set('trainer', 'steps', 0)
