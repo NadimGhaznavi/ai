@@ -1,7 +1,7 @@
 default:
   ai_version_file: next_ai_version.txt
   board_height: 20
-  board_square: 16
+  board_square: 30
   board_width: 20
   checkpoint_freq: 50
   data_dir: sim_data
@@ -12,7 +12,7 @@ default:
   epsilon_min: 0
   epsilon_print_stats: 1
   epsilon_value: 0.5
-  game_speed: 50
+  game_speed: 30
   game_title: AI Snake Game
   headless: 0
   hidden_size: 270
@@ -22,7 +22,6 @@ default:
   linear_input_size: 41
   linear_dropout: 0.02
   log_basename: _log.txt
-  matplot_max_x: 1000
   max_epochs: 0
   max_memories: 20
   max_memory: 10000
@@ -46,22 +45,25 @@ default:
   plot_cnn_enable: False
   plot_dir: sim_plots
   plot_freq: 5
+  plot_max_x: 1000
   random_seed: 1970
   relu_slope: 0.1
   replay_mem_enable_shuffle: False
   replay_mem_enable_game_shuffle: False
   replay_mem_max_games: 25
+  replay_mem_min_games: 5
   replay_mem_batch_size: 100
   replay_mem_size: 25000
-  reward_excessive_move: -10
-  reward_food: 10
-  reward_move: 0.2
-  reward_move_closer: 1
-  reward_move_further: -1
-  reward_snake_collision: -10
-  reward_snake_multiplier: 1.5
+  reward_excessive_move: -15
+  reward_food: 30
+  reward_move: 0
+  reward_move_closer: 3
+  reward_move_further: -3
+  reward_snake_collision: -19.5
   reward_snake_collision_max: -30
-  reward_wall_collision: -10
+  reward_snake_multiplier: 0.1
+  reward_snake_collision_close: -1.5
+  reward_wall_collision: -13
   show_loss: true
   show_reward: true
   show_replay: true
