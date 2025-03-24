@@ -119,6 +119,11 @@ class TBoard():
         headyb = self.get_binary(5, head.y)
 
         state = [
+            # Snake length in binary using 7 bits
+            slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6],
+            # Last move direction
+            dir_l, dir_r, dir_u, dir_d,
+
             # Wall collision straight ahead
             (dir_r and self.is_wall_collision(point_r)) or
             (dir_l and self.is_wall_collision(point_l)) or
@@ -166,11 +171,7 @@ class TBoard():
             self.food.y == self.head.y,
             self.food.y == self.head.y and self.food.x > self.head.x, # Food above
             self.food.y == self.head.y and self.food.x < self.head.x, # Food below
-
-            # Last move direction
-            dir_l, dir_r, dir_u, dir_d,
-            # Snake length in binary using 7 bits
-            slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6],
+            
         ]
         # Previous direction of the snake
         for aDir in self.last_dirs:
@@ -206,6 +207,19 @@ class TBoard():
             pt = self.head
         if pt in self.snake[1:]:
             return True
+        return False
+    
+    def is_snake_collision_close(self, pt=None):
+        # Return true if the head is next to the body.
+        if pt is None:
+            head = self.head
+        else:
+            head = pt
+        if len(self.snake) >= 5:
+            body_positions = {(seg.x, seg.y) for seg in self.snake[4:]}  # Use a set for O(1) lookup
+            for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (-1, 1), (1, -1)]:
+                if (head.x + dx, head.y + dy) in body_positions:
+                    return True
         return False
 
     def is_wall_collision(self, pt=None):

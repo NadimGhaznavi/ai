@@ -12,11 +12,19 @@ class ModelL(nn.Module):
         self.log = log
         self.stats = stats
         input_size = ini.get('linear_input_size')
-        hidden_size = ini.get('hidden_size')
+        hidden_size = ini.get('linear_hidden_size')
         output_size = ini.get('output_size')
         p_value = ini.get('linear_dropout')
-        self.input_block = nn.Linear(input_size, hidden_size)
-        self.hidden_block = nn.Linear(hidden_size, hidden_size)
+        self.input_block = nn.Sequential(
+            nn.Linear(input_size, hidden_size),
+            nn.ReLU(),
+        )
+        self.hidden_block = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+        )
         self.dropout_block = nn.Dropout(p=p_value)
         self.output_block = nn.Linear(hidden_size, output_size)
         self.stats.set('model', 'steps', 0)
@@ -24,8 +32,8 @@ class ModelL(nn.Module):
 
     def forward(self, x):
         self.stats.incr('model', 'steps')
-        x = F.relu(self.input_block(x))
-        x = F.relu(self.hidden_block(x))
+        x = self.input_block(x)
+        x = self.hidden_block(x)
         x = self.dropout_block(x)
         x = self.output_block(x)
         return x

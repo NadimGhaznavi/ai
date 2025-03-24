@@ -15,8 +15,9 @@ class SimPlot():
     self.ini = ini
     self.log = log
     self.stats = stats
-    self.image_1 = None
     self.image_2 = None
+    self.summary_freq = ini.get('show_summary_freq')
+    self.plot_max_x = ini.get('plot_max_x')
     plt.ion()
     self.fig, self.axs = plt.subplots(4, 2, figsize=(28, 10), layout="tight", facecolor="#000000", 
                                   gridspec_kw={'width_ratios': [20, 1]})
@@ -56,11 +57,6 @@ class SimPlot():
     self.ax3.tick_params(labelcolor='#00ff00')
     self.ax4.tick_params(labelcolor='#00ff00')
 
-    # Render an image if it's been set
-    self.axs[0][1].set_title('Input Image #' + str(len(self.games)), color='#00ff00')
-    self.axs[0][1].axis('off')  # Hide x and y axis
-    self.axs[0][1].imshow(self.image_1)
-    
     # Plot the game score and the mean game score
     self.axs[0][0].cla() 
     self.axs[0][0].set_title('Scores', color='#00ff00')
@@ -68,6 +64,11 @@ class SimPlot():
     self.axs[0][0].set_xlabel('Number of Games', color='#00ff00')
     self.axs[0][0].plot(self.games, self.scores, color='#6666ff', linewidth=1)
     self.axs[0][0].plot(self.games, self.mean_scores, color='#cccc00', linewidth=1)
+    
+    # Render an image if it's been set
+    self.axs[0][1].set_title('Input Image #' + str(len(self.games)), color='#00ff00')
+    self.axs[0][1].axis('off')  # Hide x and y axis
+    self.axs[0][1].imshow(self.image_1)
     
     # Bar chart of the score distribution
     self.axs[1][0].set_title('Score Distribution', color='#00ff00')
@@ -118,14 +119,17 @@ class SimPlot():
     mean_scores = []
     count = 0
     num_games = self.stats.get('game', 'num_games')
+
+    x_value = 0
     for x in self.stats.get('scores', 'all'):
-      games.append(count + num_games)
+      games.append(x_value)
       scores.append(x)
       if len(mean_scores) <= 1:
         mean_scores.append(x)
       else:
         mean_scores.append(round((mean_scores[count - 1] * count + x) / (count + 1), 2))
       count += 1
+      x_value += 1
     self.games = games
     self.scores = scores
     self.mean_scores = mean_scores

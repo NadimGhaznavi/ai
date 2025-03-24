@@ -30,7 +30,6 @@ class EpsilonAlgo():
     if self.epsilon_value != 0:
       self.stats.set('epsilon', 'depleted', False)
     self.epsilon = self.epsilon_value
-    print('self.epsilon', self.epsilon)
     self.num_games = 0
     self.injected = 0
     self.depleted = False

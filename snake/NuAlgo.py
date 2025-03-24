@@ -134,7 +134,9 @@ class NuAlgo():
       self.reset_count += 1
       if self.verbose:
         self.log.log(f"NuAlgo: Played ({self.reset_count * self.bad_games}) games without a new high score, incrementing reset count to ({self.reset_count + 1}), decreasing score to ({self.score})")
-        
+    
+    # Reset injected count
+    self.reset_injected()
 
   def reset_injected(self):
     self.injected = 0

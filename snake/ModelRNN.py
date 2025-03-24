@@ -19,7 +19,11 @@ class ModelRNN(nn.Module):
             nn.Linear(input_size, hidden_size),
             nn.ReLU(),
         )
-        self.m_rnn = nn.RNN(input_size=hidden_size, hidden_size=hidden_size, nonlinearity='tanh', num_layers=rnn_layers, dropout=rnn_dropout)
+        self.m_rnn = nn.RNN(input_size=hidden_size, 
+                            hidden_size=hidden_size, 
+                            nonlinearity='tanh', 
+                            num_layers=rnn_layers, 
+                            dropout=rnn_dropout)
         self.m_out = nn.Linear(hidden_size, output_size)
         
         self.stats.set('model', 'steps', 0)

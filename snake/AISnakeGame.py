@@ -19,6 +19,7 @@ class AISnakeGame():
         self.headless = False # If True, the game will run without updating the display
         self.init_stats()
         self.game_reward = 0
+        self.agent = None
         random.seed(ini.get('random_seed'))
 
     def get_direction(self):
@@ -76,6 +77,7 @@ class AISnakeGame():
         print(" - d to pause the display, but resume the simulation")
         print(" - u to unpause the display, and resume the simulation")
         print(" - m to print the model")
+        print(" - r to print replay memory stats")
         print(" - a to increase speed")
         print(" - z to decrease speed")
         while is_paused:
@@ -104,6 +106,8 @@ class AISnakeGame():
                         self.board.decr_speed()
                     if event.key == self.pygame.K_m:
                         self.print_model()
+                    if event.key == self.pygame.K_r:
+                        self.agent.memory_stats()
 
     def place_food(self):
         x = random.randint(0, self.ini.get('board_width') - 1) 
@@ -156,7 +160,7 @@ class AISnakeGame():
             # Exceeded max moves
             game_over = True
             reward = self.ini.get('reward_excessive_move') 
-            lose_reason = 'Exceeded max {:>4} moves ({:>5})'.format(max_moves * snake_length, max_moves)
+            lose_reason = 'Exceeded max {} moves ({})'.format(max_moves * snake_length, reward)
             self.stats.set('game', 'lose_reason', lose_reason)
             self.stats.incr('game', 'exceeded_max_moves_count')
         
@@ -168,7 +172,12 @@ class AISnakeGame():
             self.stats.append('recent', 'score', self.stats.get('game', 'score'))
             return reward, game_over, self.stats.get('game', 'score')
 
-        ## Game is not over, see what's going on
+        ## Game is not over, lets see what else is going on
+
+        if self.board.is_snake_collision_close():
+            # The next move will place the snake head next to the snake body.
+            #print(".", flush=True,end='')
+            reward += self.ini.get('reward_snake_collision_close')
 
         if self.head == self.food:
             # We found food!!
@@ -227,6 +236,9 @@ class AISnakeGame():
         self.place_food()
         self.board.update_food(self.food)
         self.board.refresh()
+
+    def set_agent(self, agent):
+        self.agent = agent
 
     def set_model(self, model):
         self.model = model

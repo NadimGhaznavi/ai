@@ -87,6 +87,7 @@ def train():
     model.set_plot(plot)
     save_model(config, model)
     game = AISnakeGame(config, log, stats)
+    game.set_agent(agent)
     plot_cnn_enable = config.get('plot_cnn_enable')
     if plot_cnn_enable and model_type == 'cnnr' or model_type == 'cnn' or model_type == 'cnnr4':
         cnn_plot = PlotCNN(log, config, model)
@@ -113,9 +114,12 @@ def train():
     log.log("AISim initialization:       [OK]")
     in_progress = True
     max_epochs = int(config.get('max_epochs'))
+    enable_long_training = config.get('enable_long_training')
     nu_max_epochs = int(config.get('nu_max_epochs'))
-    matplot_max_x = int(config.get('matplot_max_x'))
-    num_plots = 0
+    model_type = config.get('model')
+    nu_enabled = config.get('nu_enabled')
+    plot_save_freq = int(config.get('plot_save_freq'))
+    num_plots = 0 # Initialize to zero
 
     while in_progress:
         # The actual training loop
@@ -142,40 +146,62 @@ def train():
                     total_loss += loss
                 total_loss += cur_loss
                 stats.append('loss', 'all', total_loss / (len(all_losses) + 1))
-            model_type = config.get('model')
-            nu_enabled = config.get('nu_enabled')
+
+            # Check if we've reached the max epochs (if max_)
             if max_epochs > 0 and max_epochs == num_games:
                 in_progress = False # Reached max epochs
                 log.log("Reached max epochs (" + str(max_epochs) + "), exiting")
+
+            # Check if we've reached the Nu max epochs (if Nu us enabled)
             if nu_enabled and nu_max_epochs > 0 and nu_max_epochs == num_games:
                 log.log("Reached Nu max epochs (" + str(nu_max_epochs) + "), disabling Nu")
                 config.set('nu_enabled', False)
-            if num_games % matplot_max_x == 0:
+
+            # Save the matplotlib figure with the plots 
+            if num_games != 0 and (num_games % plot_save_freq == 0):
                 num_plots += 1
                 plot.save(num_plots)
             if plot_cnn_enable and (num_games % plot_cnn_freq == 0) and model_type == 'cnn':
                 cnn_plot.plot(new_state) # Visualize the CNN feature maps
-                #pass
-            # Track how often a specific score has been reached for matplotlib's score distribution
+
+            # Collect score data
             stats.incr('scores', score)
+
             # Track the scores for each game
             stats.append('scores', 'all', score)
-            agent.train_long_memory()
+
+            # Train long memory
+            if enable_long_training:
+                agent.train_long_memory()
+
+            # New highscore!!! YAY!
             if score > stats.get('game', 'highscore'):
-                # New highscore!!! YAY!
                 stats.set('game', 'highscore', score)
                 update_highscore_file(config, num_games, score)
+
             game.reset() # Reset the game
+
             print_stats(log, stats, agent, config) # Print some stats
+
+            # Update the plots every plot_freq games
             if num_games % config.get('plot_freq') == 0:
-                plot.plot() # Plot some stats every plot_freq games
+                plot.plot() 
+
+            # Save the model with weights
             if num_games % config.get('checkpoint_freq') == 0:
-                checkpoint(config, stats, agent)
+                checkpoint(config, stats, agent) 
+
+            # Recalculate averages over the last show_summary_freq games
             if num_games % config.get('show_summary_freq') == 0:
                 update_avg(log, stats, config)
+            
+            # Save the stats to file every stats_save_freq games
             if num_games % config.get('stats_save_freq') == 0:
                 stats.save()
-            agent.played_game(score) # Update the agent
+
+            # Let the agent know we've finished a game
+            agent.played_game(score) 
+
     cleanup(agent, plot)
 
 def print_stats(log, stats, agent, config):
@@ -184,38 +210,39 @@ def print_stats(log, stats, agent, config):
     summary += ' Score: {:>3}'.format(stats.get('game', 'last_score'))
     summary += ', Time: {:6.2f}s'.format(stats.get('game', 'game_time'))
     summary += ', Highscore: {:>3}'.format(stats.get('game', 'highscore'))
-    summary += ', ReplayMem: {:>4}'.format(stats.get('replay', 'mem_size'))
+    summary += ', ReplayMem: {:>9}'.format(stats.get('replay', 'mem_size'))
 
     long_training_msg = stats.get('trainer', 'long_training_msg')
     trainer_steps = stats.get('trainer', 'steps')
+    # Number of training steps for the epoch
     if config.get('trainer_stats'):
-        # Number of training steps for the epoch
         summary += ', Trainer steps {:>5}'.format(long_training_msg, trainer_steps)
 
+    # Number of forward(x) calls to the model for this epoch
     if config.get('model_stats'):
-        # Number of forward(x) calls to the model for this epoch
         summary += ', Model steps {:>5}'.format(stats.get('model', 'steps'))
 
+    # Epsilon stats
     if config.get('epsilon_enabled'):
-        # Epsilon stats
         epsilon_value = stats.get('epsilon', 'value')
         if epsilon_value > 0:
             epsilon_value = round(epsilon_value, 2)
             epsilon_injected = stats.get('epsilon', 'injected')
             summary += ', Epsilon value: {:>5}, injected: {:>4}'.format(epsilon_value, epsilon_injected)
 
+    # NuAlgo stats
     if config.get('nu_enabled'):
-        # NuAlgo stats
         agent.nu_algo.update_status()
         summary += ', Nu: {}'.format(stats.get('nu', 'status'))
 
+    # Epoch reward
     if config.get('show_reward'):
-        # Epoch reward
         summary += ', Reward: {:>6}'.format(round(stats.get('game', 'game_reward'), 1))
 
+    # Loss
     if config.get('show_loss'):
-        # Loss
         summary += ', Loss: {:>6}'.format(round(stats.get('trainer', 'loss'), 2))
+    
     summary += ' - {}'.format(stats.get('game', 'lose_reason'))
     log.log(summary)
 

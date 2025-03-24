@@ -45,9 +45,6 @@ class AIAgent:
         self.stats.save()
         self.ini.save()
 
-    def get_optimizer(self):
-        return self.trainer.get_optimizer()
-
     def get_model(self):
         return self.model
 
@@ -65,10 +62,16 @@ class AIAgent:
         if type(state) != torch.Tensor:
             state = torch.tensor(state, dtype=torch.float) # Convert to a tensor
         prediction = self.model(state) # Get the prediction
-        move = torch.argmax(prediction).item() # Get the move
+        move = torch.argmax(prediction).item() # Select the move with the highest value
         final_move[move] = 1 # Set the move
         return final_move # Return
-        
+
+    def get_optimizer(self):
+        return self.trainer.get_optimizer()
+
+    def memory_stats(self):
+        return self.memory.log_stats()
+
     def played_game(self, score):
         self.epsilon_algo.played_game()
         self.nu_algo.played_game(score)
