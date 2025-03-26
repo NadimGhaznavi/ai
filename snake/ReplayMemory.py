@@ -13,9 +13,15 @@ class ReplayMemory():
     self.ini = ini
     self.stats = stats
     self.log = log
-    self.enable_shuffle = ini.get('replay_mem_enable_shuffle')
-    self.enable_game_shuffle = ini.get('replay_mem_enable_game_shuffle')
+    
+    self.enable_shuffle        = ini.get('replay_mem_enable_shuffle')
+    self.enable_game_shuffle   = ini.get('replay_mem_enable_game_shuffle')
     self.enable_targeted_games = ini.get('replay_mem_enable_targeted_games')
+    self.min_games             = ini.get('replay_mem_min_games')
+    self.max_games             = ini.get('replay_mem_max_games')
+    self.max_memories          = ini.get('replay_mem_max_games')
+    self.min_memories          = ini.get('replay_mem_min_games')
+    
     if self.enable_shuffle:
       # States are stored in a deque and a random sample will be returned
       self.batch_size = ini.get('replay_mem_batch_size')
@@ -24,17 +30,14 @@ class ReplayMemory():
     elif self.enable_game_shuffle:
       # All of the states for a game are stored, in order, in a deque.
       # A complete game will be returned
-      self.max_games=ini.get('replay_mem_max_games')
       self.memories = deque(maxlen=self.max_games)
       self.cur_memory = []
-      self.max_memories = ini.get('replay_mem_max_games')
+      
     else:
       # All of the states for a games are stored in a dictionary, with the game score being the key
       # and the value being a deque of complete games for that score.
       # For enable_game shuffle, a random score is chosen and a random game for that score is returned.
       # For enable targetd_games, a game with the same score as the current score is returned.
-      self.min_memories = ini.get('replay_mem_min_games')
-      self.max_memories = ini.get('replay_mem_max_games')
       self.memories = {}
       self.extra_memories = {}
       self.cur_memory = []
@@ -72,7 +75,7 @@ class ReplayMemory():
         self.cur_memory = []
       
   def get_game_shuffle_memory(self):
-    if len(self.memories) == self.max_games:
+    if len(self.memories) >= self.min_games:
       rand_game = random.sample(self.memories, 1)
       self.stats.set('replay', 'mem_size', len(rand_game[0]))
       return rand_game
@@ -89,11 +92,14 @@ class ReplayMemory():
     return random.sample(self.memories, self.batch_size) 
 
   def get_targeted_game(self):
-    score = self.stats.get('game', 'score')
-    rand_game = random.sample(self.memories[score], 1)
-    msg = '{:>2} /{:>5}'.format(score, len(rand_game[0]))
-    self.stats.set('replay', 'mem_size', msg)
-    return rand_game
+    score = self.stats.get('game', 'score') + 1
+    if score in self.memories:
+      rand_game = random.sample(self.memories[score], 1)
+      msg = '{:>2} /{:>5}'.format(score, len(rand_game[0]))
+      self.stats.set('replay', 'mem_size', msg)
+      return rand_game
+    self.stats.set('replay', 'mem_size', 'N/A')
+    return False
 
   def get_memory(self):
 

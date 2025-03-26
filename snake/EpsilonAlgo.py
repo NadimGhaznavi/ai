@@ -38,6 +38,9 @@ class EpsilonAlgo():
       self.ini.set('epsilon_print_stats', 'False')
 
   def get_move(self):
+    if self.epsilon <= 0.0001:
+      self.enabled = False
+      self.ini.set('epsilon_enabled', False)
     if not self.enabled or self.epsilon == 0:
       return False
     

@@ -19,7 +19,7 @@ class SimPlot():
     self.summary_freq = ini.get('show_summary_freq')
     self.plot_max_x = ini.get('plot_max_x')
     plt.ion()
-    self.fig, self.axs = plt.subplots(4, 2, figsize=(28, 10), layout="tight", facecolor="#000000", 
+    self.fig, self.axs = plt.subplots(4, 2, figsize=(24, 9), layout="tight", facecolor="#000000", 
                                   gridspec_kw={'width_ratios': [20, 1]})
     gs = self.fig.add_gridspec(4, 2)
     self.ax3 = self.fig.add_subplot(gs[2, :], facecolor="#000000")

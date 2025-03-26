@@ -77,11 +77,11 @@ class AITrainer():
             game_over = (game_over, )
 
         pred = self.model(state)
-        target = pred.clone()
+        target = pred.clone().detach()
 
         for idx in range(len(game_over)):
             Q_new = reward[idx]
-            if not game_over[idx]:
+            if not game_over[idx][0]:
                 Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
             target[idx][action[idx].argmax().item()] = Q_new  # Update Q value
 
