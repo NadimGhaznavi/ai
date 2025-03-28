@@ -37,11 +37,6 @@ class SimPlot():
     
     with io.capture_output() as captured:
       display.display(plt.gcf())
-    # Plot horizontal lines to differentiate the ranges of scores into groups of 10
-    # Only plot the horizontal lines if there is a score that is equal to or greater than 10
-    for y in range(10, 200, 10):
-      if max(self.scores) >= y:
-        self.axs[0][0].axhline(y=y, color='r', linestyle=(0, (1, 10)), linewidth=1)
     # Clear the figure before plotting new data to support a sliding view to maintain constant 
     # resolution at the cost of losing visibility into old data
     self.axs[0][0].set_facecolor('#002000')
@@ -59,6 +54,11 @@ class SimPlot():
 
     # Plot the game score and the mean game score
     self.axs[0][0].cla() 
+    # Plot horizontal lines to differentiate the ranges of scores into groups of 10
+    # Only plot the horizontal lines if there is a score that is equal to or greater than 10
+    for y in range(10, 200, 10):
+      if max(self.scores) >= y:
+        self.axs[0][0].axhline(y=y, color='r', linestyle=(0, (1, 10)), linewidth=1)
     self.axs[0][0].set_title('Scores', color='#00ff00')
     self.axs[0][0].set_ylabel('Score', color='#00ff00')
     self.axs[0][0].set_xlabel('Number of Games', color='#00ff00')
@@ -98,8 +98,13 @@ class SimPlot():
     self.ax4.set_ylabel('Average Score', color='#00ff00')
     xlabel = f'Number of Games x{span}'
     self.ax4.set_xlabel(xlabel, color='#00ff00')
-    
     self.ax4.fill_between(self.avg_scores_count, self.avg_scores, color='#6666ff', alpha=0.3)
+    # Plot horizontal lines to differentiate the ranges of scores into groups of 10
+    # Only plot the horizontal lines if there is a score that is equal to or greater than 10
+    for y in range(10, 200, 10):
+      if max(self.avg_scores) >= y:
+        self.ax4.axhline(y=y, color='r', linestyle=(0, (1, 10)), linewidth=1)
+
     self.ax4.plot(self.avg_scores_count, self.avg_scores, '-x', markeredgewidth=1, color='#6666ff')
 
 

@@ -8,11 +8,13 @@ import sys
 class AITrainer():
 
     def __init__(self, ini, log, stats, model):
+        torch.manual_seed(ini.get('random_seed'))
         self.ini = ini
         self.log = log
         self.stats = stats
-        self.gamma = ini.get('discount')
         self.model = model
+        self.gamma = ini.get('discount')
+        self.stats.set('trainer', 'steps', 0)
         model_type = ini.get('model')
         if model_type == 'cnnr':
             self.optimizer = optim.AdamW(self.model.parameters(), lr=ini.get('cnnr_learning_rate'))
@@ -25,9 +27,6 @@ class AITrainer():
         elif model_type == 'linear':
             self.optimizer = optim.Adam(self.model.parameters(), lr=ini.get('linear_learning_rate'))
             self.criterion = nn.MSELoss()
-            
-        self.stats.set('trainer', 'steps', 0)
-        torch.manual_seed(ini.get('random_seed'))
         self.log.log('AITrainer initialization:   [OK]')
 
     def get_optimizer(self):

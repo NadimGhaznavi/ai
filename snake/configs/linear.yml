@@ -2,29 +2,27 @@ default:
   ai_version_file: next_ai_version.txt
   board_height: 20
   board_width: 20
-  board_square: 20
+  board_square: 30
   checkpoint_freq: 50
   data_dir: sim_data
   discount: 0.9
-  epsilon_decay: 0.95
   enable_long_training: True
+  epsilon_decay: 0.9
   epsilon_enabled: True
   epsilon_min: 0
   epsilon_print_stats: 1
-  epsilon_value: 0.5
+  epsilon_value: 0.7
   game_speed: 0
   game_title: AI Snake Game
   headless: 0
   highscore_file_basename: _highscores.csv
   input_size: 400
-  linear_learning_rate: 0.0001
+  linear_learning_rate: 0.000009
   linear_input_size: 41
   linear_dropout: 0.02
   linear_hidden_size: 287
   log_basename: _log.txt
   max_epochs: 0
-  max_memories: 25
-  max_memory: 10000
   max_moves: 250
   max_scores: 1000
   model: linear
@@ -49,13 +47,12 @@ default:
   plot_max_x: 1000
   random_seed: 1970
   relu_slope: 0.1
-  replay_mem_enable_shuffle: False
-  replay_mem_enable_game_shuffle: True
-  replay_mem_enable_targeted_games: False
-  replay_mem_max_games: 35
-  replay_mem_min_games: 4
-  replay_mem_batch_size: 100
-  replay_mem_size: 25000
+  replay_mem_type: shuffle
+  replay_mem_batch_size: 750
+  replay_mem_min_games: 1
+  replay_mem_max_states: 15000
+  replay_mem_max_games: 40
+  replay_mem_max_shuffle_games: 500
   reward_excessive_move: -15
   reward_food: 30
   reward_move: 0

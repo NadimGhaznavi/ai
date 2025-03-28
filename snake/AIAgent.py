@@ -101,32 +101,47 @@ class AIAgent:
 
     def train_long_memory(self):
         # Get the states, actions, rewards, next_states, and dones from the mini_sample
-        enable = self.ini.get('enable_long_training')
-        shuffle = self.ini.get('replay_mem_enable_shuffle')
+        enabled = self.ini.get('enable_long_training')
+        mem_type = self.ini.get('replay_mem_type')
         model_type = self.ini.get('model')
-        if not enable:
-            return True
-        if shuffle:
-            memory = self.memory.get_memory()
-            for state, action, reward, next_state, done in memory:
-                if model_type == 'cnn':
-                    self.trainer.train_step_cnn(state, action, reward, next_state, done)
-                else:
-                    self.trainer.train_step(state, action, reward, next_state, done)
-        else:
+        
+        if not enabled:
+            return False
+
+        
+        if model_type == 'cnn':
             memory = self.memory.get_memory()
             if memory != False:
-                moves = 0
-                if model_type == 'cnn':
-                    for state, action, reward, next_state, done in memory[0]:
-                        moves += 1
-                        self.trainer.train_step_cnn(state, action, reward, next_state, [done])
-                else:
+                for state, action, reward, next_state, done in memory[0]:
+                    moves += 1
+                    self.trainer.train_step_cnn(state, action, reward, next_state, [done])
+
+                    self.trainer.train_step(state, action, reward, next_state, done)
+
+        if mem_type == 'shuffle':
+            moves = 0
+            for state, action, reward, next_state, done in memory:
+                moves += 1
+                self.trainer.train_step(state, action, reward, next_state, [done])
+            
+        elif model_type == 'rnn':
+            moves = 0
+            count = 3
+            while count > 0:
+                count -= 1
+                memory = self.memory.get_memory()
+                if memory != False:
                     for state, action, reward, next_state, done in memory[0]:
                         moves += 1
                         self.trainer.train_step(state, action, reward, next_state, [done])
-                        
-                self.stats.set('trainer', 'long_training_msg', moves)
+        else:
+            moves = 0
+            if memory != False:
+                for state, action, reward, next_state, done in memory[0]:
+                    moves += 1
+                    self.trainer.train_step(state, action, reward, next_state, [done])
+        
+        self.stats.set('trainer', 'long_training_msg', moves)
 
     def train_short_memory(self, state, action, reward, next_state, done):
         model_type = self.ini.get('model')
