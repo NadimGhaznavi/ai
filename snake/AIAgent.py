@@ -126,7 +126,7 @@ class AIAgent:
             
         elif model_type == 'rnn':
             moves = 0
-            count = 3
+            count = 1
             while count > 0:
                 count -= 1
                 memory = self.memory.get_memory()
