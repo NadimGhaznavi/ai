@@ -107,7 +107,7 @@ Once you have activated the virtual environment you will need to install some Py
 (ai_dev) nadim@mypc:~$ pip install torch --index-url https://download.pytorch.org/whl/cpu
 (ai_dev) nadim@mypc:~$ pip install pygame
 (ai_dev) nadim@mypc:~$ pip install IPython
-(ai_dev) nadim@mypc:~$ pip install scipy
+(ai_dev) nadim@mypc:~$ pip install PyYAML
 ```
 
 # Running the Snake Game
