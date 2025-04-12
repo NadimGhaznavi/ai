@@ -84,27 +84,6 @@ class TBoard():
 
     def get_state(self):
         DEBUG = True
-        if DEBUG:
-            # Snake collision straight ahead
-            if (dir_r and self.is_snake_collision(point_r)) or \
-                (dir_l and self.is_snake_collision(point_l)) or \
-                (dir_u and self.is_snake_collision(point_u)) or \
-                (dir_d and self.is_snake_collision(point_d)):
-                self.log.log("Snake collision ahead")
-
-            # Snake collision to the right
-            if (dir_u and self.is_snake_collision(point_r)) or \
-                (dir_d and self.is_snake_collision(point_l)) or \
-                (dir_l and self.is_snake_collision(point_u)) or \
-                (dir_r and self.is_snake_collision(point_d)):
-                self.log.log("Snake collision to the right")
-
-            # Snake collision to the left
-            if (dir_d and self.is_snake_collision(point_r)) or \
-                (dir_u and self.is_snake_collision(point_l)) or \
-                (dir_r and self.is_snake_collision(point_u)) or \
-                (dir_l and self.is_snake_collision(point_d)):
-                self.log.log("Snake collision to the left")
             
         model_type = self.ini.get('model')
         if model_type == 'rnn' or model_type == 'linear':
@@ -140,6 +119,28 @@ class TBoard():
         slb = self.get_binary(7, len(self.snake))
         headxb = self.get_binary(5, head.x)
         headyb = self.get_binary(5, head.y)
+
+        if DEBUG:
+            # Snake collision straight ahead
+            if (dir_r and self.is_snake_collision(point_r)) or \
+                (dir_l and self.is_snake_collision(point_l)) or \
+                (dir_u and self.is_snake_collision(point_u)) or \
+                (dir_d and self.is_snake_collision(point_d)):
+                self.log.log("Snake collision ahead")
+
+            # Snake collision to the right
+            if (dir_u and self.is_snake_collision(point_r)) or \
+                (dir_d and self.is_snake_collision(point_l)) or \
+                (dir_l and self.is_snake_collision(point_u)) or \
+                (dir_r and self.is_snake_collision(point_d)):
+                self.log.log("Snake collision to the right")
+
+            # Snake collision to the left
+            if (dir_d and self.is_snake_collision(point_r)) or \
+                (dir_u and self.is_snake_collision(point_l)) or \
+                (dir_r and self.is_snake_collision(point_u)) or \
+                (dir_l and self.is_snake_collision(point_d)):
+                self.log.log("Snake collision to the left")
 
         state = [
             # Snake length in binary using 7 bits
