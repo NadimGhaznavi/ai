@@ -83,6 +83,29 @@ class TBoard():
         return out_list
 
     def get_state(self):
+        DEBUG = True
+        if DEBUG:
+            # Snake collision straight ahead
+            if (dir_r and self.is_snake_collision(point_r)) or \
+                (dir_l and self.is_snake_collision(point_l)) or \
+                (dir_u and self.is_snake_collision(point_u)) or \
+                (dir_d and self.is_snake_collision(point_d)):
+                self.log.log("Snake collision ahead")
+
+            # Snake collision to the right
+            if (dir_u and self.is_snake_collision(point_r)) or \
+                (dir_d and self.is_snake_collision(point_l)) or \
+                (dir_l and self.is_snake_collision(point_u)) or \
+                (dir_r and self.is_snake_collision(point_d)):
+                self.log.log("Snake collision to the right")
+
+            # Snake collision to the left
+            if (dir_d and self.is_snake_collision(point_r)) or \
+                (dir_u and self.is_snake_collision(point_l)) or \
+                (dir_r and self.is_snake_collision(point_u)) or \
+                (dir_l and self.is_snake_collision(point_d)):
+                self.log.log("Snake collision to the left")
+            
         model_type = self.ini.get('model')
         if model_type == 'rnn' or model_type == 'linear':
             self.plot.set_image_1(self.board)

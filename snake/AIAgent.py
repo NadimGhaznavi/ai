@@ -109,8 +109,8 @@ class AIAgent:
             return False
 
         
+        memory = self.memory.get_memory()
         if model_type == 'cnn':
-            memory = self.memory.get_memory()
             if memory != False:
                 for state, action, reward, next_state, done in memory[0]:
                     moves += 1
