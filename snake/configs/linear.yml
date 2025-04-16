@@ -18,7 +18,7 @@ default:
   highscore_file_basename: _highscores.csv
   input_size: 400
   linear_learning_rate: 0.000009
-  linear_input_size: 41
+  linear_input_size: 34
   linear_dropout: 0.02
   linear_hidden_size: 287
   log_basename: _log.txt

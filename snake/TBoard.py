@@ -82,9 +82,43 @@ class TBoard():
             out_list[x] = int(out_list[x])
         return out_list
 
+    def get_snake_collision_flags(self):
+        """
+        Returns a tuple of (left, right, ahead) collision flags.
+        Each flag is 1 if the snake body is immediately adjacent in that direction.
+        """
+        if len(self.snake) < 5:
+            return (0, 0, 0)  # Not enough body to be meaningful
+
+        # Map directions to vector deltas
+        direction_map = {
+            Direction.UP: (0, -1),
+            Direction.DOWN: (0, 1),
+            Direction.LEFT: (-1, 0),
+            Direction.RIGHT: (1, 0),
+        }
+
+        # Get relative direction deltas
+        def left_of(dx, dy): return (-dy, dx)
+        def right_of(dx, dy): return (dy, -dx)
+
+        head = self.head
+        dir_dx, dir_dy = direction_map[self.direction]
+
+        # Relative directions
+        left_dx, left_dy = left_of(dir_dx, dir_dy)
+        right_dx, right_dy = right_of(dir_dx, dir_dy)
+
+        body_positions = {(seg.x, seg.y) for seg in self.snake[4:]}  # skip neck and recent tail
+
+        # Check for collisions in each relative direction
+        ahead = (head.x + dir_dx, head.y + dir_dy) in body_positions
+        left = (head.x + left_dx, head.y + left_dy) in body_positions
+        right = (head.x + right_dx, head.y + right_dy) in body_positions
+
+        return (int(left), int(right), int(ahead))
+
     def get_state(self):
-        DEBUG = True
-            
         model_type = self.ini.get('model')
         if model_type == 'rnn' or model_type == 'linear':
             self.plot.set_image_1(self.board)
@@ -117,34 +151,19 @@ class TBoard():
         dir_u = direction == Direction.UP
         dir_d = direction == Direction.DOWN
         slb = self.get_binary(7, len(self.snake))
+        
         headxb = self.get_binary(5, head.x)
         headyb = self.get_binary(5, head.y)
 
-        if DEBUG:
-            # Snake collision straight ahead
-            if (dir_r and self.is_snake_collision(point_r)) or \
-                (dir_l and self.is_snake_collision(point_l)) or \
-                (dir_u and self.is_snake_collision(point_u)) or \
-                (dir_d and self.is_snake_collision(point_d)):
-                self.log.log("Snake collision ahead")
-
-            # Snake collision to the right
-            if (dir_u and self.is_snake_collision(point_r)) or \
-                (dir_d and self.is_snake_collision(point_l)) or \
-                (dir_l and self.is_snake_collision(point_u)) or \
-                (dir_r and self.is_snake_collision(point_d)):
-                self.log.log("Snake collision to the right")
-
-            # Snake collision to the left
-            if (dir_d and self.is_snake_collision(point_r)) or \
-                (dir_u and self.is_snake_collision(point_l)) or \
-                (dir_r and self.is_snake_collision(point_u)) or \
-                (dir_l and self.is_snake_collision(point_d)):
-                self.log.log("Snake collision to the left")
+        left_flag, right_flag, ahead_flag = self.get_snake_collision_flags()
 
         state = [
             # Snake length in binary using 7 bits
             slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6],
+
+            # Snake collision flags
+            ahead_flag, left_flag, right_flag,
+
             # Last move direction
             dir_l, dir_r, dir_u, dir_d,
 
@@ -195,20 +214,12 @@ class TBoard():
             self.food.y == self.head.y,
             self.food.y == self.head.y and self.food.x > self.head.x, # Food above
             self.food.y == self.head.y and self.food.x < self.head.x, # Food below
-            
         ]
         # Previous direction of the snake
         for aDir in self.last_dirs:
             state.append(int(aDir))
         self.last_dirs = [ dir_l, dir_r, dir_u, dir_d ]
 
-        # Head location in binary using 4 bits (x,y)
-        for aBit in headxb:
-            state.append(int(aBit))
-        for aBit in headyb:
-            state.append(int(aBit))
-
-        #return torch.from_numpy(np.array(state, dtype=np.float32))
         return np.array(state, dtype='int8')
 
     def incr_speed(self):

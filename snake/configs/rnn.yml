@@ -18,7 +18,7 @@ default:
   hidden_size: 270
   highscore_file_basename: _highscores.csv
   input_size: 400
-  linear_input_size: 41
+  linear_input_size: 34
   log_basename: _log.txt
   max_epochs: 0
   max_memories: 25
