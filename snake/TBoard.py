@@ -84,39 +84,48 @@ class TBoard():
 
     def get_snake_collision_flags(self):
         """
-        Returns a tuple of (left, right, ahead) collision flags.
-        Each flag is 1 if the snake body is immediately adjacent in that direction.
+        Returns a tuple of (left, right, ahead) near collision flags.
         """
         if len(self.snake) < 5:
             return (0, 0, 0)  # Not enough body to be meaningful
-
-        # Map directions to vector deltas
-        direction_map = {
-            Direction.UP: (0, -1),
-            Direction.DOWN: (0, 1),
-            Direction.LEFT: (-1, 0),
-            Direction.RIGHT: (1, 0),
-        }
-
-        # Get relative direction deltas
-        def left_of(dx, dy): return (-dy, dx)
-        def right_of(dx, dy): return (dy, -dx)
-
+        
         head = self.head
-        dir_dx, dir_dy = direction_map[self.direction]
+        direction = self.direction
 
-        # Relative directions
-        left_dx, left_dy = left_of(dir_dx, dir_dy)
-        right_dx, right_dy = right_of(dir_dx, dir_dy)
+        left_flag = 0
+        right_flag = 0
+        ahead_flag = 0
 
-        body_positions = {(seg.x, seg.y) for seg in self.snake[4:]}  # skip neck and recent tail
-
-        # Check for collisions in each relative direction
-        ahead = (head.x + dir_dx, head.y + dir_dy) in body_positions
-        left = (head.x + left_dx, head.y + left_dy) in body_positions
-        right = (head.x + right_dx, head.y + right_dy) in body_positions
-
-        return (int(left), int(right), int(ahead))
+        for seg in self.snake[4:]:
+            if direction == Direction.RIGHT:
+                if (head.x == seg.x) and ((head.y - 2) == seg.y):
+                    left_flag = 1
+                if ((head.x + 2) == seg.x) and (head.y == seg.y):
+                    ahead_flag = 1
+                if (head.x == seg.x) and ((head.y + 2) == seg.y):
+                    right_flag = 1
+            elif direction == Direction.DOWN:
+                if ((head.x + 2) == seg.x) and (head.y == seg.y):
+                    left_flag = 1
+                if (head.x == seg.x) and ((head.y + 2) == seg.y):
+                    ahead_flag = 1
+                if ((head.x - 2) == seg.x) and (head.y == seg.y):
+                    right_flag = 1
+            elif direction == Direction.LEFT:
+                if (head.x == seg.x) and ((head.y + 2) == seg.y):
+                    left_flag = 1
+                if ((head.x - 2) == seg.x) and (head.y == seg.y):
+                    ahead_flag = 1
+                if (head.x == seg.x) and ((head.y - 2) == seg.y):
+                    right_flag = 1
+            elif direction == Direction.UP:
+                if ((head.x - 2) == seg.x) and (head.y == seg.y):
+                    left_flag = 1
+                if (head.x == seg.x) and ((head.y + 2) == seg.y):
+                    ahead_flag = 1
+                if ((head.x + 2) == seg.x) and (head.y == seg.y):
+                    right_flag = 1
+        return left_flag, ahead_flag, right_flag
 
     def get_state(self):
         model_type = self.ini.get('model')
@@ -152,20 +161,36 @@ class TBoard():
         dir_d = direction == Direction.DOWN
         slb = self.get_binary(7, len(self.snake))
         
-        headxb = self.get_binary(5, head.x)
-        headyb = self.get_binary(5, head.y)
-
-        left_flag, right_flag, ahead_flag = self.get_snake_collision_flags()
+        left_flag, ahead_flag, right_flag = self.get_snake_collision_flags()
+        if left_flag or ahead_flag or right_flag:
+            print("Collision flags (L/A/R): " + str(left_flag) + " " + str(ahead_flag)  + " " + str(right_flag))
 
         state = [
             # Snake length in binary using 7 bits
-            slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6],
+            slb[0], slb[1], slb[2], slb[3], slb[4], slb[5], slb[6], 0,
 
             # Snake collision flags
-            ahead_flag, left_flag, right_flag,
+            ahead_flag, right_flag, left_flag, 0,
 
-            # Last move direction
-            dir_l, dir_r, dir_u, dir_d,
+            # Snake collision straight ahead
+            (dir_r and self.is_snake_collision(point_r)) or
+            (dir_l and self.is_snake_collision(point_l)) or
+            (dir_u and self.is_snake_collision(point_u)) or
+            (dir_d and self.is_snake_collision(point_d)),
+
+            # Snake collision to the right
+            (dir_u and self.is_snake_collision(point_r)) or
+            (dir_d and self.is_snake_collision(point_l)) or
+            (dir_l and self.is_snake_collision(point_u)) or
+            (dir_r and self.is_snake_collision(point_d)),
+
+            # Snake collision to the left
+            (dir_d and self.is_snake_collision(point_r)) or
+            (dir_u and self.is_snake_collision(point_l)) or
+            (dir_r and self.is_snake_collision(point_u)) or
+            (dir_l and self.is_snake_collision(point_d)),
+
+            0, 
 
             # Wall collision straight ahead
             (dir_r and self.is_wall_collision(point_r)) or
@@ -185,23 +210,12 @@ class TBoard():
             (dir_r and self.is_wall_collision(point_u)) or
             (dir_l and self.is_wall_collision(point_d)),
 
-            # Snake collision straight ahead
-            (dir_r and self.is_snake_collision(point_r)) or
-            (dir_l and self.is_snake_collision(point_l)) or
-            (dir_u and self.is_snake_collision(point_u)) or
-            (dir_d and self.is_snake_collision(point_d)),
+            0,
 
-            # Snake collision to the right
-            (dir_u and self.is_snake_collision(point_r)) or
-            (dir_d and self.is_snake_collision(point_l)) or
-            (dir_l and self.is_snake_collision(point_u)) or
-            (dir_r and self.is_snake_collision(point_d)),
+            # Last move direction
+            dir_l, dir_r, dir_u, dir_d,
 
-            # Snake collision to the left
-            (dir_d and self.is_snake_collision(point_r)) or
-            (dir_u and self.is_snake_collision(point_l)) or
-            (dir_r and self.is_snake_collision(point_u)) or
-            (dir_l and self.is_snake_collision(point_d)),
+            0,
 
             # Food location
             self.food.x < self.head.x, # Food left

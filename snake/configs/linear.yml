@@ -11,14 +11,14 @@ default:
   epsilon_enabled: True
   epsilon_min: 0
   epsilon_print_stats: 1
-  epsilon_value: 0.7
+  epsilon_value: 0.6
   game_speed: 0
   game_title: AI Snake Game
   headless: 0
   highscore_file_basename: _highscores.csv
   input_size: 400
   linear_learning_rate: 0.000009
-  linear_input_size: 34
+  linear_input_size: 39
   linear_dropout: 0.02
   linear_hidden_size: 287
   log_basename: _log.txt
@@ -48,7 +48,7 @@ default:
   random_seed: 1970
   relu_slope: 0.1
   replay_mem_type: shuffle
-  replay_mem_batch_size: 750
+  replay_mem_batch_size: 250
   replay_mem_min_games: 1
   replay_mem_max_states: 15000
   replay_mem_max_games: 40
