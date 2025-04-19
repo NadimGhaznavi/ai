@@ -160,10 +160,7 @@ class TBoard():
         dir_u = direction == Direction.UP
         dir_d = direction == Direction.DOWN
         slb = self.get_binary(7, len(self.snake))
-        
         left_flag, ahead_flag, right_flag = self.get_snake_collision_flags()
-        if left_flag or ahead_flag or right_flag:
-            print("Collision flags (L/A/R): " + str(left_flag) + " " + str(ahead_flag)  + " " + str(right_flag))
 
         state = [
             # Snake length in binary using 7 bits
