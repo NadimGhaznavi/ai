@@ -2,7 +2,7 @@
 
 This is a port of my old *AI Snake Game* project that was using *pygame*, *matplotlib*, a verbose log file and a bunch of terminals grepping different, interesting metrics out of the log file.
 
-This version is based on the [Textual](https://textual.textualize.io/) *rapid application development framework*. It took me less than a day to port my code.
+This version is based on the [Textual](https://textual.textualize.io/) *rapid application development framework*.
 
 # Installation
 
