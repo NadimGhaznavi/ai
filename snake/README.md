@@ -1,7 +1,3 @@
----
-title: AI Snake Game
----
-
 # Introduction
 
 This is a port of my old *AI Snake Game* project that was using *pygame*, *matplotlib*, a verbose log file and a bunch of terminals grepping different, interesting metrics out of the log file.
