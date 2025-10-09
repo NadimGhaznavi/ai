@@ -17,6 +17,7 @@ You can easily clone this setup and run it yourself.
 ```shell
 python3 -m venv snake_venv
 . snake_venv/bin/activate
+```
 
 ## Install Textual
 
