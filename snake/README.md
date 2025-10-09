@@ -23,9 +23,11 @@ After you activate your *venv* environment:
 pip install textual textual-dev numpy
 ```
 
+## Install Pytorch
+
 To install pytorch go to [pytorch.org](https://pytorch.org/) and scroll down till you come to the *Install PyTorch* section. Click on your platform (Linux, Mac, Windows), choose a compute platform and cut-and-paste the *run this command*. I'm running Linux and I don't have a GPU, but your setup may be different.
 
-## Getting my Code
+## Download my Code
 
 I'll package this into a PyPI package shortly, but for now you're stuck either cloning my whole *ai* repo (`git clone https://github.com/NadimGhaznavi/ai`) which is 323 Mb of mostly crud or going to a [sub directory](https://github.com/NadimGhaznavi/ai/tree/main/snake) of the repo and using the github *copy* feature to copy the 9 files that contain the code.
 
