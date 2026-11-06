@@ -1,5 +1,8 @@
 ---
 title: AI Snake Game
+layout: single
+classes: wide
+author_profile: true
 ---
 
 ## Table of Contents
