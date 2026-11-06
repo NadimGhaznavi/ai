@@ -1,0 +1,32 @@
+.page__content .projects-table {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.page__content .projects-table td {
+  width: 20%;
+  padding: 1rem 0.5rem;
+  text-align: center;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.projects-table .project-site {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.projects-table .project-site img {
+  width: 100%;
+  max-width: 140px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.projects-table .project-source {
+  display: block;
+  margin-top: 0.5rem;
+}

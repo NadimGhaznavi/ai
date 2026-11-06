@@ -7,17 +7,15 @@ author_profile: true
 
 ## Table of Contents
 
----
-
 * [Environment Setup](#environment-setup)
 * [Experience Replay](#experience-replay)
 * [Q-Learning Formula](#q-learning-formula)
 * [Calculating Loss](#calculating-loss)
 * [The Epsilon Greedy Function](#the-epsilon-greedy-function)
 
-## Overview of Flappy Bird Gymnasium
-
 ---
+
+## Overview of Flappy Bird Gymnasium
 
 *Flappy Bird* is a simple video game. The game presents a series of pipes and the bird has to fly between them without hitting the pipe or the top of the screen.
 
@@ -52,11 +50,12 @@ Rewards | Description
  -1.0   | When Flappy Bird loses the game
  −0.5   | When Flappy Bird loses the game by touching the top of the screen
 
-## Environment Setup
-
 ---
 
+## Environment Setup
+
 The commands below show the creation of a Python virtual environment and the installation of the flappy-bird-gymnasium, TensorFlow and PyTorch libraries.
+
 ```
 nadim@mypc:~$ python3 -m venv ai_flappy
 nadim@mypc:~$ . ai_flappy/bin/activate
@@ -67,9 +66,9 @@ nadim@mypc:~$ . ai_flappy/bin/activate
 (ai_flappy) nadim@mypc:~$ 
 ```
 
-## Experience Replay
-
 ---
+
+## Experience Replay
 
 *Experience replay* is used in training a neural network. It consists of the following components:
 
@@ -81,9 +80,9 @@ nadim@mypc:~$ . ai_flappy/bin/activate
 
 These five elements are stored in a Python *deque*, which is a fixed length array or a *deque* (pronounced *deck*): When a new element is added to a deque, such that the addition would exceed the size of the deque, then the *oldest* element of the deque is *popped off*. A deque is a type of FIFO (first in, first out) queue.
 
-## Q-Learning Formula
-
 ---
+
+## Q-Learning Formula
 
 This is the *Q-Learning Formula* which is used to move the policy network to the target network.
 
@@ -111,9 +110,9 @@ Otherwise:
 
 > $$ reward + discount * max(q[state_n,:]) $$
 
-## Calculating Loss
-
 ---
+
+## Calculating Loss
 
 We are using the *Mean Squared Error* (MSE) function to calculate loss:
 
@@ -123,9 +122,9 @@ We are using the *Mean Squared Error* (MSE) function to calculate loss:
 
 > $$ \frac{( C - T )^2} { 2 } $$
 
-## The Epsilon Greedy Function
-
 ---
+
+## The Epsilon Greedy Function
 
 The *epsilon greedy function* can be described as follows:
 ```
@@ -138,9 +137,9 @@ decrease epsilon
 ```
 The *choose best calculated action* is the best Q value.
 
-## Conclusion and Lessons Learned
-
 ---
+
+## Conclusion and Lessons Learned
 
 The *Flappy Bird* tutorial helped me gain a better, more theoretical, understanding of Linear Q Networks. I also learned about using YAML for configuration management. YAML is a bit better than using the Python ConfigParser which I used in my [AI Snake Game](https://ai.osoyalce.com/pages/ai-snake-game.html). It provides support for booleans and nested configuration elements including lists.
 
@@ -150,12 +149,16 @@ However, the *AI Snake Game* remains my favorite sandbox for ongoing AI Developm
 
 I am exploring strategies to have the AI develop new, better strategies, but so far nothing has worked. It remains stuck in a *local minimum*.
 
-## Links
-
 ---
+
+## Links
 
 * [Implement Deep Q-Learning with PyTorch and Train Flappy Bird! DQN PyTorch](https://www.youtube.com/watch?v=arR7KzlYs4w&list=PL58zEckBH8fCMIVzQCRSZVPUp3ZAVagWi&index=1&ab_channel=JohnnyCode)
 * [Flappy Bird Gymnasium on GitHub](https://github.com/markub3327/flappy-bird-gymnasium)
 * [Tutorial Code on GitHub](https://github.com/johnnycode8/dqn_pytorch/blob/main/)
 * [AI Snake Game](https://ai.osoyalce.com/ai/ai-snake-game.html)
 * [The Flappy Bird code in my GitHub repository](#https://github.com/NadimGhaznavi/ai/tree/main/flappy_bird)
+
+---
+
+[Back](/)

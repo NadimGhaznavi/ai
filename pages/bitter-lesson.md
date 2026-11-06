@@ -7,13 +7,11 @@ author_profile: true
 
 ## Introduction
 
----
-
 This is a short article by Richard S. Sutton, the father of Machine Learning.
 
-## The Bitter Lesson
-
 ---
+
+## The Bitter Lesson
 
 The biggest lesson that can be read from 70 years of AI research is that general methods that leverage computation are ultimately the most effective, and by a large margin. The ultimate reason for this is Moore's law, or rather its generalization of continued exponentially falling cost per unit of computation. Most AI research has been conducted as if the computation available to the agent were constant (in which case leveraging human knowledge would be one of the only ways to improve performance) but, over a slightly longer time than a typical research project, massively more computation inevitably becomes available. Seeking an improvement that makes a difference in the shorter term, researchers seek to leverage their human knowledge of the domain, but the only thing that matters in the long run is the leveraging of computation. These two need not run counter to each other, but in practice they tend to. Time spent on one is time not spent on the other. There are psychological commitments to investment in one approach or the other. And the human-knowledge approach tends to complicate methods in ways that make them less suited to taking advantage of general methods leveraging computation.  There were many examples of AI researchers' belated learning of this bitter lesson, and it is instructive to review some of the most prominent.
 
@@ -31,9 +29,13 @@ One thing that should be learned from the bitter lesson is the great power of ge
 
 The second general point to be learned from the bitter lesson is that the actual contents of minds are tremendously, irredeemably complex; we should stop trying to find simple ways to think about the contents of minds, such as simple ways to think about space, objects, multiple agents, or symmetries. All these are part of the arbitrary, intrinsically-complex, outside world. They are not what should be built in, as their complexity is endless; instead we should build in only the meta-methods that can find and capture this arbitrary complexity. Essential to these methods is that they can find good approximations, but the search for them should be by our methods, not by us. We want AI agents that can discover like we can, not which contain what we have discovered. Building in our discoveries only makes it harder to see how the discovering process can be done.
 
-## Links
-
 ---
+
+## Links
 
 * [The Bitter Lesson](http://www.incompleteideas.net/IncIdeas/BitterLesson.html)
 * [Incomplete Ideas Site](http://www.incompleteideas.net/) by Richard S. Sutton
+
+---
+
+[Back](/)
