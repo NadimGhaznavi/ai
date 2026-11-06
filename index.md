@@ -89,7 +89,7 @@ that I'm working on.
 
 ## Old Projects
 
-- [AI Snake Game]({% link pages/ai-snake-game.md %})
+- [AI Snake Game]({% link pages/ai-snake-game.md %}) notes. See the [SnakeLab website](https://snakelab.osoyalce.com/) for clean docs
 - [AI Flappy Bird]({% link pages/flappy-bird.md %})
 - [Arcade Learning Environment]({% link pages/ale.md %})
 
